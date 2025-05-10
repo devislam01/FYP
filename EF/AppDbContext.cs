@@ -88,15 +88,13 @@ public partial class AppDbContext : DbContext
                 .IsFixedLength()
                 .HasColumnName("orderID");
             entity.Property(e => e.CreatedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("createdBy");
             entity.Property(e => e.CreatedDateTime)
                 .HasColumnType("datetime")
                 .HasColumnName("createdDateTime");
             entity.Property(e => e.DeletedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("deletedBy");
             entity.Property(e => e.DeletedDateTime)
                 .HasColumnType("datetime")
@@ -105,8 +103,7 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("feedback");
             entity.Property(e => e.PaymentId)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("paymentID");
             entity.Property(e => e.ProductId)
                 .HasMaxLength(16)
@@ -119,15 +116,13 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.TotalAmount).HasColumnName("totalAmount");
             entity.Property(e => e.UpdatedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("updatedBy");
             entity.Property(e => e.UpdatedDateTime)
                 .HasColumnType("datetime")
                 .HasColumnName("updatedDateTime");
             entity.Property(e => e.UserId)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("userID");
         });
 
@@ -138,12 +133,10 @@ public partial class AppDbContext : DbContext
             entity.ToTable("payment");
 
             entity.Property(e => e.PaymentId)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("paymentID");
             entity.Property(e => e.CreatedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("createdBy");
             entity.Property(e => e.CreatedDateTime)
                 .HasColumnType("datetime")
@@ -157,8 +150,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.TotalPaidAmount).HasColumnName("totalPaidAmount");
             entity.Property(e => e.UpdatedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("updatedBy");
             entity.Property(e => e.UpdatedDateTime)
                 .HasColumnType("datetime")
@@ -178,15 +170,13 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ProductId).HasColumnName("productID");
             entity.Property(e => e.CategoryId).HasColumnName("categoryID");
             entity.Property(e => e.CreatedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("createdBy");
             entity.Property(e => e.CreatedDateTime)
                 .HasColumnType("datetime")
                 .HasColumnName("createdDateTime");
             entity.Property(e => e.DeletedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("deletedBy");
             entity.Property(e => e.DeletedDateTime)
                 .HasColumnType("datetime")
@@ -208,15 +198,13 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ProductRating).HasColumnName("productRating");
             entity.Property(e => e.StockQty).HasColumnName("stockQty");
             entity.Property(e => e.UpdatedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("updatedBy");
             entity.Property(e => e.UpdatedDateTime)
                 .HasColumnType("datetime")
                 .HasColumnName("updatedDateTime");
             entity.Property(e => e.UserId)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("userID");
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
@@ -248,22 +236,19 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.UserId, "userID_UNIQUE").IsUnique();
 
             entity.Property(e => e.UserId)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("userID");
             entity.Property(e => e.Address)
                 .HasMaxLength(45)
                 .HasColumnName("address");
             entity.Property(e => e.CreatedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("createdBy");
             entity.Property(e => e.CreatedDateTime)
                 .HasColumnType("datetime")
                 .HasColumnName("createdDateTime");
             entity.Property(e => e.DeletedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("deletedBy");
             entity.Property(e => e.DeletedDateTime)
                 .HasColumnType("datetime")
@@ -280,8 +265,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("phoneNumber");
             entity.Property(e => e.RatingMark).HasColumnName("ratingMark");
             entity.Property(e => e.UpdatedBy)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("updatedBy");
             entity.Property(e => e.UpdatedDateTime)
                 .HasColumnType("datetime")
@@ -314,8 +298,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("RefreshToken_ExpiresAt");
             entity.Property(e => e.UserId)
-                .HasMaxLength(16)
-                .IsFixedLength()
+                .HasColumnType("binary(16)")
                 .HasColumnName("UserID");
         });
 

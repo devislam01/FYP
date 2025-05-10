@@ -13,6 +13,8 @@ namespace DemoFYP.Controllers
             _userServices = userServices ?? throw new ArgumentNullException(nameof(userServices));
         }
 
+        #region Create APIs
+
         [HttpPost("register")]
         public async Task<ActionResult<StandardResponse>> Register(UserRegisterRequest payload)
         {
@@ -20,5 +22,7 @@ namespace DemoFYP.Controllers
 
             return SuccessResponse("User Registered Successfully!");
         }
+
+        #endregion
     }
 }

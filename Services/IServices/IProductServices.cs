@@ -5,7 +5,20 @@ namespace DemoFYP.Services.IServices
 {
     public interface IProductServices
     {
-        Task AddProduct(AddProductRequest product, byte[] curUserID);
-        Task<List<ProductListResult>> GetProductList(byte[] curUserID);
+        #region Read Services
+
+        Task<List<ProductListResult>> GetProductList();
+        Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID);
+        Task<ProductDetailResult> GetProductDetailByProductID(int ProductID, Guid curUserID);
+
+        #endregion
+
+        #region Create Services
+
+        Task AddProduct(AddProductRequest product, Guid curUserID);
+        Task UpdateProductByProductID(UpdateProductRequest product, Guid curUserID);
+        Task DeleteProductByProductID(int productID, Guid curUserID);
+
+        #endregion
     }
 }

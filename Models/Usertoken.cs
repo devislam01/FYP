@@ -7,7 +7,7 @@ public partial class Usertoken
 {
     public int TokenId { get; set; }
 
-    public byte[] UserId { get; set; } = null!;
+    public Guid UserId { get; set; }
 
     public string AccessToken { get; set; } = null!;
 

@@ -26,7 +26,7 @@ namespace DemoFYP.Services
             _jwtRepository = jwtRepository ?? throw new ArgumentNullException(nameof(jwtRepository));
         }
 
-        public async Task<JwtAuthResult> GenerateToken(UserLoginRequest payload, byte[] curUserID)
+        public async Task<JwtAuthResult> GenerateToken(UserLoginRequest payload, Guid curUserID)
         {
             if (payload == null) throw new BadRequestException("User request is required");
 

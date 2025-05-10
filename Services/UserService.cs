@@ -13,7 +13,7 @@ namespace DemoFYP.Services
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
-        public async Task RegisterUser(UserRegisterRequest payload, byte[] updatedBy)
+        public async Task RegisterUser(UserRegisterRequest payload, Guid updatedBy)
         {
             if (payload == null) throw new BadRequestException("Payload is required.");
             if (payload.Email == null) throw new BadRequestException("Email is required.");
@@ -32,17 +32,17 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<bool> CheckLoginCredentials(UserLoginRequest payload)
+        public async Task<Guid> CheckLoginCredentials(UserLoginRequest payload)
         {
             if (payload == null) throw new BadRequestException("Payload is required.");
 
             try
             {
-                bool isValid = await _userRepository.CheckUserLoginCredentials(payload);
+                var hasUserID = await _userRepository.CheckUserLoginCredentials(payload);
 
-                if (!isValid) throw new BadRequestException("Invalid Email or Password");
+                if (hasUserID == Guid.Empty) throw new BadRequestException("Invalid Email or Password");
 
-                return true;
+                return hasUserID;
             }
             catch (Exception) {
                 throw;

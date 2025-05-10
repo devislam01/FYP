@@ -7,11 +7,11 @@ public partial class Order
 {
     public byte[] OrderId { get; set; } = null!;
 
-    public byte[] UserId { get; set; } = null!;
+    public Guid UserId { get; set; }
 
     public byte[] ProductId { get; set; } = null!;
 
-    public byte[] PaymentId { get; set; } = null!;
+    public Guid PaymentId { get; set; }
 
     public int Quantity { get; set; }
 
@@ -29,9 +29,9 @@ public partial class Order
 
     public DateTime DeletedDateTime { get; set; }
 
-    public byte[] CreatedBy { get; set; } = null!;
+    public Guid CreatedBy { get; set; }
 
-    public byte[] UpdatedBy { get; set; } = null!;
+    public Guid UpdatedBy { get; set; }
 
-    public byte[] DeletedBy { get; set; } = null!;
+    public Guid DeletedBy { get; set; }
 }

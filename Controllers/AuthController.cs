@@ -21,8 +21,8 @@ namespace DemoFYP.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<StandardResponse<JwtAuthResult>>> Login(UserLoginRequest request)
         {
-            await _userServices.CheckLoginCredentials(request);
-            var data = await _Jwtservices.GenerateToken(request, CurUserID);
+            Guid userID = await _userServices.CheckLoginCredentials(request);
+            var data = await _Jwtservices.GenerateToken(request, userID);
 
             return SuccessResponse(data, "Login Successfully");
         }

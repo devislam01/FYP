@@ -4,7 +4,17 @@ namespace DemoFYP.Services.IServices
 {
     public interface IUserServices
     {
-        Task RegisterUser(UserRegisterRequest payload, byte[] updatedBy);
-        Task<bool> CheckLoginCredentials(UserLoginRequest login);
+        
+        #region Read Services
+
+        Task<Guid> CheckLoginCredentials(UserLoginRequest login);
+
+        #endregion
+        
+        #region Create Services
+
+        Task RegisterUser(UserRegisterRequest payload, Guid updatedBy);
+
+        #endregion
     }
 }

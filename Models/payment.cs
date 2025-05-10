@@ -5,9 +5,9 @@ namespace DemoFYP;
 
 public partial class Payment
 {
-    public byte[] PaymentId { get; set; } = null!;
+    public Guid PaymentId { get; set; }
 
-    public byte[] OrderId { get; set; } = null!;
+    public Guid OrderId { get; set; }
 
     public double TotalPaidAmount { get; set; }
 
@@ -17,7 +17,7 @@ public partial class Payment
 
     public DateTime UpdatedDateTime { get; set; }
 
-    public byte[] CreatedBy { get; set; } = null!;
+    public Guid CreatedBy { get; set; }
 
-    public byte[] UpdatedBy { get; set; } = null!;
+    public Guid UpdatedBy { get; set; }
 }

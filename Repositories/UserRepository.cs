@@ -36,7 +36,7 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task RegisterUser(UserRegisterRequest registerData, byte[] updatedBy, AppDbContext outerContext)
+        public async Task RegisterUser(UserRegisterRequest registerData, Guid updatedBy, AppDbContext outerContext)
         {
             var context = outerContext ?? _factory.CreateDbContext();
             IDbContextTransaction tran = null;
@@ -49,7 +49,7 @@ namespace DemoFYP.Repositories
                 }
 
                 var newData = _mapper.Map<User>(registerData);
-                newData.UserId = GenerateUserGuid();
+                newData.UserId = Guid.NewGuid();
                 newData.CreatedBy = updatedBy;
                 newData.CreatedDateTime = DateTime.Now;
 
@@ -78,13 +78,16 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<bool> CheckUserLoginCredentials(UserLoginRequest payload)
+        public async Task<Guid> CheckUserLoginCredentials(UserLoginRequest payload)
         {
             var context = _factory.CreateDbContext();
 
             try
             {
-                return await context.Users.AnyAsync(u => u.Email.ToLower().Equals(payload.Email.ToLower()) && u.Password.Equals(payload.Password));
+                return await context.Users
+                    .Where(u => u.Email.ToLower() == payload.Email.ToLower() && u.Password == payload.Password)
+                    .Select(u => u.UserId)
+                    .FirstOrDefaultAsync();
             }
             catch
             {

@@ -6,7 +6,20 @@ namespace DemoFYP.Repositories.IRepositories
 {
     public interface IProductRepository
     {
-        Task InsertProduct(AddProductRequest paylaod, byte[] curUserID, AppDbContext outerContext = null);
-        Task<List<ProductListResult>> GetProductListByLoginID(byte[] curUserID);
+        #region Read
+        Task<List<ProductListResult>> GetProductList();
+        Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID);
+        Task<ProductDetailResult> GetProductDetailByProductID(int ProductID, Guid curUserID);
+
+        #endregion
+
+        #region Create
+
+        Task InsertProduct(AddProductRequest paylaod, Guid curUserID);
+        Task UpdateProductByProductID(UpdateProductRequest paylaod, Guid curUserID);
+
+        Task DeleteProductByProductID(int productID, Guid curUserID);
+
+        #endregion
     }
 }

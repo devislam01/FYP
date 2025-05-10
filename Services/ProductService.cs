@@ -13,7 +13,50 @@ namespace DemoFYP.Services
             _productRepository = productRepositories ?? throw new ArgumentNullException(nameof(productRepositories));
         }
 
-        public async Task AddProduct(AddProductRequest payload, byte[] curUserID)
+        #region Read Repositories
+
+        public async Task<List<ProductListResult>> GetProductList()
+        {
+            try
+            {
+                return await _productRepository.GetProductList();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID)
+        {
+            try
+            {
+                return await _productRepository.GetProductListByLoginID(curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<ProductDetailResult> GetProductDetailByProductID(int ProductID, Guid curUserID)
+        {
+            if (ProductID == 0) { throw new NotFoundException("Missing Product ID"); }
+
+            try {
+                return await _productRepository.GetProductDetailByProductID(ProductID, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Create Repositories
+
+        public async Task AddProduct(AddProductRequest payload, Guid curUserID)
         {
             if (payload == null) { throw new NotFoundException("No payload was found."); }
             if (string.IsNullOrEmpty(payload.ProductName)) { throw new NotFoundException("Missing Product Name"); }
@@ -33,18 +76,35 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<List<ProductListResult>> GetProductList(byte[] curUserID)
+        public async Task UpdateProductByProductID(UpdateProductRequest payload, Guid curUserID)
         {
-            if (curUserID == null) { throw new UnauthorizedAccessException("No access!"); }
+            if (payload == null) { throw new NotFoundException("No Payload Was Found."); }
+            if (payload.ProductID == 0) { throw new NotFoundException("No Product ID Was Found"); }
 
             try
             {
-                return await _productRepository.GetProductListByLoginID(curUserID);
+                await _productRepository.UpdateProductByProductID(payload, curUserID);
             }
             catch
             {
                 throw;
             }
         }
+
+        public async Task DeleteProductByProductID(int productID, Guid curUserID)
+        {
+            if (productID == 0) { throw new NotFoundException("No Product ID Was Found"); }
+
+            try
+            {
+                await _productRepository.DeleteProductByProductID(productID, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        #endregion
     }
 }

@@ -1,5 +1,6 @@
 ﻿using DemoFYP.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DemoFYP.Controllers
 {
@@ -20,12 +21,18 @@ namespace DemoFYP.Controllers
             }
         }
 
-        public byte[] CurUserID
+        public Guid CurUserID
         {
             get
             {
-                Guid.TryParse(HttpContext.User.Claims?.Where(x => x.Type == "CurUserID")?.FirstOrDefault()?.Value, out Guid userId);
-                return userId.ToByteArray();
+                var userIdStr = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (Guid.TryParse(userIdStr, out Guid userId))
+                {
+                    return userId;
+                }
+
+                return Guid.Empty;
             }
         }
 

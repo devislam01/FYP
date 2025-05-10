@@ -5,9 +5,16 @@ namespace DemoFYP.Repositories.IRepositories
 {
     public interface IUserRepository
     {
-        Task<bool> CheckIfEmailExist(string email, AppDbContext outerContext = null);
-        Task RegisterUser(UserRegisterRequest registerDTO, byte[] updatedBy, AppDbContext outerContext = null);
+        #region Read Repositories
 
-        Task<bool> CheckUserLoginCredentials(UserLoginRequest payload);
+        Task<bool> CheckIfEmailExist(string email, AppDbContext outerContext = null);
+        Task<Guid> CheckUserLoginCredentials(UserLoginRequest payload);
+
+        #endregion
+
+        #region Create Repositories
+        Task RegisterUser(UserRegisterRequest registerDTO, Guid updatedBy, AppDbContext outerContext = null);
+
+        #endregion
     }
 }

@@ -37,6 +37,11 @@ namespace DemoFYP.Middlewares
                         response.Code = 401;
                         response.Status = "Unauthorized";
                         break;
+                    case ForbiddenException _:
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        response.Code = 403;
+                        response.Status = "Unauthorized";
+                        break;
                     case ConflictException _:
                         context.Response.StatusCode = StatusCodes.Status409Conflict;
                         response.Code = 409;

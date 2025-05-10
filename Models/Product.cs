@@ -29,15 +29,15 @@ public partial class Product
 
     public DateTime? DeletedDateTime { get; set; }
 
-    public byte[] CreatedBy { get; set; } = null!;
+    public Guid CreatedBy { get; set; }
 
-    public byte[]? UpdatedBy { get; set; }
+    public Guid? UpdatedBy { get; set; }
 
-    public byte[]? DeletedBy { get; set; }
+    public Guid? DeletedBy { get; set; }
 
     public sbyte IsActive { get; set; } = 1;
 
-    public byte[] UserId { get; set; } = null!;
+    public Guid UserId { get; set; }
 
     public virtual ProductCategory Category { get; set; } = null!;
 }
