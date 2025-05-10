@@ -1,0 +1,6 @@
+@DemoFYP_HostAddress = http://localhost:5110
+
+GET {{DemoFYP_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
