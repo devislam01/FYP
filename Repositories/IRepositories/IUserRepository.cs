@@ -1,5 +1,6 @@
 ﻿using DemoFYP.EF;
 using DemoFYP.Models.Dto.Request;
+using DemoFYP.Models.Dto.Response;
 
 namespace DemoFYP.Repositories.IRepositories
 {
@@ -9,11 +10,19 @@ namespace DemoFYP.Repositories.IRepositories
 
         Task<bool> CheckIfEmailExist(string email, AppDbContext outerContext = null);
         Task<Guid> CheckUserLoginCredentials(UserLoginRequest payload);
+        Task<UserDetailResponse> GetUserProfileByLoginID(Guid CurUserID);
 
         #endregion
 
         #region Create Repositories
+
         Task RegisterUser(UserRegisterRequest registerDTO, Guid updatedBy, AppDbContext outerContext = null);
+
+        #endregion
+
+        #region Update Repositories
+
+        Task UpdateUserProfile(UserUpdateDetailRequest payload);
 
         #endregion
     }

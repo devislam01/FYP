@@ -4,6 +4,7 @@ using DemoFYP.Enums;
 using DemoFYP.Exceptions;
 using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
+using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -22,19 +23,69 @@ namespace DemoFYP.Repositories
             _mapper = mapper;
         }
 
+        #region Read DB
+
         public async Task<bool> CheckIfEmailExist(string email, AppDbContext outerContext)
         {
             var context = outerContext ?? _factory.CreateDbContext();
 
             try
             {
-                return await context.Users.AnyAsync(u => u.Email == email);
+                return await context.Users.AnyAsync(u => u.Email == email && u.IsActive == 1);
             }
             catch
             {
                 throw;
             }
         }
+
+        public async Task<Guid> CheckUserLoginCredentials(UserLoginRequest payload)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                return await context.Users
+                    .Where(u => u.Email.ToLower() == payload.Email.ToLower() && u.Password == payload.Password && u.IsActive == 1)
+                    .Select(u => u.UserId)
+                    .FirstOrDefaultAsync();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<UserDetailResponse> GetUserProfileByLoginID(Guid CurUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var result = await context.Users.Where(u => u.UserId == CurUserID && u.IsActive == 1)
+                            .Select(u => new UserDetailResponse
+                            {
+                                UserName = u.UserName ?? string.Empty,
+                                Email = u.Email,
+                                PhoneNumber = u.PhoneNumber ?? string.Empty,
+                                UserGender = u.UserGender ?? string.Empty,
+                                Address = u.Address ?? string.Empty
+                            })
+                            .FirstOrDefaultAsync();
+
+                if (result == null) throw new NotFoundException("No detail was found");
+
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Create Action
 
         public async Task RegisterUser(UserRegisterRequest registerData, Guid updatedBy, AppDbContext outerContext)
         {
@@ -52,6 +103,7 @@ namespace DemoFYP.Repositories
                 newData.UserId = Guid.NewGuid();
                 newData.CreatedBy = updatedBy;
                 newData.CreatedDateTime = DateTime.Now;
+                newData.IsActive = 1;
 
                 await context.Users.AddAsync(newData);
                 await context.SaveChangesAsync();
@@ -78,21 +130,45 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<Guid> CheckUserLoginCredentials(UserLoginRequest payload)
+        #endregion
+
+        #region Update DB
+
+        public async Task UpdateUserProfile(UserUpdateDetailRequest payload)
         {
             var context = _factory.CreateDbContext();
+            IDbContextTransaction tran = context.Database.BeginTransaction(IsolationLevel.ReadCommitted);
 
             try
             {
-                return await context.Users
-                    .Where(u => u.Email.ToLower() == payload.Email.ToLower() && u.Password == payload.Password)
-                    .Select(u => u.UserId)
-                    .FirstOrDefaultAsync();
+                var curData = await context.Users.FirstOrDefaultAsync(u => u.UserId == payload.UserID && u.IsActive == 1) ?? throw new NotFoundException("User Not Found");
+
+                curData.UserName = payload.UserName;
+                curData.Email = payload.Email;
+                curData.PhoneNumber = payload.PhoneNumber;
+                curData.UserGender = payload.UserGender;
+                curData.Address = payload.Address;
+
+                await context.SaveChangesAsync();
+                await tran.CommitAsync();
             }
             catch
             {
+                if (tran != null)
+                {
+                    await tran.RollbackAsync();
+                }
                 throw;
             }
+            finally
+            {
+                if (tran != null)
+                {
+                    await tran.DisposeAsync();
+                }
+            }
         }
+
+        #endregion
     }
 }

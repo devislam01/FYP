@@ -1,6 +1,8 @@
 ﻿using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
+using DemoFYP.Models.Dto.Response;
 using DemoFYP.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DemoFYP.Controllers
@@ -21,6 +23,32 @@ namespace DemoFYP.Controllers
             await _userServices.RegisterUser(payload, CurUserID);
 
             return SuccessResponse("User Registered Successfully!");
+        }
+
+        #endregion
+
+        #region Read APIs
+
+        [Authorize]
+        [HttpGet("getUserProfile")]
+        public async Task<ActionResult<StandardResponse<UserDetailResponse>>> GetUserProfile()
+        {
+            var result = await _userServices.GetUserProfile(CurUserID);
+
+            return SuccessResponse<UserDetailResponse>(result);
+        }
+
+        #endregion
+
+        #region Update APIs
+
+        [Authorize]
+        [HttpPost("updateUserProfile")]
+        public async Task<ActionResult<StandardResponse>> UpdateUserProfile(UserUpdateDetailRequest payload)
+        {
+            await _userServices.UpdateUserProfile(payload);
+
+            return SuccessResponse("Updated Successfully!");
         }
 
         #endregion

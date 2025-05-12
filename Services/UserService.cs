@@ -1,5 +1,6 @@
 ﻿using DemoFYP.Exceptions;
 using DemoFYP.Models.Dto.Request;
+using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
 using DemoFYP.Services.IServices;
 
@@ -13,6 +14,45 @@ namespace DemoFYP.Services
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
+
+        #region Read Services
+
+        public async Task<Guid> CheckLoginCredentials(UserLoginRequest payload)
+        {
+            if (payload == null) throw new BadRequestException("Payload is required.");
+
+            try
+            {
+                var hasUserID = await _userRepository.CheckUserLoginCredentials(payload);
+
+                if (hasUserID == Guid.Empty) throw new BadRequestException("Invalid Email or Password");
+
+                return hasUserID;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<UserDetailResponse> GetUserProfile(Guid CurUserID)
+        {
+            if (CurUserID == Guid.Empty) throw new UnauthorizedAccessException();
+
+            try
+            {
+                return await _userRepository.GetUserProfileByLoginID(CurUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Create Services
+
         public async Task RegisterUser(UserRegisterRequest payload, Guid updatedBy)
         {
             if (payload == null) throw new BadRequestException("Payload is required.");
@@ -32,21 +72,25 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<Guid> CheckLoginCredentials(UserLoginRequest payload)
+        #endregion
+
+        #region Update Services
+
+        public async Task UpdateUserProfile(UserUpdateDetailRequest payload)
         {
-            if (payload == null) throw new BadRequestException("Payload is required.");
+            if (payload == null) throw new BadRequestException("Payload is required");
+            if (payload.UserID == Guid.Empty) throw new BadRequestException("User ID is required");
 
             try
             {
-                var hasUserID = await _userRepository.CheckUserLoginCredentials(payload);
-
-                if (hasUserID == Guid.Empty) throw new BadRequestException("Invalid Email or Password");
-
-                return hasUserID;
+                await _userRepository.UpdateUserProfile(payload);
             }
-            catch (Exception) {
+            catch
+            {
                 throw;
             }
         }
+
+        #endregion
     }
 }
