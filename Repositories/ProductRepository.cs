@@ -63,6 +63,7 @@ namespace DemoFYP.Repositories
                     .Where(p => p.UserId == curUserID && p.IsActive == 1)
                     .Select(pl => new FilteredProductListResult
                     {
+                        ProductID = pl.ProductId,
                         ProductName = pl.ProductName,
                         ProductDescription = pl.ProductDescription,
                         CategoryID = pl.CategoryId,
