@@ -22,7 +22,7 @@ namespace DemoFYP.Services.IServices
 
         #region Update Services
 
-        Task UpdateUserProfile(UserUpdateDetailRequest payload);
+        Task UpdateUserProfile(UserUpdateDetailRequest payload, Guid curUserID);
 
         #endregion
     }
