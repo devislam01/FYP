@@ -25,16 +25,6 @@ builder.Services.AddAutoMapper(typeof(Program));
 // Register IServices
 builder.AutoRegisterServices(AppDomain.CurrentDomain.GetAssemblies());
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowLocalhost5173", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
 // Register Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -80,6 +70,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost5174", policy =>
+    {
+        policy.WithOrigins("http://localhost:5174")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Register Exception Middleware
@@ -93,9 +93,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowLocalhost5173");
+app.UseCors("AllowLocalhost5174");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseStaticFiles();
 
 app.Run();

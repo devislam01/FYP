@@ -12,7 +12,7 @@ namespace DemoFYP.Models.Dto.Request
 
         public string ProductCondition { get; set; }
 
-        public string ProductImage { get; set; }
+        public IFormFile ProductImage { get; set; }
 
         public double ProductPrice { get; set; }
 
@@ -35,7 +35,7 @@ namespace DemoFYP.Models.Dto.Request
 
         public string? ProductCondition { get; set; }
 
-        public string? ProductImage { get; set; }
+        public IFormFile? ProductImage { get; set; }
 
         public double? ProductPrice { get; set; }
 

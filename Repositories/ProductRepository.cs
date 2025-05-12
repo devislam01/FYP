@@ -15,11 +15,13 @@ namespace DemoFYP.Repositories
     {
         private readonly IDbContextFactory<AppDbContext> _factory;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProductRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper)
+        public ProductRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper, IWebHostEnvironment environment)
         {
-            _factory = factory;
-            _mapper = mapper;
+            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(factory));
+            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
 
         #region Read DB
@@ -118,7 +120,7 @@ namespace DemoFYP.Repositories
 
         #region Write DB
 
-        public async Task InsertProduct(AddProductRequest payload, Guid curUserID)
+        public async Task InsertProduct(AddProductRequest payload, Guid curUserID, string ImageURL)
         {
             var context = _factory.CreateDbContext();
             IDbContextTransaction tran = await context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
@@ -127,7 +129,7 @@ namespace DemoFYP.Repositories
             {
                 var newData = _mapper.Map<Product>(payload);
 
-                newData.ProductImage = "test";
+                newData.ProductImage = ImageURL;
                 newData.CreatedDateTime = DateTime.Now;
                 newData.CreatedBy = curUserID;
                 newData.UserId = payload.UserID.HasValue && payload.UserID.Value != Guid.Empty ? payload.UserID.Value : curUserID;
@@ -158,7 +160,7 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task UpdateProductByProductID(UpdateProductRequest payload, Guid curUserID)
+        public async Task UpdateProductByProductID(UpdateProductRequest payload, Guid curUserID, string ImageURL)
         {
             var context = _factory.CreateDbContext();
             IDbContextTransaction tran = await context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
@@ -173,7 +175,7 @@ namespace DemoFYP.Repositories
                 existingData.ProductDescription = payload.ProductDescription ?? existingData.ProductDescription;
                 existingData.CategoryId = payload.CategoryID ?? existingData.CategoryId;
                 existingData.ProductCondition = payload.ProductCondition ?? existingData.ProductCondition;
-                existingData.ProductImage = payload.ProductImage ?? existingData.ProductImage;
+                existingData.ProductImage = string.IsNullOrEmpty(ImageURL) ? existingData.ProductImage : ImageURL;
                 existingData.ProductPrice = payload.ProductPrice ?? existingData.ProductPrice;
                 existingData.StockQty = payload.StockQty ?? existingData.StockQty;
                 existingData.UpdatedDateTime = DateTime.Now;

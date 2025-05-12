@@ -15,8 +15,8 @@ namespace DemoFYP.Repositories.IRepositories
 
         #region Create
 
-        Task InsertProduct(AddProductRequest paylaod, Guid curUserID);
-        Task UpdateProductByProductID(UpdateProductRequest paylaod, Guid curUserID);
+        Task InsertProduct(AddProductRequest paylaod, Guid curUserID, string ImageURL);
+        Task UpdateProductByProductID(UpdateProductRequest paylaod, Guid curUserID, string ImageURL);
 
         Task DeleteProductByProductID(int productID, Guid curUserID);
 
