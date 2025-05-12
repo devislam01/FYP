@@ -2,7 +2,7 @@
 {
     public class UserUpdateDetailRequest
     {
-        public Guid UserID { get; set; }
+        public Guid? UserID { get; set; }
 
         public string? UserName { get; set; }
 

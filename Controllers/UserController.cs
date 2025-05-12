@@ -46,7 +46,7 @@ namespace DemoFYP.Controllers
         [HttpPost("updateUserProfile")]
         public async Task<ActionResult<StandardResponse>> UpdateUserProfile(UserUpdateDetailRequest payload)
         {
-            await _userServices.UpdateUserProfile(payload);
+            await _userServices.UpdateUserProfile(payload, CurUserID);
 
             return SuccessResponse("Updated Successfully!");
         }

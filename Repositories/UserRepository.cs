@@ -134,14 +134,14 @@ namespace DemoFYP.Repositories
 
         #region Update DB
 
-        public async Task UpdateUserProfile(UserUpdateDetailRequest payload)
+        public async Task UpdateUserProfile(UserUpdateDetailRequest payload, Guid curUserID)
         {
             var context = _factory.CreateDbContext();
             IDbContextTransaction tran = context.Database.BeginTransaction(IsolationLevel.ReadCommitted);
 
             try
             {
-                var curData = await context.Users.FirstOrDefaultAsync(u => u.UserId == payload.UserID && u.IsActive == 1) ?? throw new NotFoundException("User Not Found");
+                var curData = await context.Users.FirstOrDefaultAsync(u => u.UserId == (payload.UserID ?? curUserID) && u.IsActive == 1) ?? throw new NotFoundException("User Not Found");
 
                 curData.UserName = payload.UserName;
                 curData.Email = payload.Email;

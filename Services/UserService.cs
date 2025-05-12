@@ -76,14 +76,13 @@ namespace DemoFYP.Services
 
         #region Update Services
 
-        public async Task UpdateUserProfile(UserUpdateDetailRequest payload)
+        public async Task UpdateUserProfile(UserUpdateDetailRequest payload, Guid curUserID)
         {
             if (payload == null) throw new BadRequestException("Payload is required");
-            if (payload.UserID == Guid.Empty) throw new BadRequestException("User ID is required");
 
             try
             {
-                await _userRepository.UpdateUserProfile(payload);
+                await _userRepository.UpdateUserProfile(payload, curUserID);
             }
             catch
             {
