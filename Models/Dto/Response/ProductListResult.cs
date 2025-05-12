@@ -19,5 +19,6 @@
         public string ProductCondition { get; set; }
         public string ProductImage { get; set; }
         public double ProductPrice { get; set; }
+        public int StockQty { get; set; }
     }
 }
