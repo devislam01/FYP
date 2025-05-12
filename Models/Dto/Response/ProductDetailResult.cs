@@ -6,6 +6,8 @@
 
         public string ProductDescription { get; set; }
 
+        public int CategoryID { get; set; }
+
         public string CategoryName { get; set; }
 
         public string ProductCondition { get; set; }

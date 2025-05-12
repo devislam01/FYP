@@ -95,6 +95,7 @@ namespace DemoFYP.Repositories
                             .Join(context.ProductCategories, pc => pc.CategoryId, product => product.CategoryId, (product, category) => new ProductDetailResult { 
                                 ProductName = product.ProductName,
                                 ProductDescription = product.ProductDescription,
+                                CategoryID = category.CategoryId,
                                 CategoryName = category.CategoryName,
                                 ProductCondition = product.ProductCondition,
                                 ProductImage = product.ProductImage,
