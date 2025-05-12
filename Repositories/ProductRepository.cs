@@ -34,6 +34,7 @@ namespace DemoFYP.Repositories
                     .Where(p => p.IsActive == 1)
                     .Select(pl => new ProductListResult
                     {
+                        ProductID = pl.ProductId,
                         ProductName = pl.ProductName,
                         ProductDescription = pl.ProductDescription,
                         CategoryID = pl.CategoryId,
