@@ -23,6 +23,7 @@ namespace DemoFYP.Repositories
         }
 
         #region Read DB
+
         public async Task<List<ProductListResult>> GetProductList()
         {
             var context = _factory.CreateDbContext();
@@ -68,6 +69,7 @@ namespace DemoFYP.Repositories
                         ProductCondition = pl.ProductCondition,
                         ProductImage = pl.ProductImage,
                         ProductPrice = pl.ProductPrice,
+                        StockQty = pl.StockQty,
                     })
                     .ToListAsync();
             }
