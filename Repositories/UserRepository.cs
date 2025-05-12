@@ -148,6 +148,8 @@ namespace DemoFYP.Repositories
                 curData.PhoneNumber = payload.PhoneNumber;
                 curData.UserGender = payload.UserGender;
                 curData.Address = payload.Address;
+                curData.UpdatedDateTime = DateTime.Now;
+                curData.UpdatedBy = curUserID;
 
                 await context.SaveChangesAsync();
                 await tran.CommitAsync();
