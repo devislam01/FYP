@@ -88,8 +88,17 @@ namespace DemoFYP.Repositories
             try
             {
                 var product = await context.Products
-                             .Where(p => p.ProductId == ProductID && p.IsActive == 1)
-                             .FirstOrDefaultAsync();
+                            .Where(p => p.ProductId == ProductID && p.IsActive == 1)
+                            .Join(context.ProductCategories, pc => pc.CategoryId, product => product.CategoryId, (product, category) => new ProductDetailResult { 
+                                ProductName = product.ProductName,
+                                ProductDescription = product.ProductDescription,
+                                CategoryName = category.CategoryName,
+                                ProductCondition = product.ProductCondition,
+                                ProductImage = product.ProductImage,
+                                ProductPrice = product.ProductPrice,
+                                StockQty = product.StockQty,
+                            })
+                            .FirstOrDefaultAsync();
 
                 return _mapper.Map<ProductDetailResult>(product);
             }

@@ -6,6 +6,8 @@
 
         public string ProductDescription { get; set; }
 
+        public string CategoryName { get; set; }
+
         public string ProductCondition { get; set; }
 
         public string ProductImage { get; set; }
