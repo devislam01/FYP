@@ -23,6 +23,7 @@ namespace DemoFYP.Repositories.IRepositories
         #region Update Repositories
 
         Task UpdateUserProfile(UserUpdateDetailRequest payload, Guid curUserID);
+        Task UpdatePassword(string email, Guid CurUserID, string password);
 
         #endregion
     }

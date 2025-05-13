@@ -51,6 +51,23 @@ namespace DemoFYP.Controllers
             return SuccessResponse("Updated Successfully!");
         }
 
+        [HttpPost("forgetPassword")]
+        public async Task<ActionResult<StandardResponse>> SendTemporilyPassword(ForgotPasswordRequest payload)
+        {
+            await _userServices.SendTemporilyPassword(payload.Email, CurUserID);
+
+            return SuccessResponse("Email was sent! Please check your mailbox and reset password.");
+        }
+
+        [Authorize]
+        [HttpPost("resetPassword")]
+        public async Task<ActionResult<StandardResponse>> ResetPassword(ResetPasswordRequest payload)
+        {
+            await _userServices.ResetPassword(payload, CurUserID);
+
+            return SuccessResponse("Your password was reset!");
+        }
+
         #endregion
     }
 }

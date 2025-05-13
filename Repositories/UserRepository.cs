@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using DemoFYP.EF;
-using DemoFYP.Enums;
 using DemoFYP.Exceptions;
-using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
+using DemoFYP.Services.IServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
@@ -16,11 +15,13 @@ namespace DemoFYP.Repositories
     {
         private readonly IDbContextFactory<AppDbContext> _factory;
         private readonly IMapper _mapper;
+        private readonly ICommonServices _commonServices;
 
-        public UserRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper)
+        public UserRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper, ICommonServices commonServices)
         {
-            _factory = factory;
-            _mapper = mapper;
+            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _commonServices = commonServices ?? throw new ArgumentNullException(nameof(commonServices));
         }
 
         #region Read DB
@@ -45,10 +46,16 @@ namespace DemoFYP.Repositories
 
             try
             {
-                return await context.Users
-                    .Where(u => u.Email.ToLower() == payload.Email.ToLower() && u.Password == payload.Password && u.IsActive == 1)
-                    .Select(u => u.UserId)
-                    .FirstOrDefaultAsync();
+
+                var user = await context.Users
+                    .Where(u => u.Email.ToLower() == payload.Email.ToLower() && u.IsActive == 1)
+                    .Select(u => new { u.UserId, u.Password })
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException("User Not Found");
+
+                bool isValid = BCrypt.Net.BCrypt.Verify(payload.Password, user.Password);
+
+                return isValid ? user.UserId : Guid.Empty;
+
             }
             catch
             {
@@ -101,6 +108,7 @@ namespace DemoFYP.Repositories
 
                 var newData = _mapper.Map<User>(registerData);
                 newData.UserId = Guid.NewGuid();
+                newData.Password = _commonServices.HashPassword(registerData.Password);
                 newData.CreatedBy = updatedBy;
                 newData.CreatedDateTime = DateTime.Now;
                 newData.IsActive = 1;
@@ -168,6 +176,37 @@ namespace DemoFYP.Repositories
                 {
                     await tran.DisposeAsync();
                 }
+            }
+        }
+
+        public async Task UpdatePassword(string email, Guid CurUserID, string password)
+        {
+            var context = _factory.CreateDbContext();
+            IDbContextTransaction trans = context.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+
+            try
+            {
+                var curData = await context.Users.FirstOrDefaultAsync(u => u.Email == email) ?? throw new NotFoundException("Email Not Found!");
+
+                curData.Password = password;
+                curData.UpdatedDateTime = DateTime.Now;
+                curData.UpdatedBy = CurUserID;
+
+                await context.SaveChangesAsync();
+                await trans.CommitAsync();
+            }
+            catch
+            {
+                if (trans != null)
+                {
+                    await trans.RollbackAsync();
+                }
+
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
 

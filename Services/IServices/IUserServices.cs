@@ -23,6 +23,8 @@ namespace DemoFYP.Services.IServices
         #region Update Services
 
         Task UpdateUserProfile(UserUpdateDetailRequest payload, Guid curUserID);
+        Task SendTemporilyPassword(string email, Guid CurUserID);
+        Task ResetPassword(ResetPasswordRequest payload, Guid CurUserID);
 
         #endregion
     }

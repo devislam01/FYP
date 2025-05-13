@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DemoFYP.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DemoFYP.EF;
 
@@ -26,6 +27,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<Usertoken> Usertokens { get; set; }
+    public virtual DbSet<EmailLog> EmailLogs { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {}
 
@@ -256,7 +258,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("email");
             entity.Property(e => e.IsActive).HasColumnName("isActive");
             entity.Property(e => e.Password)
-                .HasMaxLength(45)
+                .HasMaxLength(60)
                 .HasColumnName("password");
             entity.Property(e => e.PhoneNumber)
                 .HasMaxLength(45)
@@ -298,6 +300,21 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UserId)
                 .HasColumnType("binary(16)")
                 .HasColumnName("UserID");
+        });
+
+        modelBuilder.Entity<EmailLog>(entity =>
+        {
+            entity.HasKey(e => e.EmailId).HasName("PRIMARY");
+
+            entity.ToTable("email_log");
+
+            entity.HasIndex(e => e.EmailId, "emailID_UNIQUE").IsUnique();
+
+            entity.Property(e => e.EmailId).HasColumnName("EmailID");
+            entity.Property(e => e.From).HasMaxLength(45);
+            entity.Property(e => e.To).HasMaxLength(45);
+            entity.Property(e => e.Subject).HasMaxLength(45);
+            entity.Property(e => e.IsSent).HasColumnName("isSent");
         });
 
         OnModelCreatingPartial(modelBuilder);

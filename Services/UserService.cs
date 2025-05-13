@@ -9,10 +9,16 @@ namespace DemoFYP.Services
     public class UserService : IUserServices
     {
         private readonly IUserRepository _userRepository;
+        private readonly ICommonServices _commonServices;
+        private readonly IEmailServices _emailServices;
+        private readonly IConfiguration _config;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, ICommonServices commonServices, IEmailServices emailServices, IConfiguration config)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _commonServices = commonServices ?? throw new ArgumentNullException(nameof(commonServices));
+            _emailServices = emailServices ?? throw new ArgumentNullException(nameof(emailServices));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
         #region Read Services
@@ -83,6 +89,43 @@ namespace DemoFYP.Services
             try
             {
                 await _userRepository.UpdateUserProfile(payload, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task SendTemporilyPassword(string email, Guid CurUserID)
+        {
+            if (email == null) throw new BadRequestException("Email is required");
+
+            try
+            {
+                var temporilyPassword = _commonServices.GenerateTemporaryPassword();
+                string hashPassword = _commonServices.HashPassword(temporilyPassword);
+                await _userRepository.UpdatePassword(email, CurUserID, hashPassword);
+
+                string subject = "[Test] Reset Password";
+                string body = $"Your temporary password is: {temporilyPassword}\n\nPlease login and change it immediately with the link {_config["FrontendUrl"]}";
+
+                await _emailServices.SendEmailAsync(email, temporilyPassword, subject, body);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task ResetPassword(ResetPasswordRequest payload, Guid CurUserID)
+        {
+            if (payload.Email == null) throw new BadRequestException("Email is required");
+            if (payload.Password == null) throw new BadRequestException("New Password is required");
+
+            try
+            {
+                var hashPassword = _commonServices.HashPassword(payload.Password);
+                await _userRepository.UpdatePassword(payload.Email, CurUserID, hashPassword);
             }
             catch
             {
