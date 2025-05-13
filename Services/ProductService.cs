@@ -45,7 +45,7 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<ProductDetailResult> GetProductDetailByProductID(int ProductID, Guid curUserID)
+        public async Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, Guid curUserID)
         {
             if (ProductID == 0) { throw new BadRequestException("Missing Product ID"); }
 

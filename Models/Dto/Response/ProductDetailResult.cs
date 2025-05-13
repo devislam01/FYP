@@ -20,4 +20,18 @@
 
         public int StockQty { get; set; } = 1;
     }
+
+    public class SellerDetailResult
+    {
+        public string SellerName { get; set; }
+        public double? RatingMark { get; set; }
+        public int CompletedOrders { get; set; }
+        public string JoinTime { get; set; }
+    }
+
+    public class ProductDetailResponse
+    {
+        public ProductDetailResult ProductDetail { get; set; }
+        public SellerDetailResult SellerDetail { get; set; }
+    }
 }

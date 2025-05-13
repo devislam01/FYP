@@ -120,27 +120,55 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<ProductDetailResult> GetProductDetailByProductID(int ProductID, Guid curUserID)
+        public async Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, Guid curUserID)
         {
             var context = _factory.CreateDbContext();
 
             try
             {
-                var product = await context.Products
-                            .Where(p => p.ProductId == ProductID && p.IsActive == 1)
-                            .Join(context.ProductCategories, pc => pc.CategoryId, product => product.CategoryId, (product, category) => new ProductDetailResult { 
-                                ProductName = product.ProductName,
-                                ProductDescription = product.ProductDescription,
-                                CategoryID = category.CategoryId,
-                                CategoryName = category.CategoryName,
-                                ProductCondition = product.ProductCondition,
-                                ProductImage = product.ProductImage,
-                                ProductPrice = product.ProductPrice,
-                                StockQty = product.StockQty,
-                            })
-                            .FirstOrDefaultAsync();
+                var productWithCategory = await context.Products
+                    .Where(p => p.ProductId == ProductID && p.IsActive == 1)
+                    .Join(context.ProductCategories,
+                          product => product.CategoryId,
+                          pc => pc.CategoryId,
+                          (product, category) => new
+                          {
+                              product,
+                              category
+                          })
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException("Product Not Found");
 
-                return _mapper.Map<ProductDetailResult>(product);
+                var seller = await context.Users
+                    .Where(u => u.UserId == productWithCategory.product.UserId)
+                    .FirstOrDefaultAsync();
+
+                var completedOrders = await context.Orders
+                    .Where(o => o.UserId == productWithCategory.product.UserId)
+                    .CountAsync();
+
+                var response = new ProductDetailResponse
+                {
+                    ProductDetail = new ProductDetailResult
+                    {
+                        ProductName = productWithCategory.product.ProductName,
+                        ProductDescription = productWithCategory.product.ProductDescription,
+                        CategoryID = productWithCategory.category.CategoryId,
+                        CategoryName = productWithCategory.category.CategoryName,
+                        ProductCondition = productWithCategory.product.ProductCondition,
+                        ProductImage = productWithCategory.product.ProductImage,
+                        ProductPrice = productWithCategory.product.ProductPrice,
+                        StockQty = productWithCategory.product.StockQty
+                    },
+                    SellerDetail = new SellerDetailResult
+                    {
+                        SellerName = seller?.UserName ?? "Unknown",
+                        RatingMark = seller?.RatingMark,
+                        CompletedOrders = completedOrders,
+                        JoinTime = seller != null ? (DateTime.Now - seller.CreatedDateTime).Days + " days ago" : "Unknown"
+                    }
+                };
+
+                return response;
             }
             catch
             {
