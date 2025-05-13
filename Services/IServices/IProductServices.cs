@@ -9,7 +9,7 @@ namespace DemoFYP.Services.IServices
     {
         #region Read Services
 
-        Task<List<ProductListResult>> GetProductList(ProductFilterRequest filter);
+        Task<PagedResult<ProductListResult>> GetProductList(ProductFilterRequest filter);
         Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID);
         Task<ProductDetailResult> GetProductDetailByProductID(int ProductID, Guid curUserID);
 

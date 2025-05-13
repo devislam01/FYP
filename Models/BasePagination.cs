@@ -30,4 +30,10 @@
         public int PageCount => (int)Math.Ceiling((double)TotalRecord / PageSize);
     }
 
+    public class PagedResult<T>
+    {
+        public List<T> Data { get; set; } = new();
+        public PaginationResponse Pagination { get; set; } = new();
+    }
+
 }

@@ -21,7 +21,7 @@ namespace DemoFYP.Services
 
         #region Read Repositories
 
-        public async Task<List<ProductListResult>> GetProductList(ProductFilterRequest filter)
+        public async Task<PagedResult<ProductListResult>> GetProductList(ProductFilterRequest filter)
         {
             try
             {

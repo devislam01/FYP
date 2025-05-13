@@ -27,7 +27,7 @@ namespace DemoFYP.Repositories
 
         #region Read DB
 
-        public async Task<List<ProductListResult>> GetProductList(ProductFilterRequest filter)
+        public async Task<PagedResult<ProductListResult>> GetProductList(ProductFilterRequest filter)
         {
             var context = _factory.CreateDbContext();
 
@@ -49,30 +49,35 @@ namespace DemoFYP.Repositories
 
                 int totalRecord = await query.CountAsync();
 
-                var projectedQuery = query.Select(pl => new ProductListResult
-                {
-                    ProductID = pl.ProductId,
-                    ProductName = pl.ProductName,
-                    ProductDescription = pl.ProductDescription,
-                    CategoryID = pl.CategoryId,
-                    ProductCondition = pl.ProductCondition,
-                    ProductImage = pl.ProductImage,
-                    ProductPrice = pl.ProductPrice,
-                    PageNumber = filter.PageNumber,
-                    PageSize = filter.PageSize,
-                    TotalRecord = totalRecord,
-                    DisablePagination = filter.DisablePagination
-                });
-
                 if (!filter.DisablePagination)
                 {
-                    projectedQuery = projectedQuery
-                        .OrderBy(p => p.ProductID)
+                    query = query
+                        .OrderBy(p => p.ProductId)
                         .Skip((filter.PageNumber - 1) * filter.PageSize)
                         .Take(filter.PageSize);
                 }
 
-                return await projectedQuery.ToListAsync();
+                var products = await query.Select(p => new ProductListResult
+                {
+                    ProductID = p.ProductId,
+                    ProductName = p.ProductName,
+                    ProductDescription = p.ProductDescription,
+                    CategoryID = p.CategoryId,
+                    ProductCondition = p.ProductCondition,
+                    ProductImage = p.ProductImage,
+                    ProductPrice = p.ProductPrice
+                }).ToListAsync();
+
+                return new PagedResult<ProductListResult>
+                {
+                    Data = products,
+                    Pagination = new PaginationResponse
+                    {
+                        PageNumber = filter.PageNumber,
+                        PageSize = filter.PageSize,
+                        TotalRecord = totalRecord
+                    }
+                };
             }
             catch
             {
@@ -142,7 +147,6 @@ namespace DemoFYP.Repositories
                 throw;
             }
         }
-
 
         #endregion
 

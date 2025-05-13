@@ -19,11 +19,11 @@ namespace DemoFYP.Controllers
         #region Read APIs
 
         [HttpPost("getProductList")]
-        public async Task<ActionResult<StandardResponse<List<ProductListResult>>>> GetProductList(ProductFilterRequest filter)
+        public async Task<ActionResult<StandardResponse<PagedResult<ProductListResult>>>> GetProductList(ProductFilterRequest filter)
         {
             var result = await _productServices.GetProductList(filter);
 
-            return SuccessResponse<List<ProductListResult>>(result);
+            return SuccessResponse<PagedResult<ProductListResult>>(result);
         }
 
         [Authorize]

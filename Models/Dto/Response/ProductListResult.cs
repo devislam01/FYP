@@ -1,6 +1,6 @@
 ﻿namespace DemoFYP.Models.Dto.Response
 {
-    public class ProductListResult : BasePagination
+    public class ProductListResult
     {
         public int ProductID {  get; set; }
         public string ProductName {  get; set; }
@@ -12,7 +12,7 @@
 
     }
 
-    public class FilteredProductListResult : BasePagination
+    public class FilteredProductListResult
     {
         public int ProductID { get; set; }
         public string ProductName { get; set; }
