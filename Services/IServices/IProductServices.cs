@@ -1,5 +1,7 @@
-﻿using DemoFYP.Models.Dto.Request;
+﻿using DemoFYP.Models;
+using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DemoFYP.Services.IServices
 {
@@ -7,7 +9,7 @@ namespace DemoFYP.Services.IServices
     {
         #region Read Services
 
-        Task<List<ProductListResult>> GetProductList();
+        Task<List<ProductListResult>> GetProductList(ProductFilterRequest filter);
         Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID);
         Task<ProductDetailResult> GetProductDetailByProductID(int ProductID, Guid curUserID);
 

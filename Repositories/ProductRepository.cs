@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using DemoFYP.EF;
 using DemoFYP.Exceptions;
+using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
@@ -26,29 +27,56 @@ namespace DemoFYP.Repositories
 
         #region Read DB
 
-        public async Task<List<ProductListResult>> GetProductList()
+        public async Task<List<ProductListResult>> GetProductList(ProductFilterRequest filter)
         {
             var context = _factory.CreateDbContext();
 
             try
             {
-                return await context.Products
-                    .Where(p => p.IsActive == 1)
-                    .Select(pl => new ProductListResult
-                    {
-                        ProductID = pl.ProductId,
-                        ProductName = pl.ProductName,
-                        ProductDescription = pl.ProductDescription,
-                        CategoryID = pl.CategoryId,
-                        ProductCondition = pl.ProductCondition,
-                        ProductImage = pl.ProductImage,
-                        ProductPrice = pl.ProductPrice,
-                    })
-                    .ToListAsync();
+                var query = context.Products
+                            .Where(p => p.IsActive == 1);
+
+                if (!string.IsNullOrWhiteSpace(filter.Search))
+                {
+                    query = query.Where(p => p.ProductName.Contains(filter.Search));
+                    filter.DisablePagination = true;
+                }
+
+                if (filter.CategoryId.HasValue)
+                {
+                    query = query.Where(p => p.CategoryId == filter.CategoryId.Value);
+                }
+
+                int totalRecord = await query.CountAsync();
+
+                var projectedQuery = query.Select(pl => new ProductListResult
+                {
+                    ProductID = pl.ProductId,
+                    ProductName = pl.ProductName,
+                    ProductDescription = pl.ProductDescription,
+                    CategoryID = pl.CategoryId,
+                    ProductCondition = pl.ProductCondition,
+                    ProductImage = pl.ProductImage,
+                    ProductPrice = pl.ProductPrice,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalRecord = totalRecord,
+                    DisablePagination = filter.DisablePagination
+                });
+
+                if (!filter.DisablePagination)
+                {
+                    projectedQuery = projectedQuery
+                        .OrderBy(p => p.ProductID)
+                        .Skip((filter.PageNumber - 1) * filter.PageSize)
+                        .Take(filter.PageSize);
+                }
+
+                return await projectedQuery.ToListAsync();
             }
             catch
             {
-                throw;
+                    throw;
             }
             finally
             {

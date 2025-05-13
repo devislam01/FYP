@@ -1,8 +1,10 @@
 ﻿using DemoFYP.Exceptions;
+using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
 using DemoFYP.Services.IServices;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DemoFYP.Services
@@ -19,11 +21,11 @@ namespace DemoFYP.Services
 
         #region Read Repositories
 
-        public async Task<List<ProductListResult>> GetProductList()
+        public async Task<List<ProductListResult>> GetProductList(ProductFilterRequest filter)
         {
             try
             {
-                return await _productRepository.GetProductList();
+                return await _productRepository.GetProductList(filter);
             }
             catch
             {
