@@ -23,12 +23,26 @@ namespace DemoFYP.Repositories
 
             try
             {
-                var newData = _mapper.Map<Usertoken>(userToken);
+                var existUserToken = await context.Usertokens.OrderByDescending(ut => ut.TokenId).FirstOrDefaultAsync(ut => ut.UserId == userToken.UserId);
 
-                await context.Usertokens.AddAsync(newData);
+                if (existUserToken == null)
+                {
+                    await context.Usertokens.AddAsync(userToken);
+                }
+                else
+                {
+                    existUserToken.AccessToken = userToken.AccessToken;
+                    existUserToken.AccessTokenExpiresAt = userToken.AccessTokenExpiresAt;
+                    existUserToken.RefreshToken = userToken.RefreshToken;
+                    existUserToken.RefreshTokenExpiresAt = userToken.RefreshTokenExpiresAt;
+                    existUserToken.CreatedAt = DateTime.Now;
+                    existUserToken.IsRevoked = false;
+                }
+
                 await context.SaveChangesAsync();
             }
-            catch (Exception ex) {
+            catch
+            {
                 throw new InvalidOperationException("Insert token failed");
             }
         }

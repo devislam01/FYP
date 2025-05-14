@@ -67,7 +67,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
                 if (userToken.AccessToken != accessTokenFromJwt)
                 {
-                    context.Fail("Token is Expired");
+                    context.Fail("Token mismatch");
                     return;
                 }
 
