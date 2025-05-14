@@ -19,6 +19,13 @@
         public bool DisablePagination { get; set; } = false;
     }
 
+    public class PaginationRequest
+    {
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public bool DisablePagination { get; set; } = false;
+    }
+
     public class PaginationResponse
     {
         public int PageNumber { get; set; }
