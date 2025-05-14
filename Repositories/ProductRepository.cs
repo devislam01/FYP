@@ -34,7 +34,8 @@ namespace DemoFYP.Repositories
             try
             {
                 var query = context.Products
-                            .Where(p => p.IsActive == 1);
+                    .OrderByDescending(p => p.ProductId)
+                    .Where(p => p.IsActive == 1);
 
                 if (!string.IsNullOrWhiteSpace(filter.Search))
                 {
@@ -52,7 +53,6 @@ namespace DemoFYP.Repositories
                 if (!filter.DisablePagination)
                 {
                     query = query
-                        .OrderBy(p => p.ProductId)
                         .Skip((filter.PageNumber - 1) * filter.PageSize)
                         .Take(filter.PageSize);
                 }
