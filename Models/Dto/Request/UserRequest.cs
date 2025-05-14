@@ -14,4 +14,9 @@
 
         public string? Address { get; set; }
     }
+
+    public class RevokeUserRequest
+    {
+        public Guid UserID { get; set; }
+    }
 }

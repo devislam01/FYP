@@ -6,6 +6,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
+using DemoFYP.Repositories;
+using DemoFYP.Repositories.IRepositories;
+using DemoFYP.Exceptions;
+using DemoFYP;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +31,8 @@ builder.Services.AddAutoMapper(typeof(Program));
 // Register IServices
 builder.AutoRegisterServices(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddScoped<IJwtRepository, JwtRepository>();
+
 // Register Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -37,6 +45,55 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var jwtRepository = context.HttpContext.RequestServices.GetRequiredService<IJwtRepository>();
+
+            var userId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var accessTokenFromJwt = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+            if (userId != null)
+            {
+                var userToken = await jwtRepository.GetUserTokenByUserId(Guid.Parse(userId));
+
+                if (userToken == null) {
+                    context.Fail("You haven't login yet");
+                    return;
+                }
+
+                if (userToken.AccessToken != accessTokenFromJwt)
+                {
+                    context.Fail("Token is Expired");
+                    return;
+                }
+
+                if (userToken.IsRevoked)
+                {
+                    context.Fail("Token is revoked");
+                    return;
+                }
+            }
+        },
+        OnChallenge = context =>
+        {
+            if (!context.Response.HasStarted)
+            {
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                var result = JsonSerializer.Serialize(new
+                {
+                    code = 401,
+                    message = context?.AuthenticateFailure?.Message
+                });
+                return context.Response.WriteAsync(result);
+            }
+
+            return Task.CompletedTask;
+        }
     };
 });
 

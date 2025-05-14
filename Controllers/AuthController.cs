@@ -1,9 +1,8 @@
-﻿using DemoFYP.Exceptions;
-using DemoFYP.Models;
+﻿using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
+using DemoFYP.Repositories.IRepositories;
 using DemoFYP.Services.IServices;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DemoFYP.Controllers
@@ -13,7 +12,7 @@ namespace DemoFYP.Controllers
         private readonly IJwtServices _Jwtservices;
         private readonly IUserServices _userServices;
 
-        public AuthController(IJwtServices jwtServices, IUserServices userServices) {
+        public AuthController(IJwtServices jwtServices, IUserServices userServices, IJwtRepository jwtRepository) {
             _Jwtservices = jwtServices ?? throw new ArgumentNullException(nameof(jwtServices));
             _userServices = userServices ?? throw new ArgumentNullException(nameof(userServices));
         }
@@ -26,5 +25,22 @@ namespace DemoFYP.Controllers
 
             return SuccessResponse(data, "Login Successfully");
         }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<StandardResponse<JwtAuthResult>>> RefreshToken([FromBody] RefreshTokenRequest payload)
+        {
+            var data = await _Jwtservices.VerifyAndGenerateRefreshToken(payload);
+
+            return SuccessResponse(data);
+        }
+
+        [HttpPost("revoke-user")]
+        public async Task<ActionResult<StandardResponse>> RevokeUser([FromBody] RevokeUserRequest payload)
+        {
+            await _Jwtservices.RevokeUser(payload.UserID, CurUserID);
+
+            return SuccessResponse($"User { payload.UserID } has been revoked");
+        }
+
     }
 }

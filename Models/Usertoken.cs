@@ -18,4 +18,6 @@ public partial class Usertoken
     public DateTime RefreshTokenExpiresAt { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public bool IsRevoked { get; set; }
 }

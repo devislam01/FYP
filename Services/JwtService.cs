@@ -42,7 +42,7 @@ namespace DemoFYP.Services
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(15),
+                expires: DateTime.Now.AddMinutes(15),
                 signingCredentials: creds
             );
 
@@ -53,7 +53,7 @@ namespace DemoFYP.Services
             {
                 UserId = curUserID,
                 AccessToken = jwtToken,
-                AccessTokenExpiresAt = token.ValidTo,
+                AccessTokenExpiresAt = DateTime.Now.AddMinutes(15),
                 RefreshToken = refreshToken.Token,
                 RefreshTokenExpiresAt = refreshToken.Expiry,
             };
@@ -73,7 +73,38 @@ namespace DemoFYP.Services
             }
         }
 
-        private RefreshToken GenerateSecureRefreshToken()
+        public async Task<JwtAuthResult> VerifyAndGenerateRefreshToken(RefreshTokenRequest payload)
+        {
+            if (string.IsNullOrEmpty(payload.RefreshToken)) throw new BadRequestException("Refresh token is required");
+
+            var userToken = await _jwtRepository.GetUserTokenByRefreshToken(payload.RefreshToken) ?? throw new UnauthorizedAccessException("Invalid or expired refresh token");
+            var userId = userToken.UserId;
+
+            await _jwtRepository.RevokeUserTokenByRefreshToken(payload.RefreshToken);
+
+            var jwtResult = await GenerateToken(new UserLoginRequest
+            {
+                Email = "",
+            }, userId);
+
+            return jwtResult;
+        }
+
+        public async Task RevokeUser(Guid userID, Guid curUserID)
+        {
+            if (userID == Guid.Empty) throw new BadRequestException("User ID is required");
+
+            try
+            {
+                await _jwtRepository.RevokeUserByUserID(userID, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private static RefreshToken GenerateSecureRefreshToken()
         {
             var randomBytes = new byte[32];
             using var rng = RandomNumberGenerator.Create();
@@ -81,7 +112,7 @@ namespace DemoFYP.Services
 
             return new RefreshToken {
                 Token = Convert.ToBase64String(randomBytes),
-                Expiry = DateTime.UtcNow.AddDays(7)
+                Expiry = DateTime.Now.AddDays(7)
             };
         }
     }
