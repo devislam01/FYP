@@ -45,9 +45,9 @@ namespace DemoFYP.Repositories
                     filter.DisablePagination = true;
                 }
 
-                if (filter.CategoryId.HasValue)
+                if (filter.CategoryId != null && filter.CategoryId.Length > 0)
                 {
-                    query = query.Where(p => p.CategoryId == filter.CategoryId.Value);
+                    query = query.Where(p => filter.CategoryId.Contains(p.CategoryId));
                 }
 
                 int totalRecord = await query.CountAsync();
@@ -66,7 +66,7 @@ namespace DemoFYP.Repositories
                     ProductDescription = p.ProductDescription,
                     CategoryID = p.CategoryId,
                     ProductCondition = p.ProductCondition,
-                    ProductImage = p.ProductImage,
+                    ProductImage = $"{_config["BackendUrl"]}/{p.ProductImage}",
                     ProductPrice = p.ProductPrice
                 }).ToListAsync();
 
@@ -106,7 +106,7 @@ namespace DemoFYP.Repositories
                         ProductDescription = pl.ProductDescription,
                         CategoryID = pl.CategoryId,
                         ProductCondition = pl.ProductCondition,
-                        ProductImage = pl.ProductImage,
+                        ProductImage = $"{_config["BackendUrl"]}/{pl.ProductImage}",
                         ProductPrice = pl.ProductPrice,
                         StockQty = pl.StockQty,
                     })

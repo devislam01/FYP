@@ -3,6 +3,6 @@
     public class ProductFilterRequest : PaginationRequest
     {
         public string? Search { get; set; }
-        public int? CategoryId { get; set; }
+        public int[]? CategoryId { get; set; }
     }
 }
