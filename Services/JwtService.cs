@@ -60,7 +60,7 @@ namespace DemoFYP.Services
 
             try
             {
-                await _jwtRepository.AddUserToken(userToken);
+                await _jwtRepository.AddOrUpdateUserToken(userToken);
 
                 return new JwtAuthResult
                 {

@@ -17,7 +17,7 @@ namespace DemoFYP.Repositories
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task AddUserToken(Usertoken userToken)
+        public async Task AddOrUpdateUserToken(Usertoken userToken)
         {
             var context = _factory.CreateDbContext();
 
