@@ -17,12 +17,14 @@ namespace DemoFYP.Repositories
         private readonly IDbContextFactory<AppDbContext> _factory;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _environment;
+        private readonly IConfiguration _config;
 
-        public ProductRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper, IWebHostEnvironment environment)
+        public ProductRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper, IWebHostEnvironment environment, IConfiguration config)
         {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(factory));
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
         #region Read DB
@@ -155,7 +157,7 @@ namespace DemoFYP.Repositories
                         CategoryID = productWithCategory.category.CategoryId,
                         CategoryName = productWithCategory.category.CategoryName,
                         ProductCondition = productWithCategory.product.ProductCondition,
-                        ProductImage = productWithCategory.product.ProductImage,
+                        ProductImage = $"{_config["BackendUrl"]}/{ productWithCategory.product.ProductImage }",
                         ProductPrice = productWithCategory.product.ProductPrice,
                         StockQty = productWithCategory.product.StockQty
                     },
