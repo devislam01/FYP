@@ -38,11 +38,25 @@ namespace DemoFYP.Controllers
             return SuccessResponse<UserDetailResponse>(result);
         }
 
+        [Authorize]
+        [HttpGet("permissionList")]
+        public async Task<ActionResult<StandardResponse<UserPermissionResponse>>> GetPermissionList()
+        {
+            return SuccessResponse<UserPermissionResponse>(await _userServices.GetPermissionsList());
+        }
+
+        [Authorize]
+        [HttpGet("permission")]
+        public async Task<ActionResult<StandardResponse<UserPermissionResponse>>> GetPermission()
+        {
+            return SuccessResponse<UserPermissionResponse>(await _userServices.GetUserPermissions(CurUserID));
+        }
+
         #endregion
 
         #region Update APIs
 
-        [Authorize]
+        [Authorize(Policy = "Update_User")]
         [HttpPost("updateUserProfile")]
         public async Task<ActionResult<StandardResponse>> UpdateUserProfile(UserUpdateDetailRequest payload)
         {
@@ -59,7 +73,7 @@ namespace DemoFYP.Controllers
             return SuccessResponse("Email was sent! Please check your mailbox and reset password.");
         }
 
-        [Authorize]
+        [Authorize(Policy = "Reset_Password")]
         [HttpPost("resetPassword")]
         public async Task<ActionResult<StandardResponse>> ResetPassword(ResetPasswordRequest payload)
         {

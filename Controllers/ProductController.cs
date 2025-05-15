@@ -58,7 +58,7 @@ namespace DemoFYP.Controllers
 
         #region Create APIs
 
-        [Authorize]
+        [Authorize(Policy = "Create_Product")]
         [HttpPost("addProduct")]
         public async Task<ActionResult<StandardResponse>> AddProduct(AddProductRequest payload)
         {
@@ -67,7 +67,7 @@ namespace DemoFYP.Controllers
             return SuccessResponse("Added Successfully!");
         }
 
-        [Authorize]
+        [Authorize(Policy = "Update_Product")]
         [HttpPost("updateProduct")]
         public async Task<ActionResult<StandardResponse>> UpdateProduct(UpdateProductRequest payload)
         {
@@ -76,7 +76,7 @@ namespace DemoFYP.Controllers
             return SuccessResponse("Updated Successfully!");
         }
 
-        [Authorize]
+        [Authorize(Policy = "Delete_Product")]
         [HttpPost("deleteProduct")]
         public async Task<ActionResult<StandardResponse>> DeleteProduct(DeleteProductRequest payload)
         {

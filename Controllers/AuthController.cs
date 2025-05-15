@@ -3,6 +3,7 @@ using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
 using DemoFYP.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DemoFYP.Controllers
@@ -20,8 +21,8 @@ namespace DemoFYP.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<StandardResponse<JwtAuthResult>>> Login(UserLoginRequest request)
         {
-            Guid userID = await _userServices.CheckLoginCredentials(request);
-            var data = await _Jwtservices.GenerateToken(request, userID);
+            UserJwtClaims jwtClaims = await _userServices.CheckLoginCredentials(request);
+            var data = await _Jwtservices.GenerateToken(jwtClaims);
 
             return SuccessResponse(data, "Login Successfully");
         }
@@ -29,11 +30,12 @@ namespace DemoFYP.Controllers
         [HttpPost("refresh-token")]
         public async Task<ActionResult<StandardResponse<JwtAuthResult>>> RefreshToken([FromBody] RefreshTokenRequest payload)
         {
-            var data = await _Jwtservices.VerifyAndGenerateRefreshToken(payload);
+            var data = await _Jwtservices.VerifyAndGenerateRefreshToken(payload, CurUserEmail, CurUserRole);
 
             return SuccessResponse(data);
         }
 
+        [Authorize(Policy = "Revoke_User")]
         [HttpPost("revoke-user")]
         public async Task<ActionResult<StandardResponse>> RevokeUser([FromBody] RevokeUserRequest payload)
         {
@@ -41,6 +43,5 @@ namespace DemoFYP.Controllers
 
             return SuccessResponse($"User { payload.UserID } has been revoked");
         }
-
     }
 }

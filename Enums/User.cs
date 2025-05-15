@@ -8,8 +8,8 @@
 
     public enum UserLevel
     {
-        Admin = 0,
-        User = 1,
+        Admin = 1,
+        User = 2,
     }
 
     public enum Status

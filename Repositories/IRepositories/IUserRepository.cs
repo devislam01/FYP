@@ -9,8 +9,10 @@ namespace DemoFYP.Repositories.IRepositories
         #region Read Repositories
 
         Task<bool> CheckIfEmailExist(string email, AppDbContext outerContext = null);
-        Task<Guid> CheckUserLoginCredentials(UserLoginRequest payload);
-        Task<UserDetailResponse> GetUserProfileByLoginID(Guid CurUserID);
+        Task<UserJwtClaims> CheckUserLoginCredentials(UserLoginRequest payload);
+        Task<UserDetailResponse> GetUserProfileByLoginID(Guid curUserID);
+        Task<UserPermissionResponse> GetPermissions();
+        Task<UserPermissionResponse> GetUserPermissionsByLoginID(Guid curUserID);
 
         #endregion
 
@@ -23,7 +25,7 @@ namespace DemoFYP.Repositories.IRepositories
         #region Update Repositories
 
         Task UpdateUserProfile(UserUpdateDetailRequest payload, Guid curUserID);
-        Task UpdatePassword(string email, Guid CurUserID, string password);
+        Task UpdatePassword(string email, Guid curUserID, string password);
 
         #endregion
     }

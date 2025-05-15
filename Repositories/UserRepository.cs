@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DemoFYP.EF;
+using DemoFYP.Enums;
 using DemoFYP.Exceptions;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
@@ -40,22 +41,47 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<Guid> CheckUserLoginCredentials(UserLoginRequest payload)
+        public async Task<UserJwtClaims> CheckUserLoginCredentials(UserLoginRequest payload)
         {
             var context = _factory.CreateDbContext();
 
             try
             {
 
-                var user = await context.Users
+                var userWithRole = await context.Users
                     .Where(u => u.Email.ToLower() == payload.Email.ToLower() && u.IsActive == 1)
-                    .Select(u => new { u.UserId, u.Password })
+                    .Join(context.Roles,
+                        u => u.RoleID,
+                        r => r.RoleID,
+                        (u, r) => new
+                        {
+                            u.UserId,
+                            u.Email,
+                            u.Password,
+                            r.RoleID,
+                            r.RoleName
+                        })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException("User Not Found");
 
-                bool isValid = BCrypt.Net.BCrypt.Verify(payload.Password, user.Password);
+                bool isValid = BCrypt.Net.BCrypt.Verify(payload.Password, userWithRole.Password);
+                if (!isValid)
+                    throw new NotFoundException("Invalid Password");
 
-                return isValid ? user.UserId : Guid.Empty;
+                var permissionNames = await context.RolePermissions
+                    .Where(rp => rp.RoleID == userWithRole.RoleID)
+                    .Join(context.Permissions,
+                        rp => rp.PermissionID,
+                        p => p.PermissionID,
+                        (rp, p) => p.PermissionName)
+                    .ToListAsync();
 
+                return new UserJwtClaims
+                {
+                    UserID = userWithRole.UserId,
+                    Email = userWithRole.Email,
+                    Role = userWithRole.RoleName,
+                    Permissions = permissionNames
+                };
             }
             catch
             {
@@ -90,6 +116,41 @@ namespace DemoFYP.Repositories
             }
         }
 
+        public async Task<UserPermissionResponse> GetPermissions()
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var result = await context.Permissions.Select(p => p.PermissionName).ToListAsync();
+                
+                return new UserPermissionResponse { Permissions = result };
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to Get Permission List", ex);
+            }
+        }
+
+        public async Task<UserPermissionResponse> GetUserPermissionsByLoginID(Guid curUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var permissionNames = await context.Users
+                    .Where(u => u.UserId == curUserID)
+                    .SelectMany(u => u.Role.RolePermissions.Select(rp => rp.Permission.PermissionName))
+                    .ToListAsync();
+
+                return new UserPermissionResponse { Permissions = permissionNames };
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to Get User Permissions", ex);
+            }
+        }
+
         #endregion
 
         #region Create Action
@@ -108,6 +169,7 @@ namespace DemoFYP.Repositories
 
                 var newData = _mapper.Map<User>(registerData);
                 newData.UserId = Guid.NewGuid();
+                newData.RoleID = (int)UserLevel.User;
                 newData.Password = _commonServices.HashPassword(registerData.Password);
                 newData.CreatedBy = updatedBy;
                 newData.CreatedDateTime = DateTime.Now;
@@ -152,7 +214,6 @@ namespace DemoFYP.Repositories
                 var curData = await context.Users.FirstOrDefaultAsync(u => u.UserId == (payload.UserID ?? curUserID) && u.IsActive == 1) ?? throw new NotFoundException("User Not Found");
 
                 curData.UserName = payload.UserName;
-                curData.Email = payload.Email;
                 curData.PhoneNumber = payload.PhoneNumber;
                 curData.UserGender = payload.UserGender;
                 curData.Address = payload.Address;

@@ -28,6 +28,9 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Usertoken> Usertokens { get; set; }
     public virtual DbSet<EmailLog> EmailLogs { get; set; }
+    public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<Permission> Permissions { get; set; }
+    public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {}
 
@@ -273,10 +276,15 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UserGender)
                 .HasMaxLength(45)
                 .HasColumnName("userGender");
-            entity.Property(e => e.UserLevel).HasColumnName("userLevel");
+            entity.Property(e => e.RoleID).HasColumnName("roleID");
             entity.Property(e => e.UserName)
                 .HasMaxLength(45)
                 .HasColumnName("userName");
+
+            entity.HasOne(e => e.Role).WithMany(r => r.Users)
+                .HasForeignKey(d => d.RoleID)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("roleID");
         });
 
         modelBuilder.Entity<Usertoken>(entity =>
@@ -286,7 +294,7 @@ public partial class AppDbContext : DbContext
             entity.ToTable("usertoken");
 
             entity.Property(e => e.TokenId).HasColumnName("TokenID");
-            entity.Property(e => e.AccessToken).HasMaxLength(512);
+            entity.Property(e => e.AccessToken).HasMaxLength(2048);
             entity.Property(e => e.AccessTokenExpiresAt)
                 .HasColumnType("datetime")
                 .HasColumnName("AccessToken_ExpiresAt");
@@ -308,13 +316,75 @@ public partial class AppDbContext : DbContext
 
             entity.ToTable("email_log");
 
-            entity.HasIndex(e => e.EmailId, "emailID_UNIQUE").IsUnique();
+            entity.HasIndex(e => e.EmailId, "EmailID_UNIQUE").IsUnique();
 
             entity.Property(e => e.EmailId).HasColumnName("EmailID");
             entity.Property(e => e.From).HasMaxLength(45);
             entity.Property(e => e.To).HasMaxLength(45);
             entity.Property(e => e.Subject).HasMaxLength(45);
             entity.Property(e => e.IsSent).HasColumnName("isSent");
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.RoleID).HasName("PRIMARY");
+
+            entity.ToTable("role");
+
+            entity.HasIndex(e => e.RoleID, "RoleID_UNIQUE").IsUnique();
+
+            entity.Property(e => e.RoleName).HasMaxLength(45);
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("CreatedAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("UpdatedAt");
+            entity.Property(e => e.CreatedBy)
+                .HasColumnType("binary(16)")
+                .HasColumnName("CreatedBy");
+            entity.Property(e => e.UpdatedBy)
+                .HasColumnType("binary(16)")
+                .HasColumnName("UpdatedBy");
+            entity.Property(e => e.IsActive).HasColumnName("isActive");
+        });
+
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.HasKey(e => e.PermissionID).HasName("PRIMARY");
+
+            entity.ToTable("permission");
+
+            entity.HasIndex(e => e.PermissionID, "PermissionID_UNIQUE").IsUnique();
+
+            entity.Property(e => e.PermissionName).HasMaxLength(45);
+            entity.Property(e => e.PermissionDescription).HasMaxLength(45);
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("CreatedAt");
+            entity.Property(e => e.CreatedBy)
+                .HasColumnType("binary(16)")
+                .HasColumnName("CreatedBy");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("UpdatedAt");
+            entity.Property(e => e.UpdatedBy)
+                .HasColumnType("binary(16)")
+                .HasColumnName("UpdatedBy");
+        });
+
+        modelBuilder.Entity<RolePermission>(entity =>
+        {
+            entity.ToTable("role_permission");
+            entity.HasKey(rp => new { rp.RoleID, rp.PermissionID });
+
+            entity.HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.RoleID);
+
+            entity.HasOne(rp => rp.Permission)
+                .WithMany(p => p.RolePermissions)
+                .HasForeignKey(rp => rp.PermissionID);
         });
 
         OnModelCreatingPartial(modelBuilder);

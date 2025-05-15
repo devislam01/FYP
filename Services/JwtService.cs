@@ -26,14 +26,20 @@ namespace DemoFYP.Services
             _jwtRepository = jwtRepository ?? throw new ArgumentNullException(nameof(jwtRepository));
         }
 
-        public async Task<JwtAuthResult> GenerateToken(UserLoginRequest payload, Guid curUserID)
+        public async Task<JwtAuthResult> GenerateToken(UserJwtClaims userClaims)
         {
-            if (payload == null) throw new BadRequestException("User request is required");
+            if (userClaims == null) throw new BadRequestException("User request is required");
 
-            var claims = new[] {
-                new Claim(ClaimTypes.NameIdentifier, curUserID.ToString()),
-                new Claim(ClaimTypes.Email, payload.Email),
+            var claims = new List<Claim> {
+                new Claim(ClaimTypes.NameIdentifier, userClaims.UserID.ToString()),
+                new Claim(ClaimTypes.Email, userClaims.Email),
+                new Claim(ClaimTypes.Role, userClaims.Role)
             };
+
+            foreach (var permission in userClaims.Permissions)
+            {
+                claims.Add(new Claim("Permission", permission));
+            }
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
             var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -51,7 +57,7 @@ namespace DemoFYP.Services
 
             Usertoken userToken = new Usertoken
             {
-                UserId = curUserID,
+                UserId = userClaims.UserID,
                 AccessToken = jwtToken,
                 AccessTokenExpiresAt = DateTime.Now.AddMinutes(15),
                 RefreshToken = refreshToken.Token,
@@ -73,7 +79,7 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<JwtAuthResult> VerifyAndGenerateRefreshToken(RefreshTokenRequest payload)
+        public async Task<JwtAuthResult> VerifyAndGenerateRefreshToken(RefreshTokenRequest payload, string curUserEmail, string curUserRole)
         {
             if (string.IsNullOrEmpty(payload.RefreshToken)) throw new BadRequestException("Refresh token is required");
 
@@ -82,10 +88,12 @@ namespace DemoFYP.Services
 
             await _jwtRepository.RevokeUserTokenByRefreshToken(payload.RefreshToken);
 
-            var jwtResult = await GenerateToken(new UserLoginRequest
+            var jwtResult = await GenerateToken(new UserJwtClaims
             {
-                Email = "",
-            }, userId);
+                UserID = userId,
+                Email = curUserEmail,
+                Role = curUserRole,
+            });
 
             return jwtResult;
         }

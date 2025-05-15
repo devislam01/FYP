@@ -8,9 +8,13 @@ namespace DemoFYP.Services.IServices
         
         #region Read Services
 
-        Task<Guid> CheckLoginCredentials(UserLoginRequest login);
+        Task<UserJwtClaims> CheckLoginCredentials(UserLoginRequest login);
 
-        Task<UserDetailResponse> GetUserProfile(Guid CurUserID);
+        Task<UserDetailResponse> GetUserProfile(Guid curUserID);
+
+        Task<UserPermissionResponse> GetPermissionsList();
+
+        Task<UserPermissionResponse> GetUserPermissions(Guid curUserID);
 
         #endregion
 
@@ -23,8 +27,8 @@ namespace DemoFYP.Services.IServices
         #region Update Services
 
         Task UpdateUserProfile(UserUpdateDetailRequest payload, Guid curUserID);
-        Task SendTemporilyPassword(string email, Guid CurUserID);
-        Task ResetPassword(ResetPasswordRequest payload, Guid CurUserID);
+        Task SendTemporilyPassword(string email, Guid curUserID);
+        Task ResetPassword(ResetPasswordRequest payload, Guid curUserID);
 
         #endregion
     }

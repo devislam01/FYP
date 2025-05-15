@@ -36,6 +36,36 @@ namespace DemoFYP.Controllers
             }
         }
 
+        public string CurUserEmail
+        {
+            get
+            {
+                var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (!string.IsNullOrEmpty(userEmail))
+                {
+                    return userEmail;
+                }
+
+                return string.Empty;
+            }
+        }
+
+        public string CurUserRole
+        {
+            get
+            {
+                var userRole = HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+
+                if (!string.IsNullOrEmpty(userRole))
+                {
+                    return userRole;
+                }
+
+                return string.Empty;
+            }
+        }
+
         protected ActionResult<StandardResponse<T>> SuccessResponse<T>(T data, string message = "Request successful")
         {
             var response = new StandardResponse<T>(data)

@@ -12,4 +12,17 @@
 
         public string Address { get; set; }
     }
+
+    public class UserJwtClaims
+    {
+        public Guid UserID { get; set; }
+        public string Role {  get; set; }
+        public string Email { get; set; }
+        public List<string> Permissions { get; set; }
+    }
+
+    public class UserPermissionResponse
+    {
+        public List<string> Permissions { get; set; }
+    }
 }

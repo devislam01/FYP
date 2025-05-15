@@ -6,8 +6,8 @@ namespace DemoFYP.Services.IServices
 {
     public interface IJwtServices
     {
-        Task<JwtAuthResult> GenerateToken(UserLoginRequest payload, Guid curUserID);
-        Task<JwtAuthResult> VerifyAndGenerateRefreshToken(RefreshTokenRequest payload);
+        Task<JwtAuthResult> GenerateToken(UserJwtClaims claims);
+        Task<JwtAuthResult> VerifyAndGenerateRefreshToken(RefreshTokenRequest payload, string curUserEmail, string curUserRole);
         Task RevokeUser(Guid userID, Guid curUserID);
     }
 }

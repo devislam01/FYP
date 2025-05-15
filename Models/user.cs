@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DemoFYP.Models;
+using System;
 using System.Collections.Generic;
 
 namespace DemoFYP;
@@ -7,7 +8,7 @@ public partial class User
 {
     public Guid UserId { get; set; }
 
-    public int UserLevel { get; set; }
+    public int RoleID { get; set; }
 
     public string Email { get; set; } = null!;
 
@@ -36,4 +37,5 @@ public partial class User
     public Guid? UpdatedBy { get; set; }
 
     public Guid? DeletedBy { get; set; }
+    public virtual Role Role { get; set; } = null!;
 }

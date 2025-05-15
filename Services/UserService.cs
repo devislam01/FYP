@@ -23,17 +23,15 @@ namespace DemoFYP.Services
 
         #region Read Services
 
-        public async Task<Guid> CheckLoginCredentials(UserLoginRequest payload)
+        public async Task<UserJwtClaims> CheckLoginCredentials(UserLoginRequest payload)
         {
             if (payload == null) throw new BadRequestException("Payload is required.");
 
             try
             {
-                var hasUserID = await _userRepository.CheckUserLoginCredentials(payload);
+                var JwtClaim = await _userRepository.CheckUserLoginCredentials(payload);
 
-                if (hasUserID == Guid.Empty) throw new BadRequestException("Invalid Email or Password");
-
-                return hasUserID;
+                return JwtClaim ?? throw new NotFoundException("Invalid JwtClaims");
             }
             catch (Exception)
             {
@@ -41,13 +39,39 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<UserDetailResponse> GetUserProfile(Guid CurUserID)
+        public async Task<UserDetailResponse> GetUserProfile(Guid curUserID)
         {
-            if (CurUserID == Guid.Empty) throw new UnauthorizedAccessException();
+            if (curUserID == Guid.Empty) throw new UnauthorizedAccessException();
 
             try
             {
-                return await _userRepository.GetUserProfileByLoginID(CurUserID);
+                return await _userRepository.GetUserProfileByLoginID(curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<UserPermissionResponse> GetPermissionsList()
+        {
+            try
+            {
+                return await _userRepository.GetPermissions() ?? throw new NotFoundException("Permission List is Empty");
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<UserPermissionResponse> GetUserPermissions(Guid curUserID)
+        {
+            if (curUserID == Guid.Empty) throw new UnauthorizedAccessException();
+
+            try
+            {
+                return await _userRepository.GetUserPermissionsByLoginID(curUserID);
             }
             catch
             {
@@ -96,7 +120,7 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task SendTemporilyPassword(string email, Guid CurUserID)
+        public async Task SendTemporilyPassword(string email, Guid curUserID)
         {
             if (email == null) throw new BadRequestException("Email is required");
 
@@ -104,7 +128,7 @@ namespace DemoFYP.Services
             {
                 var temporilyPassword = _commonServices.GenerateTemporaryPassword();
                 string hashPassword = _commonServices.HashPassword(temporilyPassword);
-                await _userRepository.UpdatePassword(email, CurUserID, hashPassword);
+                await _userRepository.UpdatePassword(email, curUserID, hashPassword);
 
                 string subject = "[Test] Reset Password";
                 string body = $"Your temporary password is: {temporilyPassword}\n\nPlease login and change it immediately with the link {_config["FrontendUrl"]}";
@@ -117,7 +141,7 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task ResetPassword(ResetPasswordRequest payload, Guid CurUserID)
+        public async Task ResetPassword(ResetPasswordRequest payload, Guid curUserID)
         {
             if (payload.Email == null) throw new BadRequestException("Email is required");
             if (payload.Password == null) throw new BadRequestException("New Password is required");
@@ -125,7 +149,7 @@ namespace DemoFYP.Services
             try
             {
                 var hashPassword = _commonServices.HashPassword(payload.Password);
-                await _userRepository.UpdatePassword(payload.Email, CurUserID, hashPassword);
+                await _userRepository.UpdatePassword(payload.Email, curUserID, hashPassword);
             }
             catch
             {

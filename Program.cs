@@ -12,6 +12,8 @@ using DemoFYP.Repositories.IRepositories;
 using DemoFYP.Exceptions;
 using DemoFYP;
 using System.Text.Json;
+using DemoFYP.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +98,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         }
     };
 });
+
+builder.Services.AddAuthorization(options =>
+{
+    var allPermissions = new[] {
+        "Create_User", "Update_User", "Delete_User",
+        "Create_Product", "Update_Product", "Delete_Product",
+        "Reset_Password", "Revoke_User", "Create_Role"
+    };
+
+    foreach (var permission in allPermissions)
+    {
+        options.AddPolicy(permission, policy =>
+            policy.Requirements.Add(new PermissionRequirement(permission)));
+    }
+});
+
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 
 // Register Swagger with JWT support
 builder.Services.AddSwaggerGen(c =>
