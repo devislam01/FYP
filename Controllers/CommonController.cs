@@ -53,6 +53,7 @@ namespace DemoFYP.Controllers
             return Ok(claims);
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         public Dictionary<string, List<string>> DecodeJwtClaims(ClaimsPrincipal user)
         {
             var claimsDict = user.Claims
