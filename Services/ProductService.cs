@@ -88,15 +88,26 @@ namespace DemoFYP.Services
         public async Task UpdateProductByProductID(UpdateProductRequest payload, Guid curUserID)
         {
             if (payload == null) { throw new BadRequestException("No Payload Was Found."); }
-            if (payload.ProductImage == null || payload.ProductImage.Length == 0) { throw new BadRequestException("Missing Product Image"); }
-
-            string ImageURL = await _commonServices.UploadImage(payload.ProductImage, "");
-
             if (payload.ProductID == 0) { throw new BadRequestException("No Product ID Was Found"); }
+
+            string imageURL;
+
+            if (payload.ProductImageFile != null && payload.ProductImageFile.Length > 0)
+            {
+                imageURL = await _commonServices.UploadImage(payload.ProductImageFile, "");
+            }
+            else if (!string.IsNullOrEmpty(payload.ProductImageUrl))
+            {
+                imageURL = payload.ProductImageUrl;
+            }
+            else
+            {
+                throw new BadRequestException("Missing Product Image");
+            }
 
             try
             {
-                await _productRepository.UpdateProductByProductID(payload, curUserID, ImageURL);
+                await _productRepository.UpdateProductByProductID(payload, curUserID, imageURL);
             }
             catch
             {
