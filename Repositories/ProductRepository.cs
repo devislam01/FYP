@@ -152,6 +152,7 @@ namespace DemoFYP.Repositories
                 {
                     ProductDetail = new ProductDetailResult
                     {
+                        ProductID = productWithCategory.product.ProductId,
                         ProductName = productWithCategory.product.ProductName,
                         ProductDescription = productWithCategory.product.ProductDescription,
                         CategoryID = productWithCategory.category.CategoryId,
