@@ -37,18 +37,21 @@
         public string CategoryName { get; set; }
     }
 
+    #region AdminDto
+
     public class UserListResponse
     {
         public Guid UserID { get; set; }
         public string Email { set; get; } = null!;
         public double? Ratings { get; set; }
         public string? UserName { get; set; }   
+        public string? Gender {  get; set; }
         public string? PhoneNumber { set; get; }
         public string Status {  get; set; } = null!;
         public string? QRCode {  set; get; }
         public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
         public Guid CreatedBy {  get; set; }
-        public Guid? UpdatedBy { get; set; }
     }
+
+    #endregion
 }

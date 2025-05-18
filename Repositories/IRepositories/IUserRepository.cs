@@ -16,7 +16,7 @@ namespace DemoFYP.Repositories.IRepositories
         Task<UserPermissionResponse> GetPermissions();
         Task<UserPermissionResponse> GetAdminPermissions();
         Task<UserPermissionResponse> GetUserPermissionsByLoginID(Guid curUserID);
-        Task<PagedResult<UserListResponse>> GetUserList(PaginationRequest pagination);
+        Task<PagedResult<UserListResponse>> GetUserList(UserListFilterRequest filter);
 
         #endregion
 
@@ -29,7 +29,9 @@ namespace DemoFYP.Repositories.IRepositories
         #region Update Repositories
 
         Task UpdateUserProfile(UserUpdateDetailRequest payload, Guid curUserID);
-        Task UpdatePassword(string email, Guid curUserID, string password);
+        Task UpdateTempPassword(string email, Guid curUserID, string password);
+        Task<string> UpdatePassword(Guid curUserID, string password);
+        Task<string> UpdatePassword(Guid userID, Guid curUserID, string password);
 
         #endregion
     }

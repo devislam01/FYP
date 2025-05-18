@@ -22,9 +22,9 @@ namespace DemoFYP.Controllers.Admin
         }
 
         [HttpPost("userList")]
-        public async Task<ActionResult<StandardResponse<PagedResult<UserListResponse>>>> GetUserList(PaginationRequest pagination)
+        public async Task<ActionResult<StandardResponse<PagedResult<UserListResponse>>>> GetUserList(UserListFilterRequest filter)
         {
-            return SuccessResponse<PagedResult<UserListResponse>>(await _userServices.GetUserList(pagination));
+            return SuccessResponse<PagedResult<UserListResponse>>(await _userServices.GetUserList(filter));
         }
 
         [Authorize(Policy = "Admin_Create_User")]
@@ -61,6 +61,15 @@ namespace DemoFYP.Controllers.Admin
             await _jwtServices.ReinstateUser(payload.UserID, CurUserID);
 
             return SuccessResponse($"User {payload.UserID} has been reinstated");
+        }
+
+        [Authorize(Policy = "AP_Reset_Password")]
+        [HttpPost("reset-password")]
+        public async Task<ActionResult<StandardResponse>> ResetPassword(AdminResetPasswordRequest payload)
+        {
+            await _userServices.ResetPassword(payload, CurUserID);
+
+            return SuccessResponse($"User ID: '{payload.UserID}''s Password Reset Successfully");
         }
     }
 }

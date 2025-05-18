@@ -33,6 +33,18 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task<PagedResult<AdminProductListResult>> GetProductListByAdmin(AdminProductFilterRequest filter)
+        {
+            try
+            {
+                return await _productRepository.GetProductListByAdmin(filter);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID)
         {
             try
@@ -47,7 +59,7 @@ namespace DemoFYP.Services
 
         public async Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID)
         {
-            if (ProductID == 0) { throw new BadRequestException("Missing Product ID"); }
+            if (ProductID == 0) throw new BadRequestException("Missing Product ID");
 
             try {
                 return await _productRepository.GetProductDetailByProductID(ProductID);
@@ -64,16 +76,16 @@ namespace DemoFYP.Services
 
         public async Task AddProduct(AddProductRequest payload, Guid curUserID)
         {
-            if (payload == null) { throw new BadRequestException("No payload was found."); }
-            if (payload.ProductImage == null || payload.ProductImage.Length == 0) { throw new BadRequestException("Missing Product Image"); }
+            if (payload == null) throw new BadRequestException("No payload was found.");
+            if (payload.ProductImage == null || payload.ProductImage.Length == 0) throw new BadRequestException("Missing Product Image");
 
             string ImageURL = await _commonServices.UploadImage(payload.ProductImage, "", "ProductImages");
 
-            if (string.IsNullOrEmpty(payload.ProductName)) { throw new BadRequestException("Missing Product Name"); }
-            if (string.IsNullOrEmpty(payload.ProductDescription)) { throw new BadRequestException("Missing Product Description"); }
-            if (payload.CategoryID == 0) { throw new BadRequestException("Missing Category"); }
-            if (string.IsNullOrEmpty(payload.ProductCondition)) { throw new BadRequestException("Missing Product Condition"); }
-            if (double.IsNaN(payload.ProductPrice)) { throw new BadRequestException("Missing Product Price"); }
+            if (string.IsNullOrEmpty(payload.ProductName)) throw new BadRequestException("Missing Product Name");
+            if (string.IsNullOrEmpty(payload.ProductDescription)) throw new BadRequestException("Missing Product Description");
+            if (payload.CategoryID == 0) throw new BadRequestException("Missing Category");
+            if (string.IsNullOrEmpty(payload.ProductCondition)) throw new BadRequestException("Missing Product Condition");
+            if (double.IsNaN(payload.ProductPrice)) throw new BadRequestException("Missing Product Price");
 
             try
             {
@@ -85,10 +97,15 @@ namespace DemoFYP.Services
             }
         }
 
+        #endregion
+
+        #region Update Services
+
         public async Task UpdateProductByProductID(UpdateProductRequest payload, Guid curUserID)
         {
-            if (payload == null) { throw new BadRequestException("No Payload Was Found."); }
-            if (payload.ProductID == 0) { throw new BadRequestException("No Product ID Was Found"); }
+            if (payload == null) throw new BadRequestException("Payload is required");
+            if (payload.ProductID == 0) throw new BadRequestException("Product ID is required");
+            if (curUserID == Guid.Empty) throw new UnauthorizedAccessException("Session Expired! Please login again");
 
             string imageURL;
 
@@ -117,11 +134,27 @@ namespace DemoFYP.Services
 
         public async Task DeleteProductByProductID(int productID, Guid curUserID)
         {
-            if (productID == 0) { throw new BadRequestException("No Product ID Was Found"); }
+            if (productID == 0) throw new BadRequestException("Product ID is required");
+            if (curUserID == Guid.Empty) throw new UnauthorizedAccessException("Session Expired! Please login again");
 
             try
             {
                 await _productRepository.DeleteProductByProductID(productID, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task UnpublishProductByAdmin(int productID, Guid curUserID)
+        {
+            if (productID == 0) throw new BadRequestException("Product ID is required");
+            if (curUserID == Guid.Empty) throw new UnauthorizedAccessException("Session Expired! Please login again");
+
+            try
+            {
+                await _productRepository.UnpublishProductByAdmin(productID, curUserID);
             }
             catch
             {

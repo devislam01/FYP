@@ -95,11 +95,11 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<PagedResult<UserListResponse>> GetUserList(PaginationRequest pagination)
+        public async Task<PagedResult<UserListResponse>> GetUserList(UserListFilterRequest filter)
         {
             try
             {
-                return await _userRepository.GetUserList(pagination);
+                return await _userRepository.GetUserList(filter);
             }
             catch
             {
@@ -166,12 +166,12 @@ namespace DemoFYP.Services
             {
                 var temporilyPassword = _commonServices.GenerateTemporaryPassword();
                 string hashPassword = _commonServices.HashPassword(temporilyPassword);
-                await _userRepository.UpdatePassword(email, curUserID, hashPassword);
+                await _userRepository.UpdateTempPassword(email, curUserID, hashPassword);
 
                 string subject = "[Test] Reset Password";
                 string body = $"Your temporary password is: {temporilyPassword}\n\nPlease login and change it immediately with the link {_config["FrontendUrl"]}";
 
-                await _emailServices.SendEmailAsync(email, temporilyPassword, subject, body);
+                await _emailServices.SendEmailAsync(email, subject, body);
             }
             catch
             {
@@ -181,13 +181,38 @@ namespace DemoFYP.Services
 
         public async Task ResetPassword(ResetPasswordRequest payload, Guid curUserID)
         {
-            if (payload.Email == null) throw new BadRequestException("Email is required");
             if (payload.Password == null) throw new BadRequestException("New Password is required");
 
             try
             {
                 var hashPassword = _commonServices.HashPassword(payload.Password);
-                await _userRepository.UpdatePassword(payload.Email, curUserID, hashPassword);
+                var email =await _userRepository.UpdatePassword(curUserID, hashPassword);
+
+                string subject = "Reset Password";
+                string body = $"Your password is reset. Please contact us if you didn't made this action";
+
+                await _emailServices.SendEmailAsync(email, subject, body);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task ResetPassword(AdminResetPasswordRequest payload, Guid curUserID)
+        {
+            if (payload.UserID == Guid.Empty) throw new BadRequestException("User ID is required");
+            if (payload.Password == null) throw new BadRequestException("New Password is required");
+
+            try
+            {
+                var hashPassword = _commonServices.HashPassword(payload.Password);
+                var email = await _userRepository.UpdatePassword(payload.UserID, curUserID, hashPassword);
+
+                string subject = "Reset Password by Admin";
+                string body = $"Your password is reset by admin, please check with admin and get your latest password.";
+
+                await _emailServices.SendEmailAsync(email, subject, body);
             }
             catch
             {

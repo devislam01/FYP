@@ -9,6 +9,7 @@ using DemoFYP.Repositories.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
+using System.Linq;
 
 namespace DemoFYP.Repositories
 {
@@ -41,7 +42,7 @@ namespace DemoFYP.Repositories
 
                 if (!string.IsNullOrWhiteSpace(filter.Search))
                 {
-                    query = query.Where(p => p.ProductName.Contains(filter.Search));
+                    query = query.Where(p => p.ProductName.ToLower().StartsWith(filter.Search.ToLower()));
                     filter.DisablePagination = true;
                 }
 
@@ -84,6 +85,92 @@ namespace DemoFYP.Repositories
             catch
             {
                     throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task<PagedResult<AdminProductListResult>> GetProductListByAdmin(AdminProductFilterRequest filter)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var query = context.Products
+                    .OrderByDescending(p => p.ProductId)
+                    .Where(p => p.IsActive == 1);
+
+                if (filter.ProductID != null && filter.ProductID != 0)
+                {
+                    query = query.Where(p => p.ProductId == filter.ProductID);
+                }
+
+                if (!string.IsNullOrEmpty(filter.ProductName))
+                {
+                    query = query.Where(p => filter.ProductName.ToLower().StartsWith(p.ProductName.ToLower()));
+                }
+
+                if (filter.CategoryID != null && filter.CategoryID != 0)
+                {
+                    query = query.Where(p => p.CategoryId == filter.CategoryID);
+                }
+
+                if (!string.IsNullOrEmpty(filter.ProductCondition))
+                {
+                    query = query.Where(p => filter.ProductCondition.ToLower().StartsWith(p.ProductCondition.ToLower()));
+                }
+
+                if (filter.CreatedAt != null)
+                {
+                    query = query.Where(p => p.CreatedDateTime == filter.CreatedAt);
+                }
+
+                if (filter.IsActive == false)
+                {
+                    query = query.Where(p => p.IsActive == 0);
+                }
+
+                if (filter.BelongsTo != null && filter.BelongsTo != Guid.Empty)
+                {
+                    query = query.Where(p => p.UserId == filter.BelongsTo);
+                }
+
+                int totalRecord = await query.CountAsync();
+
+                var result = await query
+                        .Skip((filter.PageNumber - 1) * filter.PageSize)
+                        .Take(filter.PageSize)
+                        .Select(p => new AdminProductListResult
+                        {
+                            ProductID = p.ProductId,
+                            ProductName = p.ProductName,
+                            ProductDescription = p.ProductDescription,
+                            CategoryID = p.CategoryId,
+                            ProductCondition = p.ProductCondition,
+                            ProductImage = $"{_config["BackendUrl"]}/{p.ProductImage}",
+                            ProductPrice = p.ProductPrice,
+                            StockQty = p.StockQty,
+                            CreatedAt = p.CreatedDateTime,
+                            IsActive = p.IsActive == 1,
+                            BelongsTo = p.UserId,
+                        }).ToListAsync();
+
+                return new PagedResult<AdminProductListResult>
+                {
+                    Data = result,
+                    Pagination = new PaginationResponse
+                    {
+                        PageNumber = filter.PageNumber,
+                        PageSize = filter.PageSize,
+                        TotalRecord = totalRecord
+                    }
+                };
+            }
+            catch
+            {
+                throw;
             }
             finally
             {
@@ -284,6 +371,8 @@ namespace DemoFYP.Repositories
                 if (result.UserId != curUserID) { throw new ForbiddenException(); }
 
                 result.IsActive = 0;
+                result.UpdatedBy = curUserID;
+                result.UpdatedDateTime = DateTime.Now;
 
                 await context.SaveChangesAsync();
             }
@@ -293,6 +382,25 @@ namespace DemoFYP.Repositories
             }
         }
 
+        public async Task UnpublishProductByAdmin(int productID, Guid curUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var result = await context.Products.FirstOrDefaultAsync(p => p.ProductId == productID && p.IsActive == 1) ?? throw new NotFoundException("Product Not Found"); ;
+
+                result.IsActive = 0;
+                result.UpdatedBy = curUserID;
+                result.UpdatedDateTime = DateTime.Now;
+
+                await context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw;
+            }
+        }
         #endregion
     }
 }

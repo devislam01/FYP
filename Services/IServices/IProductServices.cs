@@ -10,6 +10,7 @@ namespace DemoFYP.Services.IServices
         #region Read Services
 
         Task<PagedResult<ProductListResult>> GetProductList(ProductFilterRequest filter);
+        Task<PagedResult<AdminProductListResult>> GetProductListByAdmin(AdminProductFilterRequest filter);
         Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID);
         Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID);
 
@@ -18,8 +19,14 @@ namespace DemoFYP.Services.IServices
         #region Create Services
 
         Task AddProduct(AddProductRequest product, Guid curUserID);
+
+        #endregion
+
+        #region Update Services
+
         Task UpdateProductByProductID(UpdateProductRequest product, Guid curUserID);
         Task DeleteProductByProductID(int productID, Guid curUserID);
+        Task UnpublishProductByAdmin(int productID, Guid curUserID);
 
         #endregion
     }

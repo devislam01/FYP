@@ -16,7 +16,7 @@ namespace DemoFYP.Services
             _emailRepo = emailRepo ?? throw new ArgumentNullException(nameof(emailRepo));
         }
 
-        public async Task<bool> SendEmailAsync(string toEmail, string password, string subject, string body)
+        public async Task<bool> SendEmailAsync(string toEmail, string subject, string body)
         {
             var fromEmail = _config["Email:From"];
             var appPassword = _config["Email:AppPassword"];

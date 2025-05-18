@@ -10,6 +10,7 @@ namespace DemoFYP.Repositories.IRepositories
     {
         #region Read
         Task<PagedResult<ProductListResult>> GetProductList(ProductFilterRequest filter);
+        Task<PagedResult<AdminProductListResult>> GetProductListByAdmin(AdminProductFilterRequest filter);
         Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID);
         Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, bool GetImageRealPath = false);
 
@@ -18,10 +19,14 @@ namespace DemoFYP.Repositories.IRepositories
         #region Create
 
         Task InsertProduct(AddProductRequest paylaod, Guid curUserID, string ImageURL);
+
+        #endregion
+
+        #region Update
+
         Task UpdateProductByProductID(UpdateProductRequest paylaod, Guid curUserID, string ImageURL);
-
         Task DeleteProductByProductID(int productID, Guid curUserID);
-
+        Task UnpublishProductByAdmin(int productID, Guid curUserID);
         #endregion
     }
 }

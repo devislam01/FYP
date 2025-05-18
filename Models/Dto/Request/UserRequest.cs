@@ -51,5 +51,16 @@
 
     #region Admin Dto
 
+    public class UserListFilterRequest : PaginationRequest
+    {
+        public Guid? UserID { get; set; }
+        public string? Email { set; get; }
+        public double? Ratings { get; set; }
+        public string? UserName { get; set; }
+        public string? PhoneNumber { set; get; }
+        public string? Status { get; set; }
+        public DateTime? CreatedAt { get; set; }
+    }
+
     #endregion
 }

@@ -36,7 +36,7 @@ namespace DemoFYP.Repositories
 
             try
             {
-                return await context.Users.AnyAsync(u => u.Email == email && u.IsActive == 1);
+                return await context.Users.AnyAsync(u => u.Email.ToLower() == email.ToLower() && u.IsActive == 1);
             }
             catch
             {
@@ -184,7 +184,7 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<PagedResult<UserListResponse>> GetUserList(PaginationRequest pagination)
+        public async Task<PagedResult<UserListResponse>> GetUserList(UserListFilterRequest filter)
         {
             var context = _factory.CreateDbContext();
 
@@ -194,37 +194,67 @@ namespace DemoFYP.Repositories
                     .OrderByDescending(u => u.CreatedDateTime)
                     .Where(u => u.RoleID != (int)UserLevel.Admin && u.IsActive == (sbyte)Status.Active);
 
-                int totalRecord = await query.CountAsync();
-
-                if (!pagination.DisablePagination)
+                if (filter.UserID != null && filter.UserID != Guid.Empty)
                 {
-                    query = query
-                        .Skip((pagination.PageNumber - 1) * pagination.PageSize)
-                        .Take(pagination.PageSize);
+                    query = query.Where(u => u.UserId == filter.UserID);
                 }
 
-                var result = await query.Select(q => new UserListResponse
+                if (!string.IsNullOrEmpty(filter.Email))
                 {
-                    UserID = q.UserId,
-                    Email = q.Email,
-                    Ratings = q.RatingMark,
-                    UserName = q.UserName ?? string.Empty,
-                    PhoneNumber = q.PhoneNumber ?? string.Empty,
-                    Status = q.IsActive == 1 ? "Active" : "Inactive",
-                    QRCode = q.PaymentQRCode,
-                    CreatedAt = q.CreatedDateTime,
-                    CreatedBy = q.CreatedBy,
-                    UpdatedAt = q.UpdatedDateTime,
-                    UpdatedBy = q.UpdatedBy,
-                }).ToListAsync();
+                    query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
+                }
+
+                if (filter.Ratings != null)
+                {
+                    query = query.Where(u => u.RatingMark >= filter.Ratings);
+                }
+
+                if (!string.IsNullOrEmpty(filter.UserName))
+                {
+                    query = query.Where(u => u.UserName.ToLower() == filter.UserName.ToLower());
+                }
+
+                if (!string.IsNullOrEmpty(filter.PhoneNumber))
+                {
+                    query = query.Where(u => u.PhoneNumber.StartsWith(filter.PhoneNumber));
+                }
+
+                if (!string.IsNullOrEmpty(filter.Status))
+                {
+                    query = query.Where(u => u.IsActive == (filter.Status == "Active" ? 1 : 0));
+                }
+
+                if (filter.CreatedAt != null)
+                {
+                    query = query.Where(u => u.CreatedDateTime == filter.CreatedAt);
+                }
+
+                int totalRecord = await query.CountAsync();
+
+                var result = await query
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .Select(q => new UserListResponse
+                    {
+                        UserID = q.UserId,
+                        Email = q.Email,
+                        Ratings = q.RatingMark,
+                        UserName = q.UserName ?? string.Empty,
+                        Gender = q.UserGender,
+                        PhoneNumber = q.PhoneNumber ?? string.Empty,
+                        Status = q.IsActive == 1 ? "Active" : "Inactive",
+                        QRCode = q.PaymentQRCode,
+                        CreatedAt = q.CreatedDateTime,
+                        CreatedBy = q.CreatedBy,
+                    }).ToListAsync();
 
                 return new PagedResult<UserListResponse>
                 {
                     Data = result,
                     Pagination = new PaginationResponse
                     {
-                        PageNumber = pagination.PageNumber,
-                        PageSize = pagination.PageSize,
+                        PageNumber = filter.PageNumber,
+                        PageSize = filter.PageSize,
                         TotalRecord = totalRecord
                     }
                 };
@@ -325,21 +355,87 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task UpdatePassword(string email, Guid CurUserID, string password)
+        public async Task UpdateTempPassword(string email, Guid curUserID, string password)
         {
             var context = _factory.CreateDbContext();
             IDbContextTransaction trans = context.Database.BeginTransaction(IsolationLevel.ReadCommitted);
 
             try
             {
-                var curData = await context.Users.FirstOrDefaultAsync(u => u.Email == email) ?? throw new NotFoundException("Email Not Found!");
+                var curData = await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower()) ?? throw new NotFoundException("Email Not Found!");
 
                 curData.Password = password;
                 curData.UpdatedDateTime = DateTime.Now;
-                curData.UpdatedBy = CurUserID;
+                curData.UpdatedBy = curUserID;
 
                 await context.SaveChangesAsync();
                 await trans.CommitAsync();
+            }
+            catch
+            {
+                if (trans != null)
+                {
+                    await trans.RollbackAsync();
+                }
+
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task<string> UpdatePassword(Guid curUserID, string password)
+        {
+            var context = _factory.CreateDbContext();
+            IDbContextTransaction trans = context.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+
+            try
+            {
+                var curData = await context.Users.FirstOrDefaultAsync(u => u.UserId == curUserID) ?? throw new NotFoundException("User Not Found!");
+
+                curData.Password = password;
+                curData.UpdatedDateTime = DateTime.Now;
+                curData.UpdatedBy = curUserID;
+
+                await context.SaveChangesAsync();
+                await trans.CommitAsync();
+
+                return curData.Email;
+            }
+            catch
+            {
+                if (trans != null)
+                {
+                    await trans.RollbackAsync();
+                }
+
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task<string> UpdatePassword(Guid userID, Guid curUserID, string password)
+        {
+            var context = _factory.CreateDbContext();
+            IDbContextTransaction trans = context.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+
+            try
+            {
+                var curData = await context.Users.FirstOrDefaultAsync(u => u.UserId == userID) ?? throw new NotFoundException("User Not Found!");
+
+                curData.Password = password;
+                curData.UpdatedDateTime = DateTime.Now;
+                curData.UpdatedBy = curUserID;
+
+                await context.SaveChangesAsync();
+                await trans.CommitAsync();
+
+                return curData.Email;
             }
             catch
             {

@@ -19,7 +19,7 @@ namespace DemoFYP.Services.IServices
 
         Task<UserPermissionResponse> GetUserPermissions(Guid curUserID);
 
-        Task<PagedResult<UserListResponse>> GetUserList(PaginationRequest pagination);
+        Task<PagedResult<UserListResponse>> GetUserList(UserListFilterRequest filter);
 
         #endregion
 
@@ -34,6 +34,7 @@ namespace DemoFYP.Services.IServices
         Task UpdateUserProfile(UserUpdateDetailRequest payload, Guid curUserID);
         Task SendTemporilyPassword(string email, Guid curUserID);
         Task ResetPassword(ResetPasswordRequest payload, Guid curUserID);
+        Task ResetPassword(AdminResetPasswordRequest payload, Guid curUserID);
 
         #endregion
     }
