@@ -34,14 +34,5 @@ namespace DemoFYP.Controllers
 
             return SuccessResponse(data);
         }
-
-        [Authorize(Policy = "Revoke_User")]
-        [HttpPost("revoke-user")]
-        public async Task<ActionResult<StandardResponse>> RevokeUser([FromBody] RevokeUserRequest payload)
-        {
-            await _Jwtservices.RevokeUser(payload.UserID, CurUserID);
-
-            return SuccessResponse($"User { payload.UserID } has been revoked");
-        }
     }
 }

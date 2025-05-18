@@ -1,4 +1,5 @@
 ﻿using DemoFYP.Exceptions;
+using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
@@ -68,6 +69,18 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task<UserPermissionResponse> GetAdminPermissionsList()
+        {
+            try
+            {
+                return await _userRepository.GetAdminPermissions() ?? throw new NotFoundException("Permission List is Empty");
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<UserPermissionResponse> GetUserPermissions(Guid curUserID)
         {
             if (curUserID == Guid.Empty) throw new UnauthorizedAccessException();
@@ -75,6 +88,18 @@ namespace DemoFYP.Services
             try
             {
                 return await _userRepository.GetUserPermissionsByLoginID(curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<User>> GetUserList(PaginationRequest pagination)
+        {
+            try
+            {
+                return await _userRepository.GetUserList(pagination);
             }
             catch
             {
@@ -120,6 +145,11 @@ namespace DemoFYP.Services
 
             try
             {
+                if (payload.QRCode != null)
+                {
+                    payload.QRCodePath = await _commonServices.UploadImage(payload.QRCode, "", "PaymentQR");
+                }
+
                 await _userRepository.UpdateUserProfile(payload, curUserID);
             }
             catch

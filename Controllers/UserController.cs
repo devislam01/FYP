@@ -46,6 +46,13 @@ namespace DemoFYP.Controllers
         }
 
         [Authorize]
+        [HttpGet("adminPermissionsList")]
+        public async Task<ActionResult<StandardResponse<UserPermissionResponse>>> GetAdminPermissionList()
+        {
+            return SuccessResponse<UserPermissionResponse>(await _userServices.GetAdminPermissionsList());
+        }
+
+        [Authorize]
         [HttpGet("permission")]
         public async Task<ActionResult<StandardResponse<UserPermissionResponse>>> GetPermission()
         {

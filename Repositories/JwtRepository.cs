@@ -120,5 +120,24 @@ namespace DemoFYP.Repositories
             }
             
         }
+
+        public async Task ReinstateUserByUserID(Guid userID, Guid curUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == userID) ?? throw new NotFoundException($"{userID} was not found");
+
+                user.IsActive = 1;
+
+                await context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw new InvalidOperationException("Internal Error happen");
+            }
+
+        }
     }
 }

@@ -9,5 +9,6 @@ namespace DemoFYP.Services.IServices
         Task<JwtAuthResult> GenerateToken(UserJwtClaims claims);
         Task<JwtAuthResult> VerifyAndGenerateRefreshToken(RefreshTokenRequest payload, string curUserEmail, string curUserRole);
         Task RevokeUser(Guid userID, Guid curUserID);
+        Task ReinstateUser(Guid userID, Guid curUserID);
     }
 }

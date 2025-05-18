@@ -2,6 +2,7 @@
 using DemoFYP.EF;
 using DemoFYP.Enums;
 using DemoFYP.Exceptions;
+using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
@@ -138,8 +139,24 @@ namespace DemoFYP.Repositories
 
             try
             {
-                var result = await context.Permissions.Select(p => p.PermissionName).ToListAsync();
+                var result = await context.Permissions.Where(p => !p.PermissionName.StartsWith("AP_")).Select(p => p.PermissionName).ToListAsync();
                 
+                return new UserPermissionResponse { Permissions = result };
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to Get Permission List", ex);
+            }
+        }
+
+        public async Task<UserPermissionResponse> GetAdminPermissions()
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var result = await context.Permissions.Where(p => p.PermissionName.StartsWith("AP_")).Select(p => p.PermissionName).ToListAsync();
+
                 return new UserPermissionResponse { Permissions = result };
             }
             catch (Exception ex)
@@ -164,6 +181,44 @@ namespace DemoFYP.Repositories
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to Get User Permissions", ex);
+            }
+        }
+
+        public async Task<PagedResult<User>> GetUserList(PaginationRequest pagination)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var query = context.Users
+                    .OrderByDescending(u => u.CreatedDateTime)
+                    .Where(u => u.RoleID != (int)UserLevel.Admin && u.IsActive == (sbyte)Status.Active);
+
+                int totalRecord = await query.CountAsync();
+
+                if (!pagination.DisablePagination)
+                {
+                    query = query
+                        .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                        .Take(pagination.PageSize);
+                }
+
+                var result = await query.ToListAsync();
+
+                return new PagedResult<User>
+                {
+                    Data = result,
+                    Pagination = new PaginationResponse
+                    {
+                        PageNumber = pagination.PageNumber,
+                        PageSize = pagination.PageSize,
+                        TotalRecord = totalRecord
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to Get User List", ex);
             }
         }
 
@@ -233,6 +288,7 @@ namespace DemoFYP.Repositories
                 curData.PhoneNumber = payload.PhoneNumber;
                 curData.UserGender = payload.UserGender;
                 curData.Address = payload.Address;
+                curData.PaymentQRCode = payload.QRCodePath ?? curData.PaymentQRCode;
                 curData.UpdatedDateTime = DateTime.Now;
                 curData.UpdatedBy = curUserID;
 

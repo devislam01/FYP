@@ -1,4 +1,5 @@
 ﻿using DemoFYP.EF;
+using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
 
@@ -13,7 +14,9 @@ namespace DemoFYP.Repositories.IRepositories
         Task<UserDetailResponse> GetUserProfileByLoginID(Guid curUserID);
         Task<User> GetUserByLoginID(Guid curUserID, AppDbContext outerContext = null);
         Task<UserPermissionResponse> GetPermissions();
+        Task<UserPermissionResponse> GetAdminPermissions();
         Task<UserPermissionResponse> GetUserPermissionsByLoginID(Guid curUserID);
+        Task<PagedResult<User>> GetUserList(PaginationRequest pagination);
 
         #endregion
 

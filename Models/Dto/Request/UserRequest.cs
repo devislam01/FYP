@@ -11,6 +11,10 @@
         public string? UserGender { get; set; }
 
         public string? Address { get; set; }
+
+        public IFormFile? QRCode { get; set; }
+
+        public string? QRCodePath { get; set; }
     }
 
     public class UserDetail
@@ -24,6 +28,7 @@
         public string? Address { get; set; }
 
         public IFormFile? QRCode { get; set; }
+
         public string? QRCodePath {  get; set; }
     }
 
@@ -32,9 +37,19 @@
         public Guid UserID { get; set; }
     }
 
+    public class ReinstateUserRequest
+    {
+        public Guid UserID { get; set; }
+    }
+
     public class ShoppingCartRequest
     {
         public int ProductID { get; set; }
+
         public int Quantity {  get; set; }
     }
+
+    #region Admin Dto
+
+    #endregion
 }

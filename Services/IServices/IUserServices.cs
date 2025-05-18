@@ -1,4 +1,5 @@
-﻿using DemoFYP.Models.Dto.Request;
+﻿using DemoFYP.Models;
+using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
 
 namespace DemoFYP.Services.IServices
@@ -14,7 +15,11 @@ namespace DemoFYP.Services.IServices
 
         Task<UserPermissionResponse> GetPermissionsList();
 
+        Task<UserPermissionResponse> GetAdminPermissionsList();
+
         Task<UserPermissionResponse> GetUserPermissions(Guid curUserID);
+
+        Task<PagedResult<User>> GetUserList(PaginationRequest pagination);
 
         #endregion
 

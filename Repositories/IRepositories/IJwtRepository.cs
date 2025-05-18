@@ -10,5 +10,6 @@ namespace DemoFYP.Repositories.IRepositories
         Task<Usertoken?> GetUserTokenByUserId(Guid curUserID);
         Task RevokeUserTokenByRefreshToken(string refreshToken);
         Task RevokeUserByUserID(Guid userID, Guid curUserID);
+        Task ReinstateUserByUserID(Guid userID, Guid curUserID);
     }
 }

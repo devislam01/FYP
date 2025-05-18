@@ -43,7 +43,7 @@ namespace DemoFYP.Controllers
         {
             await _roleRepository.BindRoleAndPermissions(payload, CurUserID);
 
-            return SuccessResponse($"Bind Permission '{payload.RoleID}' with Permissions: '[{ payload.PermissionIDs }]' successfully!");
+            return SuccessResponse($"Bind Permission '{payload.RoleID}' with Permissions: '[{ payload.PermissionIDs.ToList() }]' successfully!");
         }
 
         [HttpGet("debug/claims")]

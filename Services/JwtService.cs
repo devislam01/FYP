@@ -112,6 +112,20 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task ReinstateUser(Guid userID, Guid curUserID)
+        {
+            if (userID == Guid.Empty) throw new BadRequestException("User ID is required");
+
+            try
+            {
+                await _jwtRepository.ReinstateUserByUserID(userID, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         private static RefreshToken GenerateSecureRefreshToken()
         {
             var randomBytes = new byte[32];
