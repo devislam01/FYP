@@ -45,12 +45,12 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, Guid curUserID)
+        public async Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID)
         {
             if (ProductID == 0) { throw new BadRequestException("Missing Product ID"); }
 
             try {
-                return await _productRepository.GetProductDetailByProductID(ProductID, curUserID);
+                return await _productRepository.GetProductDetailByProductID(ProductID);
             }
             catch
             {
@@ -67,7 +67,7 @@ namespace DemoFYP.Services
             if (payload == null) { throw new BadRequestException("No payload was found."); }
             if (payload.ProductImage == null || payload.ProductImage.Length == 0) { throw new BadRequestException("Missing Product Image"); }
 
-            string ImageURL = await _commonServices.UploadImage(payload.ProductImage, "");
+            string ImageURL = await _commonServices.UploadImage(payload.ProductImage, "", "ProductImages");
 
             if (string.IsNullOrEmpty(payload.ProductName)) { throw new BadRequestException("Missing Product Name"); }
             if (string.IsNullOrEmpty(payload.ProductDescription)) { throw new BadRequestException("Missing Product Description"); }
@@ -94,7 +94,7 @@ namespace DemoFYP.Services
 
             if (payload.ProductImageFile != null && payload.ProductImageFile.Length > 0)
             {
-                imageURL = await _commonServices.UploadImage(payload.ProductImageFile, "");
+                imageURL = await _commonServices.UploadImage(payload.ProductImageFile, "", "ProductImages");
             }
             else if (!string.IsNullOrEmpty(payload.ProductImageUrl))
             {

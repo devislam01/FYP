@@ -11,6 +11,7 @@ namespace DemoFYP.Repositories.IRepositories
         Task<bool> CheckIfEmailExist(string email, AppDbContext outerContext = null);
         Task<UserJwtClaims> CheckUserLoginCredentials(UserLoginRequest payload);
         Task<UserDetailResponse> GetUserProfileByLoginID(Guid curUserID);
+        Task<User> GetUserByLoginID(Guid curUserID, AppDbContext outerContext = null);
         Task<UserPermissionResponse> GetPermissions();
         Task<UserPermissionResponse> GetUserPermissionsByLoginID(Guid curUserID);
 

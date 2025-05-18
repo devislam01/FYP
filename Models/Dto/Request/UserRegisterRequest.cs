@@ -1,6 +1,6 @@
 ﻿namespace DemoFYP.Models.Dto.Request
 {
-    public class UserRegisterRequest
+    public class UserRegisterRequest : UserDetail
     {
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;

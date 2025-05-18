@@ -52,6 +52,11 @@ namespace DemoFYP.Middlewares
                         response.Code = 404;
                         response.Status = "Not Found";
                         break;
+                    case BusinessException _:
+                        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                        response.Code = 400;
+                        response.Status = "Bad Business Request";
+                        break;
                     default:
                         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                         response.Code = 500;

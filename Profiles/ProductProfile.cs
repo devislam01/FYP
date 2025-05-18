@@ -13,6 +13,8 @@ namespace DemoFYP.Profiles
             CreateMap<Product, ProductDetailResult>();
 
             CreateMap<UpdateProductRequest, Product>().ForMember(dest => dest.ProductId, opt => opt.Ignore());
+
+            CreateMap<ProductDetailResult, ShoppingCartObj>();
         }
     }
 }

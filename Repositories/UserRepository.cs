@@ -8,7 +8,9 @@ using DemoFYP.Repositories.IRepositories;
 using DemoFYP.Services.IServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.IdentityModel.Tokens;
 using System.Data;
+using System.Text.Json;
 
 namespace DemoFYP.Repositories
 {
@@ -113,6 +115,20 @@ namespace DemoFYP.Repositories
             catch
             {
                 throw;
+            }
+        }
+
+        public async Task<User> GetUserByLoginID(Guid curUserID, AppDbContext outerContext)
+        {
+            var context = outerContext ?? _factory.CreateDbContext();
+
+            try
+            {
+                return await context.Users.FirstOrDefaultAsync(u => u.UserId == curUserID) ?? throw new NotFoundException("User not Found!");
+            }
+            catch (Exception ex) 
+            {
+                throw new InvalidOperationException("Failed to Get User Data", ex);
             }
         }
 

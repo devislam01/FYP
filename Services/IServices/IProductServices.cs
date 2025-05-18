@@ -11,7 +11,7 @@ namespace DemoFYP.Services.IServices
 
         Task<PagedResult<ProductListResult>> GetProductList(ProductFilterRequest filter);
         Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID);
-        Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, Guid curUserID);
+        Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID);
 
         #endregion
 

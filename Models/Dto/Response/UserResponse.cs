@@ -25,4 +25,15 @@
     {
         public List<string> Permissions { get; set; }
     }
+
+    public class ShoppingCartObj
+    {
+        public int ProductID { get; set; }
+        public string ProductName { get; set; }
+        public string ProductCondition { get; set; }
+        public double ProductPrice { get; set; }
+        public int Quantity { get; set; }
+        public string ProductImage { get; set; }
+        public string CategoryName { get; set; }
+    }
 }

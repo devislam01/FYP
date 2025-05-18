@@ -280,6 +280,12 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UserName)
                 .HasMaxLength(45)
                 .HasColumnName("userName");
+            entity.Property(e => e.PaymentQRCode)
+                .HasMaxLength(45)
+                .HasColumnName("paymentQRCode");
+            entity.Property(e => e.Shopping_Cart)
+                .HasMaxLength(255)
+                .HasColumnName("shopping_cartObj");
 
             entity.HasOne(e => e.Role).WithMany(r => r.Users)
                 .HasForeignKey(d => d.RoleID)

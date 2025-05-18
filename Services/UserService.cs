@@ -3,6 +3,7 @@ using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
 using DemoFYP.Services.IServices;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DemoFYP.Services
 {
@@ -12,13 +13,15 @@ namespace DemoFYP.Services
         private readonly ICommonServices _commonServices;
         private readonly IEmailServices _emailServices;
         private readonly IConfiguration _config;
+        private readonly IProductRepository _productRepository;
 
-        public UserService(IUserRepository userRepository, ICommonServices commonServices, IEmailServices emailServices, IConfiguration config)
+        public UserService(IUserRepository userRepository, ICommonServices commonServices, IEmailServices emailServices, IConfiguration config, IProductRepository productRepository)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _commonServices = commonServices ?? throw new ArgumentNullException(nameof(commonServices));
             _emailServices = emailServices ?? throw new ArgumentNullException(nameof(emailServices));
             _config = config ?? throw new ArgumentNullException(nameof(config));
+            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         }
 
         #region Read Services
@@ -94,6 +97,11 @@ namespace DemoFYP.Services
                 var hasUser = await _userRepository.CheckIfEmailExist(payload.Email);
 
                 if (hasUser) throw new ConflictException("User already exist.");
+
+                if (payload.QRCode != null)
+                {
+                    payload.QRCodePath = await _commonServices.UploadImage(payload.QRCode, "", "PaymentQR");
+                }
 
                 await _userRepository.RegisterUser(payload, updatedBy);
             }

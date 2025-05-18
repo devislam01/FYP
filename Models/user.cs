@@ -24,6 +24,10 @@ public partial class User
 
     public double? RatingMark { get; set; }
 
+    public string? PaymentQRCode {  get; set; }
+
+    public string? Shopping_Cart {  get; set; }
+
     public sbyte IsActive { get; set; }
 
     public DateTime CreatedDateTime { get; set; }

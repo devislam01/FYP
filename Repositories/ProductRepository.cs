@@ -122,7 +122,7 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, Guid curUserID)
+        public async Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, bool GetImageRealPath)
         {
             var context = _factory.CreateDbContext();
 
@@ -148,6 +148,7 @@ namespace DemoFYP.Repositories
                     .Where(o => o.UserId == productWithCategory.product.UserId)
                     .CountAsync();
 
+                string ImageUrl = GetImageRealPath ? productWithCategory.product.ProductImage : $"{_config["BackendUrl"]}/{productWithCategory.product.ProductImage}";
                 var response = new ProductDetailResponse
                 {
                     ProductDetail = new ProductDetailResult
@@ -158,7 +159,7 @@ namespace DemoFYP.Repositories
                         CategoryID = productWithCategory.category.CategoryId,
                         CategoryName = productWithCategory.category.CategoryName,
                         ProductCondition = productWithCategory.product.ProductCondition,
-                        ProductImage = $"{_config["BackendUrl"]}/{ productWithCategory.product.ProductImage }",
+                        ProductImage = ImageUrl,
                         ProductPrice = productWithCategory.product.ProductPrice,
                         StockQty = productWithCategory.product.StockQty
                     },

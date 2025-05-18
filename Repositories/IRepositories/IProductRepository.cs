@@ -11,7 +11,7 @@ namespace DemoFYP.Repositories.IRepositories
         #region Read
         Task<PagedResult<ProductListResult>> GetProductList(ProductFilterRequest filter);
         Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID);
-        Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, Guid curUserID);
+        Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, bool GetImageRealPath = false);
 
         #endregion
 

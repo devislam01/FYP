@@ -21,9 +21,9 @@ namespace DemoFYP.Controllers
 
         [Authorize]
         [HttpPost("upload")]
-        public async Task<ActionResult<StandardResponse<string>>> UploadImages(IFormFile file)
+        public async Task<ActionResult<StandardResponse<string>>> UploadImages(IFormFile file, string folderName)
         {
-            return SuccessResponse<string>(await _commonServices.UploadImage(file, ""));
+            return SuccessResponse<string>(await _commonServices.UploadImage(file, "", folderName));
         }
 
 

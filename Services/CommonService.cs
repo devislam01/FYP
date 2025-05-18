@@ -13,11 +13,11 @@ namespace DemoFYP.Services
 
         #region Upload Image
 
-        public async Task<string> UploadImage(IFormFile file, string fileName)
+        public async Task<string> UploadImage(IFormFile file, string fileName, string folderName)
         {
             if (file == null || file.Length == 0) throw new BadRequestException(" No File received ");
 
-            string directoryPath = Path.Combine(_environment.WebRootPath, "ProductImages");
+            string directoryPath = Path.Combine(_environment.WebRootPath, folderName);
             string safeFileName = string.IsNullOrEmpty(fileName) ? file.FileName : fileName;
             string filePath = Path.Combine(directoryPath, safeFileName);
 

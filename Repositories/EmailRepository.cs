@@ -1,18 +1,20 @@
 ﻿using AutoMapper;
 using DemoFYP.EF;
 using DemoFYP.Models;
+using DemoFYP.Repositories.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
 
-namespace DemoFYP.Repositories.IRepositories
+namespace DemoFYP.Repositories
 {
     public class EmailRepository : IEmailRepositories
     {
         private readonly IDbContextFactory<AppDbContext> _factory;
         private readonly IMapper _mapper;
 
-        public EmailRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper) {
+        public EmailRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper)
+        {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }

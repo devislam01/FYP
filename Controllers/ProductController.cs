@@ -49,7 +49,7 @@ namespace DemoFYP.Controllers
         [HttpPost("getProductDetail")]
         public async Task<ActionResult<StandardResponse<ProductDetailResponse>>> GetProductDetail(ProductDetailRequest payload)
         {
-            var result = await _productServices.GetProductDetailByProductID(payload.ProductID, CurUserID);
+            var result = await _productServices.GetProductDetailByProductID(payload.ProductID);
 
             return SuccessResponse<ProductDetailResponse>(result);
         }
