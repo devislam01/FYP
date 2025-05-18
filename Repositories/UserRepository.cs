@@ -184,7 +184,7 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<PagedResult<User>> GetUserList(PaginationRequest pagination)
+        public async Task<PagedResult<UserListResponse>> GetUserList(PaginationRequest pagination)
         {
             var context = _factory.CreateDbContext();
 
@@ -203,9 +203,22 @@ namespace DemoFYP.Repositories
                         .Take(pagination.PageSize);
                 }
 
-                var result = await query.ToListAsync();
+                var result = await query.Select(q => new UserListResponse
+                {
+                    UserID = q.UserId,
+                    Email = q.Email,
+                    Ratings = q.RatingMark,
+                    UserName = q.UserName ?? string.Empty,
+                    PhoneNumber = q.PhoneNumber ?? string.Empty,
+                    Status = q.IsActive == 1 ? "Active" : "Inactive",
+                    QRCode = q.PaymentQRCode,
+                    CreatedAt = q.CreatedDateTime,
+                    CreatedBy = q.CreatedBy,
+                    UpdatedAt = q.UpdatedDateTime,
+                    UpdatedBy = q.UpdatedBy,
+                }).ToListAsync();
 
-                return new PagedResult<User>
+                return new PagedResult<UserListResponse>
                 {
                     Data = result,
                     Pagination = new PaginationResponse

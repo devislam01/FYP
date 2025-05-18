@@ -19,7 +19,7 @@ namespace DemoFYP.Services.IServices
 
         Task<UserPermissionResponse> GetUserPermissions(Guid curUserID);
 
-        Task<PagedResult<User>> GetUserList(PaginationRequest pagination);
+        Task<PagedResult<UserListResponse>> GetUserList(PaginationRequest pagination);
 
         #endregion
 

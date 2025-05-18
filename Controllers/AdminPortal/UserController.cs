@@ -1,5 +1,6 @@
 ﻿using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
+using DemoFYP.Models.Dto.Response;
 using DemoFYP.Services;
 using DemoFYP.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -21,9 +22,9 @@ namespace DemoFYP.Controllers.Admin
         }
 
         [HttpPost("userList")]
-        public async Task<ActionResult<StandardResponse<PagedResult<User>>>> GetUserList(PaginationRequest pagination)
+        public async Task<ActionResult<StandardResponse<PagedResult<UserListResponse>>>> GetUserList(PaginationRequest pagination)
         {
-            return SuccessResponse<PagedResult<User>>(await _userServices.GetUserList(pagination));
+            return SuccessResponse<PagedResult<UserListResponse>>(await _userServices.GetUserList(pagination));
         }
 
         [Authorize(Policy = "Admin_Create_User")]

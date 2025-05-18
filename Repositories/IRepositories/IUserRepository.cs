@@ -16,7 +16,7 @@ namespace DemoFYP.Repositories.IRepositories
         Task<UserPermissionResponse> GetPermissions();
         Task<UserPermissionResponse> GetAdminPermissions();
         Task<UserPermissionResponse> GetUserPermissionsByLoginID(Guid curUserID);
-        Task<PagedResult<User>> GetUserList(PaginationRequest pagination);
+        Task<PagedResult<UserListResponse>> GetUserList(PaginationRequest pagination);
 
         #endregion
 

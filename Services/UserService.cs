@@ -95,7 +95,7 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<PagedResult<User>> GetUserList(PaginationRequest pagination)
+        public async Task<PagedResult<UserListResponse>> GetUserList(PaginationRequest pagination)
         {
             try
             {
