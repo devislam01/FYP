@@ -6,5 +6,6 @@ namespace DemoFYP.Repositories.IRepositories
     {
         Task<List<ShoppingCartObj>> GetShoppingCartByLoginID(Guid curUserID);
         Task UpdateShoppingCart(List<ShoppingCartObj> shoppingCartList, Guid curUserID);
+        Task RemovePaidProductFromCart(List<int> paidProductIds, Guid curUserID);
     }
 }

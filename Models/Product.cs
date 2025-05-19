@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DemoFYP.Models;
+using System;
 using System.Collections.Generic;
 
 namespace DemoFYP;
@@ -39,5 +40,6 @@ public partial class Product
 
     public Guid UserId { get; set; }
 
-    public virtual ProductCategory Category { get; set; } = null!;
+    public ProductCategory Category { get; set; } = null!;
+    public List<OrderItems> OrderItems { get; set; } = new();
 }

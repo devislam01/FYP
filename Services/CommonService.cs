@@ -33,7 +33,7 @@ namespace DemoFYP.Services
                     await file.CopyToAsync(stream);
                 }
 
-                return $"ProductImages/{safeFileName}";
+                return $"{folderName}/{safeFileName}";
             }
             catch
             {

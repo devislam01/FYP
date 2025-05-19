@@ -40,7 +40,7 @@ namespace DemoFYP.Middlewares
                     case ForbiddenException _:
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
                         response.Code = 403;
-                        response.Status = "Unauthorized";
+                        response.Status = "No Access";
                         break;
                     case ConflictException _:
                         context.Response.StatusCode = StatusCodes.Status409Conflict;

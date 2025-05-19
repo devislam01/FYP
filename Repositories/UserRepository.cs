@@ -42,6 +42,10 @@ namespace DemoFYP.Repositories
             {
                 throw;
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task<UserJwtClaims> CheckUserLoginCredentials(UserLoginRequest payload)
@@ -90,6 +94,10 @@ namespace DemoFYP.Repositories
             {
                 throw;
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task<UserDetailResponse> GetUserProfileByLoginID(Guid CurUserID)
@@ -117,6 +125,10 @@ namespace DemoFYP.Repositories
             {
                 throw;
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task<User> GetUserByLoginID(Guid curUserID, AppDbContext outerContext)
@@ -130,6 +142,10 @@ namespace DemoFYP.Repositories
             catch (Exception ex) 
             {
                 throw new InvalidOperationException("Failed to Get User Data", ex);
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
 
@@ -147,6 +163,10 @@ namespace DemoFYP.Repositories
             {
                 throw new InvalidOperationException("Failed to Get Permission List", ex);
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task<UserPermissionResponse> GetAdminPermissions()
@@ -162,6 +182,10 @@ namespace DemoFYP.Repositories
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to Get Permission List", ex);
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
 
@@ -181,6 +205,10 @@ namespace DemoFYP.Repositories
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to Get User Permissions", ex);
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
 
@@ -262,6 +290,10 @@ namespace DemoFYP.Repositories
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to Get User List", ex);
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
 

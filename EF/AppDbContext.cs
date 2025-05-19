@@ -31,6 +31,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Role> Roles { get; set; }
     public virtual DbSet<Permission> Permissions { get; set; }
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
+    public virtual DbSet<PaymentMethod> PaymentMethods { get; set; }
+    public virtual DbSet<OrderItems> OrderItems { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {}
 
@@ -86,9 +88,9 @@ public partial class AppDbContext : DbContext
 
             entity.ToTable("order");
 
+            entity.HasIndex(e => e.OrderId, "orderID_UNIQUE").IsUnique();
+
             entity.Property(e => e.OrderId)
-                .HasMaxLength(16)
-                .IsFixedLength()
                 .HasColumnName("orderID");
             entity.Property(e => e.CreatedBy)
                 .HasColumnType("binary(16)")
@@ -96,23 +98,11 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedDateTime)
                 .HasColumnType("datetime")
                 .HasColumnName("createdDateTime");
-            entity.Property(e => e.DeletedBy)
-                .HasColumnType("binary(16)")
-                .HasColumnName("deletedBy");
-            entity.Property(e => e.DeletedDateTime)
-                .HasColumnType("datetime")
-                .HasColumnName("deletedDateTime");
             entity.Property(e => e.Feedback)
                 .HasMaxLength(255)
                 .HasColumnName("feedback");
             entity.Property(e => e.PaymentId)
-                .HasColumnType("binary(16)")
                 .HasColumnName("paymentID");
-            entity.Property(e => e.ProductId)
-                .HasMaxLength(16)
-                .IsFixedLength()
-                .HasColumnName("productID");
-            entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.Rating).HasColumnName("rating");
             entity.Property(e => e.Status)
                 .HasMaxLength(45)
@@ -127,6 +117,12 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UserId)
                 .HasColumnType("binary(16)")
                 .HasColumnName("userID");
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Payment)
+                .WithOne(p => p.Order)
+                .HasForeignKey<Payment>(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Payment>(entity =>
@@ -135,8 +131,9 @@ public partial class AppDbContext : DbContext
 
             entity.ToTable("payment");
 
+            entity.HasIndex(e => e.PaymentId, "paymentID_UNIQUE").IsUnique();
+
             entity.Property(e => e.PaymentId)
-                .HasColumnType("binary(16)")
                 .HasColumnName("paymentID");
             entity.Property(e => e.CreatedBy)
                 .HasColumnType("binary(16)")
@@ -148,6 +145,10 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(16)
                 .IsFixedLength()
                 .HasColumnName("orderID");
+            entity.Property(e => e.PaymentMethodID).HasColumnName("paymentMethodID");
+            entity.Property(e => e.Receipt)
+                .HasMaxLength(255)
+                .HasColumnName("receipt");
             entity.Property(e => e.Status)
                 .HasMaxLength(45)
                 .HasColumnName("status");
@@ -158,6 +159,12 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UpdatedDateTime)
                 .HasColumnType("datetime")
                 .HasColumnName("updatedDateTime");
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.PaymentMethod)
+                .WithMany(pm => pm.Payments)
+                .HasForeignKey(p => p.PaymentMethodID)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Product>(entity =>
@@ -391,6 +398,50 @@ public partial class AppDbContext : DbContext
             entity.HasOne(rp => rp.Permission)
                 .WithMany(p => p.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionID);
+        });
+
+        modelBuilder.Entity<PaymentMethod>(entity => 
+        {
+            entity.HasKey(e => e.PaymentMethodID).HasName("PRIMARY");
+
+            entity.ToTable("payment_method");
+
+            entity.HasIndex(e => e.PaymentMethodID, "PaymentMethodID_UNIQUE").IsUnique();
+            entity.Property(e => e.PaymentMethodName).HasMaxLength(45);
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime");
+            entity.Property(e => e.CreatedBy)
+                .HasColumnType("binary(16)");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime");
+            entity.Property(e => e.UpdatedBy)
+                .HasColumnType("binary(16)");
+        });
+
+        modelBuilder.Entity<OrderItems>(entity =>
+        {
+            entity.HasKey(e => e.OrderItemID).HasName("PRIMARY");
+
+            entity.ToTable("order_items");
+
+            entity.HasIndex(e => e.OrderItemID, "OrderItemID_UNIQUE").IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime");
+            entity.Property(e => e.CreatedBy)
+                .HasColumnType("binary(16)");
+
+            modelBuilder.Entity<OrderItems>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(oi => oi.OrderID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderItems>()
+                .HasOne(oi => oi.Product)
+                .WithMany(p => p.OrderItems)
+                .HasForeignKey(oi => oi.ProductID)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         OnModelCreatingPartial(modelBuilder);

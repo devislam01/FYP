@@ -265,6 +265,10 @@ namespace DemoFYP.Repositories
             {
                 throw;
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         #endregion
@@ -380,6 +384,10 @@ namespace DemoFYP.Repositories
             {
                 throw;
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task UnpublishProductByAdmin(int productID, Guid curUserID)
@@ -399,6 +407,10 @@ namespace DemoFYP.Repositories
             catch
             {
                 throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
         #endregion

@@ -44,6 +44,10 @@ namespace DemoFYP.Repositories
             {
                 throw;
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         // Used for development purpose only
@@ -69,6 +73,10 @@ namespace DemoFYP.Repositories
             {
                 throw new InvalidOperationException("Failed to Create Permission", ex);
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task BindRoleAndPermissions(BindRolePermissionRequest payload, Guid curUserID)
@@ -93,6 +101,10 @@ namespace DemoFYP.Repositories
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to Bind Permissions", ex);
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
     }

@@ -1,0 +1,29 @@
+﻿using DemoFYP.Models;
+using DemoFYP.Models.Dto.Request;
+using DemoFYP.Models.Dto.Response;
+using DemoFYP.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace DemoFYP.Controllers.AdminPortal
+{
+    [Authorize(Roles = "Admin")]
+    [Route("api/admin/[controller]")]
+    public class OrderController : BaseController
+    {
+        private readonly IOrderServices _orderServices;
+        public OrderController(IOrderServices orderServices) {
+            _orderServices = orderServices ?? throw new ArgumentNullException(nameof(orderServices));
+        }
+
+        [Authorize(Policy = "AP_Read_Order")]
+        [HttpGet]
+        public async Task<ActionResult<StandardResponse<PagedResult<OrderListResponse>>>> GetOrderList(OrderListFilterRequest filter)
+        {
+            var result = await _orderServices.GetOrderList(filter);
+
+            return SuccessResponse<PagedResult<OrderListResponse>>(result);
+        }
+    }
+}

@@ -45,6 +45,10 @@ namespace DemoFYP.Repositories
             {
                 throw new InvalidOperationException("Insert token failed");
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task<Usertoken?> GetUserTokenByRefreshToken(string refreshToken)
@@ -63,6 +67,10 @@ namespace DemoFYP.Repositories
             {
                 throw new InvalidOperationException("Failed to get refresh-token");
             }
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task<Usertoken?> GetUserTokenByUserId(Guid curUserID)
@@ -79,6 +87,10 @@ namespace DemoFYP.Repositories
             catch
             {
                 throw new InvalidOperationException("Failed to get token");
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
 
@@ -97,7 +109,10 @@ namespace DemoFYP.Repositories
             {
                 throw new InvalidOperationException("Failed to Revoked User");
             }
-            
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task RevokeUserByUserID(Guid userID, Guid curUserID)
@@ -118,7 +133,10 @@ namespace DemoFYP.Repositories
             {
                 throw new InvalidOperationException("Internal Error happen");
             }
-            
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
 
         public async Task ReinstateUserByUserID(Guid userID, Guid curUserID)
@@ -137,7 +155,10 @@ namespace DemoFYP.Repositories
             {
                 throw new InvalidOperationException("Internal Error happen");
             }
-
+            finally
+            {
+                await context.DisposeAsync();
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace DemoFYP.Repositories
 {
@@ -25,13 +26,20 @@ namespace DemoFYP.Repositories
             {
                 var userData = await context.Users.Where(u => u.UserId == curUserID).FirstOrDefaultAsync() ?? throw new UnauthorizedAccessException("User not Found");
 
-                if (string.IsNullOrEmpty(userData.Shopping_Cart)) throw new NotFoundException("Cart is Empty");
+                if (!string.IsNullOrEmpty(userData.Shopping_Cart))
+                {
+                    return JsonSerializer.Deserialize<List<ShoppingCartObj>>(userData.Shopping_Cart);
+                }
 
-                return JsonSerializer.Deserialize<List<ShoppingCartObj>>(userData.Shopping_Cart);
+                return new List<ShoppingCartObj>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw new InvalidOperationException("Failed to Get Shopping Cart!", ex);
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
 
@@ -50,9 +58,50 @@ namespace DemoFYP.Repositories
 
                 await context.SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch
             {
-                throw new InvalidOperationException("Failed to update shopping cart!", ex);
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task RemovePaidProductFromCart(List<int> paidProductIds, Guid curUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == curUserID) ?? throw new NotFoundException("User not Found");
+
+                var cartItems = JsonSerializer.Deserialize<List<ShoppingCartObj>>(user.Shopping_Cart);
+
+                if (cartItems == null)
+                    return;
+
+                cartItems.RemoveAll(item => paidProductIds.Contains(item.ProductID));
+
+                if (cartItems.Any())
+                {
+                    user.Shopping_Cart = JsonSerializer.Serialize(cartItems);
+                }
+                else
+                {
+                    user.Shopping_Cart = null;
+                }
+               
+
+                await context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
     }
