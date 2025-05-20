@@ -11,6 +11,8 @@
         public string UserGender { get; set; }
 
         public string Address { get; set; }
+
+        public string ResidentialCollege { get; set; }
     }
 
     public class UserJwtClaims

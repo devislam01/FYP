@@ -113,7 +113,8 @@ namespace DemoFYP.Repositories
                                 Email = u.Email,
                                 PhoneNumber = u.PhoneNumber ?? string.Empty,
                                 UserGender = u.UserGender ?? string.Empty,
-                                Address = u.Address ?? string.Empty
+                                Address = u.Address ?? string.Empty,
+                                ResidentialCollege = u.ResidentialCollege ?? string.Empty,
                             })
                             .FirstOrDefaultAsync();
 
@@ -363,6 +364,7 @@ namespace DemoFYP.Repositories
                 curData.PhoneNumber = payload.PhoneNumber;
                 curData.UserGender = payload.UserGender;
                 curData.Address = payload.Address;
+                curData.ResidentialCollege = payload.ResidentialCollege;
                 curData.PaymentQRCode = payload.QRCodePath ?? curData.PaymentQRCode;
                 curData.UpdatedDateTime = DateTime.Now;
                 curData.UpdatedBy = curUserID;

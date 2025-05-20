@@ -15,6 +15,7 @@
         public IFormFile? QRCode { get; set; }
 
         public string? QRCodePath { get; set; }
+        public string? ResidentialCollege { get; set; }
     }
 
     public class UserDetail
