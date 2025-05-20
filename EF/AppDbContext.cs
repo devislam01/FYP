@@ -251,6 +251,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Address)
                 .HasMaxLength(45)
                 .HasColumnName("address");
+            entity.Property(e => e.ResidentialCollege)
+                .HasMaxLength(45)
+                .HasColumnName("residential_college");
             entity.Property(e => e.CreatedBy)
                 .HasColumnType("binary(16)")
                 .HasColumnName("createdBy");
