@@ -1,4 +1,5 @@
-﻿using DemoFYP.Exceptions;
+﻿using DemoFYP.Enums;
+using DemoFYP.Exceptions;
 using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
@@ -43,7 +44,7 @@ namespace DemoFYP.Services
 
             try
             {
-                string receiptUrl = await _commonServices.UploadImage(payload.Receipt, "", "Receipt");
+                string receiptUrl = await _commonServices.UploadImage(payload.Receipt, "", FolderName.Receipt.ToString());
 
                 await _orderRepository.ConfirmOrder(payload, receiptUrl, curUserID, curUserEmail);
             }
@@ -60,6 +61,18 @@ namespace DemoFYP.Services
             try
             {
                 return await _orderRepository.GetOrderList(filter);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateOrder(UpdateOrderRequest payload, Guid curUserID)
+        {
+            try
+            {
+                await _orderRepository.UpdateOrder(payload, curUserID);
             }
             catch
             {

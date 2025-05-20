@@ -108,7 +108,8 @@ builder.Services.AddAuthorization(options =>
         "Read_Cart", "Update_Cart", "AP_Create_User",
         "AP_Reinstate_user", "AP_Read_Product", "AP_Read_ProductDetail",
         "AP_Update_Product", "AP_Delete_Product", "AP_Reset_Password",
-        "AP_Read_Order"
+        "AP_Read_Order", "AP_Update_Order", "AP_Read_Payment",
+        "AP_Update_Payment"
     };
 
     foreach (var permission in allPermissions)

@@ -25,5 +25,14 @@ namespace DemoFYP.Controllers.AdminPortal
 
             return SuccessResponse<PagedResult<OrderListResponse>>(result);
         }
+
+        [Authorize(Policy = "AP_Update_Order")]
+        [HttpGet]
+        public async Task<ActionResult<StandardResponse>> UpdateOrder(UpdateOrderRequest payload)
+        {
+            await _orderServices.UpdateOrder(payload, CurUserID);
+
+            return SuccessResponse($"Order ID: '{payload.OrderID}' Updated Successfully!");
+        }
     }
 }

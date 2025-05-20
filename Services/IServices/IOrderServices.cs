@@ -9,5 +9,6 @@ namespace DemoFYP.Services.IServices
         Task<ProceedToPaymentResponse> CheckOut(PlaceOrderRequest payload, Guid curUserID);
         Task ConfirmOrder(ProceedPaymentRequest payload, Guid curUserID, string curUserEmail);
         Task<PagedResult<OrderListResponse>> GetOrderList(OrderListFilterRequest filter);
+        Task UpdateOrder(UpdateOrderRequest payload, Guid curUserID);
     }
 }

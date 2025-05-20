@@ -1,4 +1,5 @@
-﻿using DemoFYP.Models;
+﻿using DemoFYP.Enums;
+using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Repositories;
 using DemoFYP.Repositories.IRepositories;
@@ -21,9 +22,9 @@ namespace DemoFYP.Controllers
 
         [Authorize]
         [HttpPost("upload")]
-        public async Task<ActionResult<StandardResponse<string>>> UploadImages(IFormFile file, string folderName)
+        public async Task<ActionResult<StandardResponse<string>>> UploadImages(IFormFile file, FolderName folderName)
         {
-            return SuccessResponse<string>(await _commonServices.UploadImage(file, "", folderName));
+            return SuccessResponse<string>(await _commonServices.UploadImage(file, "", folderName.ToString()));
         }
 
 

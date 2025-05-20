@@ -30,7 +30,7 @@
 
         public IFormFile? QRCode { get; set; }
 
-        public string? QRCodePath {  get; set; }
+        public string? PaymentQRCode {  get; set; }
         public string? ResidentialCollege {  get; set; }
     }
 

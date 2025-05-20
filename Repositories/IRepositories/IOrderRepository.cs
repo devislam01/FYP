@@ -11,5 +11,6 @@ namespace DemoFYP.Repositories.IRepositories
         Task ConfirmPayment(int paymentID, string receiptUrl, Guid curUserID, AppDbContext outerContext = null);
         Task ConfirmOrder(ProceedPaymentRequest payload, string receiptUrl, Guid curUserID, string curUserEmail);
         Task<PagedResult<OrderListResponse>> GetOrderList(OrderListFilterRequest filter);
+        Task UpdateOrder(UpdateOrderRequest payload, Guid curUserID);
     }
 }

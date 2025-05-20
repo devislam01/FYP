@@ -1,4 +1,5 @@
 ﻿using DemoFYP.EF;
+using DemoFYP.Enums;
 using DemoFYP.Exceptions;
 using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
@@ -53,7 +54,7 @@ namespace DemoFYP.Repositories
                 {
                     UserId = curUserID,
                     TotalAmount = totalAmount,
-                    Status = "Pending",
+                    Status = OrderStatus.Pending.ToString(),
                     CreatedDateTime = DateTime.UtcNow,
                     CreatedBy = curUserID
                 };
@@ -107,7 +108,7 @@ namespace DemoFYP.Repositories
                 var curData = await context.Payments.FirstOrDefaultAsync(p => p.PaymentId == paymentID && p.Status == "Pending") ?? throw new NotFoundException("Payment Record Not Found!");
 
                 curData.Receipt = receiptUrl;
-                curData.Status = "Success";
+                curData.Status = PaymentStatus.Paid.ToString();
                 curData.UpdatedDateTime = DateTime.Now;
                 curData.UpdatedBy = curUserID;
 
@@ -136,7 +137,7 @@ namespace DemoFYP.Repositories
                 await ConfirmPayment(payload.PaymentID, receiptUrl, curUserID, context);
                 var order = await context.Orders.OrderByDescending(o => o.OrderId).FirstOrDefaultAsync(o => o.UserId == curUserID) ?? throw new NotFoundException("Order not Found!");
 
-                order.Status = "Success";
+                order.Status = OrderStatus.Completed.ToString();
                 order.UpdatedDateTime = DateTime.Now;
                 order.UpdatedBy = curUserID;
 
@@ -221,6 +222,29 @@ namespace DemoFYP.Repositories
                         TotalRecord = totalRecord
                     }
                 };
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task UpdateOrder(UpdateOrderRequest payload, Guid curUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var curData = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == payload.OrderID) ?? throw new NotFoundException("Order not Found");
+
+                curData.TotalAmount = payload.TotalAmount ?? curData.TotalAmount;
+                curData.Status = payload.Status.ToString();
+                curData.UpdatedDateTime = DateTime.Now;
+                curData.UpdatedBy = curUserID;
             }
             catch
             {

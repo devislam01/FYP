@@ -1,4 +1,5 @@
-﻿using DemoFYP.Exceptions;
+﻿using DemoFYP.Enums;
+using DemoFYP.Exceptions;
 using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
@@ -79,7 +80,7 @@ namespace DemoFYP.Services
             if (payload == null) throw new BadRequestException("No payload was found.");
             if (payload.ProductImage == null || payload.ProductImage.Length == 0) throw new BadRequestException("Missing Product Image");
 
-            string ImageURL = await _commonServices.UploadImage(payload.ProductImage, "", "ProductImages");
+            string ImageURL = await _commonServices.UploadImage(payload.ProductImage, "", FolderName.ProductImages.ToString());
 
             if (string.IsNullOrEmpty(payload.ProductName)) throw new BadRequestException("Missing Product Name");
             if (string.IsNullOrEmpty(payload.ProductDescription)) throw new BadRequestException("Missing Product Description");
@@ -111,7 +112,7 @@ namespace DemoFYP.Services
 
             if (payload.ProductImageFile != null && payload.ProductImageFile.Length > 0)
             {
-                imageURL = await _commonServices.UploadImage(payload.ProductImageFile, "", "ProductImages");
+                imageURL = await _commonServices.UploadImage(payload.ProductImageFile, "", FolderName.ProductImages.ToString());
             }
             else if (!string.IsNullOrEmpty(payload.ProductImageUrl))
             {

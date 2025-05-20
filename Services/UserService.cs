@@ -1,4 +1,5 @@
-﻿using DemoFYP.Exceptions;
+﻿using DemoFYP.Enums;
+using DemoFYP.Exceptions;
 using DemoFYP.Models;
 using DemoFYP.Models.Dto.Request;
 using DemoFYP.Models.Dto.Response;
@@ -125,7 +126,7 @@ namespace DemoFYP.Services
 
                 if (payload.QRCode != null)
                 {
-                    payload.QRCodePath = await _commonServices.UploadImage(payload.QRCode, "", "PaymentQR");
+                    payload.PaymentQRCode = await _commonServices.UploadImage(payload.QRCode, "", FolderName.PaymentQR.ToString());
                 }
 
                 await _userRepository.RegisterUser(payload, updatedBy);
@@ -147,7 +148,7 @@ namespace DemoFYP.Services
             {
                 if (payload.QRCode != null)
                 {
-                    payload.QRCodePath = await _commonServices.UploadImage(payload.QRCode, "", "PaymentQR");
+                    payload.QRCodePath = await _commonServices.UploadImage(payload.QRCode, "", FolderName.PaymentQR.ToString());
                 }
 
                 await _userRepository.UpdateUserProfile(payload, curUserID);

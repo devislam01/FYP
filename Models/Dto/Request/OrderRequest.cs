@@ -1,4 +1,5 @@
-﻿using DemoFYP.Models.Dto.Response;
+﻿using DemoFYP.Enums;
+using DemoFYP.Models.Dto.Response;
 
 namespace DemoFYP.Models.Dto.Request
 {
@@ -32,6 +33,13 @@ namespace DemoFYP.Models.Dto.Request
         public int? PaymentID { get; set; }
         public string? Status {  get; set; }
         public DateTime? CreatedAt { get; set; }
+    }
+
+    public class UpdateOrderRequest
+    {
+        public int OrderID { get; set; }
+        public double? TotalAmount {  get; set; }
+        public OrderStatus Status { get; set; }
     }
 
     #endregion
