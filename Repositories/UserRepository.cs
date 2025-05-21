@@ -115,6 +115,7 @@ namespace DemoFYP.Repositories
                                 UserGender = u.UserGender ?? string.Empty,
                                 Address = u.Address ?? string.Empty,
                                 ResidentialCollege = u.ResidentialCollege ?? string.Empty,
+                                PaymentQRCode = u.PaymentQRCode ?? string.Empty,
                             })
                             .FirstOrDefaultAsync();
 
@@ -366,7 +367,7 @@ namespace DemoFYP.Repositories
                 curData.UserGender = payload.UserGender;
                 curData.Address = payload.Address;
                 curData.ResidentialCollege = payload.ResidentialCollege;
-                curData.PaymentQRCode = payload.QRCodePath ?? curData.PaymentQRCode;
+                curData.PaymentQRCode = payload.PaymentQRCode ?? curData.PaymentQRCode;
                 curData.UpdatedDateTime = DateTime.Now;
                 curData.UpdatedBy = curUserID;
 

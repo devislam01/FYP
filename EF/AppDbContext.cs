@@ -107,6 +107,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(45)
                 .HasColumnName("status");
+            entity.Property(e => e.CancelReason)
+                .HasMaxLength(255)
+                .HasColumnName("cancelReason");
             entity.Property(e => e.TotalAmount).HasColumnName("totalAmount");
             entity.Property(e => e.UpdatedBy)
                 .HasColumnType("binary(16)")
@@ -433,6 +436,14 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.CreatedBy)
                 .HasColumnType("binary(16)");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime");
+            entity.Property(e => e.UpdatedBy)
+                .HasColumnType("binary(16)");
+            entity.Property(e => e.Status)
+                .HasMaxLength(45);
+            entity.Property(e => e.CancelReason)
+                .HasMaxLength(255);
 
             modelBuilder.Entity<OrderItems>()
                 .HasOne(oi => oi.Order)

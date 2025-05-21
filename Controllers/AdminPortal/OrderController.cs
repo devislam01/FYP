@@ -34,5 +34,23 @@ namespace DemoFYP.Controllers.AdminPortal
 
             return SuccessResponse($"Order ID: '{payload.OrderID}' Updated Successfully!");
         }
+
+        [Authorize(Policy = "AP_Cancel_Order")]
+        [HttpGet]
+        public async Task<ActionResult<StandardResponse>> CancelOrder(CancelOrderRequest payload)
+        {
+            await _orderServices.CancelOrder(payload, CurUserID);
+
+            return SuccessResponse($"Order ID: '{payload.OrderID}' Cancelled Successfully!");
+        }
+
+        [Authorize(Policy = "AP_Cancel_Order_Item")]
+        [HttpGet]
+        public async Task<ActionResult<StandardResponse>> CancelOrderItem(CancelOrderItemRequest payload)
+        {
+            await _orderServices.CancelOrderItem(payload, CurUserID);
+
+            return SuccessResponse($"Order Item ID: '{payload.OrderItemID}' Cancelled Successfully!");
+        }
     }
 }

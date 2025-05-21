@@ -19,6 +19,30 @@ namespace DemoFYP.Services
             _commonServices = commonServices ?? throw new ArgumentNullException(nameof(commonServices));
         }
 
+        public async Task<List<UserOrdersResponse>> GetOrdersByBuyer(Guid curUserID)
+        {
+            try
+            {
+                return await _orderRepository.GetOrdersByBuyer(curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<SellerOrdersResponse>> GetOrdersBySeller(Guid curUserID)
+        {
+            try
+            {
+                return await _orderRepository.GetOrdersBySeller(curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<ProceedToPaymentResponse> CheckOut(PlaceOrderRequest payload, Guid curUserID)
         {
             if (payload == null) throw new BadRequestException("Payload is required");
@@ -54,6 +78,82 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task RequestToCancelOrder(RequestToCancelOrderRequest payload, Guid curUserID)
+        {
+            if (payload == null) throw new BadRequestException("Payload is required");
+            if (string.IsNullOrEmpty(payload.CancelReason)) throw new BadRequestException("Cancel Reason is required");
+
+            try
+            {
+                await _orderRepository.RequestCancelOrderByUser(payload, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task RequestToCancelOrderItem(RequestToCancelOrderItemRequest payload, Guid curUserID)
+        {
+            if (payload == null) throw new BadRequestException("Payload is required");
+            if (string.IsNullOrEmpty(payload.CancelReason)) throw new BadRequestException("Cancel Reason is required");
+
+            try
+            {
+                await _orderRepository.RequestCancelOrderItemByUser(payload, curUserID);
+                await _orderRepository.SendCancellationRequestEmailToSeller(payload.OrderItemID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task ConfirmCancelOrderItemBySeller(ConfirmCancelOrderItemRequest payload, Guid curUserID)
+        {
+            if (payload == null) throw new BadRequestException("Payload is required");
+            if (payload.OrderItemID == 0) throw new BadRequestException("Order Item ID is required");
+
+            try
+            {
+                await _orderRepository.ConfirmCancelOrderItemBySeller(payload, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task RejectCancelBySeller(RejectCancelOrderItemRequest payload, Guid curUserID)
+        {
+            if (payload == null) throw new BadRequestException("Payload is required");
+            if (payload.OrderItemID == 0) throw new BadRequestException("Order Item ID is required");
+
+            try
+            {
+                await _orderRepository.RejectCancelOrderItemBySeller(payload, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task MarkOrderItemAsCompleted(MarkOrderItemCompletedRequest payload, Guid curUserID)
+        {
+            if (payload == null) throw new BadRequestException("Payload is required");
+            if (payload.OrderItemID == 0) throw new BadRequestException("Order Item ID is required");
+
+            try
+            {
+                await _orderRepository.MarkOrderItemAsCompleted(payload, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         #region Admin Services
 
         public async Task<PagedResult<OrderListResponse>> GetOrderList(OrderListFilterRequest filter)
@@ -73,6 +173,30 @@ namespace DemoFYP.Services
             try
             {
                 await _orderRepository.UpdateOrder(payload, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task CancelOrder(CancelOrderRequest payload, Guid curUserID)
+        {
+            try
+            {
+                await _orderRepository.CancelOrderByAdmin(payload, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task CancelOrderItem(CancelOrderItemRequest payload, Guid curUserID)
+        {
+            try
+            {
+                await _orderRepository.CancelOrderItemByAdmin(payload, curUserID);
             }
             catch
             {

@@ -13,6 +13,8 @@
         public string Address { get; set; }
 
         public string ResidentialCollege { get; set; }
+
+        public string PaymentQRCode {  get; set; }
     }
 
     public class UserJwtClaims

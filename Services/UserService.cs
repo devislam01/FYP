@@ -148,7 +148,7 @@ namespace DemoFYP.Services
             {
                 if (payload.QRCode != null)
                 {
-                    payload.QRCodePath = await _commonServices.UploadImage(payload.QRCode, "", FolderName.PaymentQR.ToString());
+                    payload.PaymentQRCode = await _commonServices.UploadImage(payload.QRCode, "", FolderName.PaymentQR.ToString());
                 }
 
                 await _userRepository.UpdateUserProfile(payload, curUserID);
