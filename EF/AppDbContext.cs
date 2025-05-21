@@ -291,7 +291,7 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(45)
                 .HasColumnName("userName");
             entity.Property(e => e.PaymentQRCode)
-                .HasMaxLength(45)
+                .HasMaxLength(255)
                 .HasColumnName("paymentQRCode");
             entity.Property(e => e.Shopping_Cart)
                 .HasMaxLength(255)
