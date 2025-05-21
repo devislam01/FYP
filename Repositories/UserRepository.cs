@@ -318,6 +318,7 @@ namespace DemoFYP.Repositories
                 newData.UserId = Guid.NewGuid();
                 newData.RoleID = (int)UserLevel.User;
                 newData.Password = _commonServices.HashPassword(registerData.Password);
+                newData.PaymentQRCode = registerData.PaymentQRCode;
                 newData.CreatedBy = updatedBy;
                 newData.CreatedDateTime = DateTime.Now;
                 newData.IsActive = 1;
@@ -330,13 +331,13 @@ namespace DemoFYP.Repositories
                     await tran.CommitAsync();
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 if (tran != null)
                 {
                     await tran.RollbackAsync();
                 }
-                throw;
+                throw new InvalidOperationException("Failed to Register User", ex);
             }
             finally
             {
