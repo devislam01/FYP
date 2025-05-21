@@ -16,12 +16,15 @@ namespace DemoFYP.Repositories
         private readonly IUserRepository _userRepository;
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _config;
 
-        public CartRepository(IDbContextFactory<AppDbContext> factory, IUserRepository userRepository, IProductRepository productRepository, IMapper mapper) {
+        public CartRepository(IDbContextFactory<AppDbContext> factory, IUserRepository userRepository, IProductRepository productRepository, IMapper mapper, IConfiguration configuration)
+        {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _config = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public async Task<List<ShoppingCartObj>> GetShoppingCartByLoginID(Guid curUserID)
@@ -34,7 +37,16 @@ namespace DemoFYP.Repositories
 
                 if (!string.IsNullOrEmpty(userData.Shopping_Cart))
                 {
-                    return JsonSerializer.Deserialize<List<ShoppingCartObj>>(userData.Shopping_Cart);
+                    var cartItems = JsonSerializer.Deserialize<List<ShoppingCartObj>>(userData.Shopping_Cart) ?? new List<ShoppingCartObj>();
+
+                    foreach (var item in cartItems)
+                    {
+                        if (!string.IsNullOrEmpty(item.ProductImage))
+                        {
+                            item.ProductImage = $"{_config["BackendUrl"]}/{item.ProductImage}";
+                        }
+                    }
+
                 }
 
                 return new List<ShoppingCartObj>();
