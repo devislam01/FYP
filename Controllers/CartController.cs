@@ -21,6 +21,15 @@ namespace DemoFYP.Controllers
             return SuccessResponse<List<ShoppingCartObj>>(await _cartServices.GetShoppingCart(CurUserID));
         }
 
+        [Authorize]
+        [HttpPost("addtoCart")]
+        public async Task<ActionResult<StandardResponse>> AddToCart(ShoppingCartRequest payload)
+        {
+            await _cartServices.AddToCart(payload, CurUserID);
+
+            return SuccessResponse("Add to Cart Successfully!");
+        }
+
         [Authorize(Policy = "Update_Cart")]
         [HttpPost("updateCart")]
         public async Task<ActionResult<StandardResponse>> UpdateShoppingCart(List<ShoppingCartRequest> payload)

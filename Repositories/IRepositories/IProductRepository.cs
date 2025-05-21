@@ -12,7 +12,7 @@ namespace DemoFYP.Repositories.IRepositories
         Task<PagedResult<ProductListResult>> GetProductList(ProductFilterRequest filter);
         Task<PagedResult<AdminProductListResult>> GetProductListByAdmin(AdminProductFilterRequest filter);
         Task<List<FilteredProductListResult>> GetProductListByLoginID(Guid curUserID);
-        Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, bool GetImageRealPath = false);
+        Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, AppDbContext outerContext = null, bool GetImageRealPath = false);
 
         #endregion
 

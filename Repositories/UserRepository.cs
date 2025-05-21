@@ -147,7 +147,10 @@ namespace DemoFYP.Repositories
             }
             finally
             {
-                await context.DisposeAsync();
+                if (outerContext == null)
+                {
+                    await context.DisposeAsync();
+                }
             }
         }
 

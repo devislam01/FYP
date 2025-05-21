@@ -6,6 +6,7 @@ namespace DemoFYP.Services.IServices
     public interface ICartServices
     {
         Task<List<ShoppingCartObj>> GetShoppingCart(Guid curUserID);
+        Task AddToCart(ShoppingCartRequest payload, Guid curUserID);
         Task UpdateShoppingCart(List<ShoppingCartRequest> payload, Guid curUserID);
     }
 }

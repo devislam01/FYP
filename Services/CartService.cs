@@ -33,6 +33,20 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task AddToCart(ShoppingCartRequest payload, Guid curUserID)
+        {
+            if (payload.ProductID == 0) throw new BadRequestException("Product ID is required");
+
+            try
+            {
+                await _cartRepository.AddToCart(payload, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task UpdateShoppingCart(List<ShoppingCartRequest> payload, Guid curUserID)
         {
             if (payload == null) throw new BadRequestException("Shopping Cart cannot be empty");
