@@ -60,7 +60,7 @@ namespace DemoFYP.Services
                         throw new BadRequestException("Product ID is required");
 
                     var latestProductDetails = await _productRepository
-                        .GetProductDetailByProductID(item.ProductID, true)
+                        .GetProductDetailByProductID(item.ProductID, null, true)
                         ?? throw new NotFoundException($"Product ID {item.ProductID} not found");
 
                     if (item.Quantity > latestProductDetails.ProductDetail.StockQty)

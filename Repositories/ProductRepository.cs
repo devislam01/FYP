@@ -209,7 +209,7 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, bool GetImageRealPath, AppDbContext outerContext)
+        public async Task<ProductDetailResponse> GetProductDetailByProductID(int ProductID, AppDbContext outerContext, bool GetImageRealPath)
         {
             var context = outerContext ?? _factory.CreateDbContext();
 
