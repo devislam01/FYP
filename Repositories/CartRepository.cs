@@ -47,6 +47,7 @@ namespace DemoFYP.Repositories
                         }
                     }
 
+                    return cartItems;
                 }
 
                 return new List<ShoppingCartObj>();
