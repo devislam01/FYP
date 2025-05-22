@@ -87,6 +87,16 @@ namespace DemoFYP.Repositories
                 var cartItems = JsonSerializer.Deserialize<List<ShoppingCartObj>>(currentCartJson) ?? new List<ShoppingCartObj>();
 
                 var existingItem = cartItems.FirstOrDefault(c => c.ProductID == newCartItem.ProductID);
+                int currentQtyInCart = existingItem?.Quantity ?? 0;
+                int totalQtyAfterAdd = currentQtyInCart + newCartItem.Quantity;
+
+                if (totalQtyAfterAdd > productDetail.ProductDetail.StockQty)
+                {
+                    throw new BusinessException(
+                        $"Insufficient stock for Product ID {payload.ProductID} — only {productDetail.ProductDetail.StockQty} left. You already have {currentQtyInCart} in your cart."
+                    );
+                }
+
                 if (existingItem != null)
                 {
                     existingItem.Quantity += newCartItem.Quantity;
