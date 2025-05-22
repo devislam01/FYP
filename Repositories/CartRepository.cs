@@ -45,6 +45,8 @@ namespace DemoFYP.Repositories
                         {
                             item.ProductImage = $"{_config["BackendUrl"]}/{item.ProductImage}";
                         }
+
+                        item.StockQty = await context.Products.Where(p => p.ProductId == item.ProductID).Select(p => p.StockQty).FirstOrDefaultAsync();
                     }
 
                     return cartItems;
