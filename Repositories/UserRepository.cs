@@ -20,12 +20,14 @@ namespace DemoFYP.Repositories
         private readonly IDbContextFactory<AppDbContext> _factory;
         private readonly IMapper _mapper;
         private readonly ICommonServices _commonServices;
+        private readonly IConfiguration _config;
 
-        public UserRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper, ICommonServices commonServices)
+        public UserRepository(IDbContextFactory<AppDbContext> factory, IMapper mapper, ICommonServices commonServices, IConfiguration config)
         {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _commonServices = commonServices ?? throw new ArgumentNullException(nameof(commonServices));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
         #region Read DB
@@ -115,7 +117,7 @@ namespace DemoFYP.Repositories
                                 UserGender = u.UserGender ?? string.Empty,
                                 Address = u.Address ?? string.Empty,
                                 ResidentialCollege = u.ResidentialCollege ?? string.Empty,
-                                PaymentQRCode = u.PaymentQRCode ?? string.Empty,
+                                PaymentQRCode = u.PaymentQRCode != string.Empty ? $"{_config["BackendUrl"]}/{u.PaymentQRCode}" : string.Empty,
                             })
                             .FirstOrDefaultAsync();
 
@@ -276,7 +278,7 @@ namespace DemoFYP.Repositories
                         Gender = q.UserGender,
                         PhoneNumber = q.PhoneNumber ?? string.Empty,
                         Status = q.IsActive == 1 ? "Active" : "Inactive",
-                        QRCode = q.PaymentQRCode,
+                        QRCode = q.PaymentQRCode != string.Empty ? $"{_config["BackendUrl"]}/{q.PaymentQRCode}" : string.Empty,
                         CreatedAt = q.CreatedDateTime,
                         CreatedBy = q.CreatedBy,
                     }).ToListAsync();
