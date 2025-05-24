@@ -159,10 +159,25 @@ namespace DemoFYP.Repositories
                 order.PaymentId = paymentID;
 
                 context.Orders.Update(order);
+
+                var firstProductId = products.FirstOrDefault()?.ProductId
+                    ?? throw new BusinessException("No product found to fetch seller's QR Code");
+
+                var paymentQRCode = await context.Products
+                    .Join(context.Users,
+                          p => p.UserId,
+                          u => u.UserId,
+                          (p, u) => new { p.ProductId, u.PaymentQRCode })
+                    .Where(x => x.ProductId == firstProductId)
+                    .Select(x => x.PaymentQRCode)
+                    .FirstOrDefaultAsync()
+                    ?? throw new NotFoundException("This seller hasn't uploaded a QR Code for payment!");
+
+
                 await context.SaveChangesAsync();
                 await trans.CommitAsync();
 
-                return new ProceedToPaymentResponse { PaymentID = paymentID, OrderID = order.OrderId };
+                return new ProceedToPaymentResponse { PaymentID = paymentID, OrderID = order.OrderId, QRCode = paymentQRCode ?? string.Empty };
             }
             catch
             {

@@ -42,6 +42,7 @@ namespace DemoFYP.Models.Dto.Response
     {
         public int PaymentID {  get; set; }
         public int OrderID {  get; set; }
+        public string QRCode { get; set; }
     }
 
     #region Admin Dto
