@@ -8,6 +8,7 @@ namespace DemoFYP.Services.IServices
     {
         Task<List<UserOrdersResponse>> GetOrdersByBuyer(Guid curUserID);
         Task<List<SellerOrdersResponse>> GetOrdersBySeller(Guid curUserID);
+        Task<OrderSummariesResponse> GetOrderSummaries(Guid curUserID);
         Task<ProceedToPaymentResponse> CheckOut(PlaceOrderRequest payload, Guid curUserID);
         Task ConfirmOrder(ProceedPaymentRequest payload, Guid curUserID, string curUserEmail);
         Task RequestToCancelOrder(RequestToCancelOrderRequest payload, Guid curUserID);

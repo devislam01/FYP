@@ -10,7 +10,7 @@ namespace DemoFYP.Repositories.IRepositories
         Task<List<UserOrdersResponse>> GetOrdersByBuyer(Guid curUserID);
         Task<List<SellerOrdersResponse>> GetOrdersBySeller(Guid curUserID);
         Task<ProceedToPaymentResponse> CheckOutOrder(PlaceOrderRequest payload, Guid curUserID);
-        Task ConfirmPayment(int paymentID, string receiptUrl, Guid curUserID, AppDbContext outerContext = null);
+        Task ConfirmPayment(int paymentID, Guid curUserID, string receiptUrl, AppDbContext outerContext = null);
         Task ConfirmOrder(ProceedPaymentRequest payload, string receiptUrl, Guid curUserID, string curUserEmail);
         Task RequestCancelOrderByUser(RequestToCancelOrderRequest payload, Guid curUserID);
         Task RequestCancelOrderItemByUser(RequestToCancelOrderItemRequest payload, Guid curUserID);

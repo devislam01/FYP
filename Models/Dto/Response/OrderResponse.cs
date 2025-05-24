@@ -9,6 +9,14 @@ namespace DemoFYP.Models.Dto.Response
         public DateTime CreatedAt { get; set; }
         public List<OrderItem> OrderItems { get; set; } = null!;
     }
+
+    public class OrderSummariesResponse
+    {
+        public List<ShoppingCartObj> shoppingCartObjs { get; set; }
+        public double Total {  get; set; }
+        public int PaymentMethod {  get; set; }
+    }
+
     public class OrderItem
     {
         public int OrderItemID { get; set; }

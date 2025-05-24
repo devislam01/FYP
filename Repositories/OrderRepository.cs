@@ -175,7 +175,7 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task ConfirmPayment(int paymentID, string receiptUrl, Guid curUserID, AppDbContext outerContext)
+        public async Task ConfirmPayment(int paymentID, Guid curUserID, string? receiptUrl, AppDbContext outerContext)
         {
             var context = outerContext ?? _factory.CreateDbContext();
 
@@ -183,7 +183,7 @@ namespace DemoFYP.Repositories
             {
                 var curData = await context.Payments.FirstOrDefaultAsync(p => p.PaymentId == paymentID && p.Status == "Pending") ?? throw new NotFoundException("Payment Record Not Found!");
 
-                curData.Receipt = receiptUrl;
+                curData.Receipt = receiptUrl ?? null;
                 curData.Status = PaymentStatus.Paid.ToString();
                 curData.UpdatedDateTime = DateTime.Now;
                 curData.UpdatedBy = curUserID;
@@ -210,7 +210,14 @@ namespace DemoFYP.Repositories
 
             try
             {
-                await ConfirmPayment(payload.PaymentID, receiptUrl, curUserID, context);
+                var paymentMethodID = await context.Payments.Where(p => p.PaymentId == payload.PaymentID).Select(p => p.PaymentMethodID).FirstOrDefaultAsync();
+
+                if (paymentMethodID == 1)
+                {
+                    await ConfirmPayment(payload.PaymentID, curUserID, null, context);
+                }
+
+                await ConfirmPayment(payload.PaymentID, curUserID, receiptUrl, context);
                 var order = await context.Orders.OrderByDescending(o => o.OrderId).FirstOrDefaultAsync(o => o.UserId == curUserID) ?? throw new NotFoundException("Order not Found!");
 
                 order.Status = OrderStatus.Processing.ToString();

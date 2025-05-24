@@ -39,6 +39,7 @@
         public int Quantity { get; set; }
         public string ProductImage { get; set; }
         public string CategoryName { get; set; }
+        public int StockQty {  get; set; }
     }
 
     #region AdminDto

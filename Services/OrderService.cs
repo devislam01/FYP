@@ -13,10 +13,13 @@ namespace DemoFYP.Services
     {
         private readonly IOrderRepository _orderRepository;
         private readonly ICommonServices _commonServices;
+        private readonly ICartServices _cartServices;
 
-        public OrderService(IOrderRepository orderRepository, ICommonServices commonServices) {
+        public OrderService(IOrderRepository orderRepository, ICommonServices commonServices, ICartServices cartServices)
+        {
             _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
             _commonServices = commonServices ?? throw new ArgumentNullException(nameof(commonServices));
+            _cartServices = cartServices ?? throw new ArgumentNullException(nameof(cartServices));
         }
 
         public async Task<List<UserOrdersResponse>> GetOrdersByBuyer(Guid curUserID)
@@ -36,6 +39,26 @@ namespace DemoFYP.Services
             try
             {
                 return await _orderRepository.GetOrdersBySeller(curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<OrderSummariesResponse> GetOrderSummaries(Guid curUserID)
+        {
+            try
+            {
+                List<ShoppingCartObj> shoppingCart = await _cartServices.GetShoppingCart(curUserID);
+
+                double total = shoppingCart.Sum(sc => sc.ProductPrice * sc.Quantity);
+
+                return new OrderSummariesResponse
+                {
+                    shoppingCartObjs = shoppingCart,
+                    Total = total
+                };
             }
             catch
             {

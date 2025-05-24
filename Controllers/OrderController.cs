@@ -30,6 +30,13 @@ namespace DemoFYP.Controllers
         }
 
         [Authorize]
+        [HttpGet("orderSummaries")]
+        public async Task<ActionResult<StandardResponse<OrderSummariesResponse>>> GetOrderSummaries()
+        {
+            return SuccessResponse<OrderSummariesResponse>(await _orderServices.GetOrderSummaries(CurUserID));
+        } 
+
+        [Authorize]
         [HttpPost("checkout")]
         public async Task<ActionResult<StandardResponse<ProceedToPaymentResponse>>> Checkout(PlaceOrderRequest payload)
         {
