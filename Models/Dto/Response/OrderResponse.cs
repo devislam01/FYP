@@ -34,6 +34,8 @@ namespace DemoFYP.Models.Dto.Response
         public string ProductName { get; set; }
         public double Price { get; set; }
         public int Quantity { get; set; }
+        public string Receipt {  get; set; }
+        public int PaymentMethodID {  get; set; }
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
     }

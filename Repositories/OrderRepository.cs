@@ -75,6 +75,7 @@ namespace DemoFYP.Repositories
             {
                 var orderItems = await context.OrderItems
                    .Include(oi => oi.Order)
+                       .ThenInclude(o => o.Payment)
                    .Include(oi => oi.Product)
                    .Where(oi => oi.Product.UserId == curUserID)
                    .OrderByDescending(oi => oi.Order.CreatedDateTime)
@@ -88,7 +89,9 @@ namespace DemoFYP.Repositories
                     Quantity = oi.Qty,
                     Status = oi.Status,
                     OrderID = oi.Order.OrderId,
-                    BuyerID = oi.Order.UserId
+                    BuyerID = oi.Order.UserId,
+                    Receipt = oi.Order.Payment?.Receipt,
+                    PaymentMethodID = oi.Order.Payment.PaymentMethodID
                 }).ToList();
             }
             catch
