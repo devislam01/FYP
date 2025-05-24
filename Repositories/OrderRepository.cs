@@ -38,6 +38,7 @@ namespace DemoFYP.Repositories
                 var orders = await context.Orders
                     .Include(o => o.OrderItems)
                         .ThenInclude(oi => oi.Product)
+                    .Include(o => o.Payment)
                     .Where(o => o.UserId == curUserID)
                     .OrderByDescending(o => o.CreatedDateTime)
                     .ToListAsync();
@@ -47,6 +48,7 @@ namespace DemoFYP.Repositories
                     OrderID = o.OrderId,
                     Status = o.Status,
                     CreatedAt = o.CreatedDateTime,
+                    Receipt = o.Payment?.Receipt,
                     OrderItems = o.OrderItems.Select(oi => new OrderItem
                     {
                         OrderItemID = oi.OrderItemID,
