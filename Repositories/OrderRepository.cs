@@ -20,12 +20,14 @@ namespace DemoFYP.Repositories
         private readonly IEmailServices _emailServices;
         private readonly IPaymentRepository _paymentRepository;
         private readonly ICartRepository _cartRepository;
+        private readonly IConfiguration _config;
 
-        public OrderRepository(IDbContextFactory<AppDbContext> factory, IEmailServices emailServices, IPaymentRepository paymentRepository, ICartRepository cartRepository) {
+        public OrderRepository(IDbContextFactory<AppDbContext> factory, IEmailServices emailServices, IPaymentRepository paymentRepository, ICartRepository cartRepository, IConfiguration config) {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _emailServices = emailServices ?? throw new ArgumentNullException(nameof(emailServices));
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _cartRepository = cartRepository ?? throw new ArgumentNullException(nameof(cartRepository));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
         #region frontend
@@ -182,7 +184,7 @@ namespace DemoFYP.Repositories
                 await context.SaveChangesAsync();
                 await trans.CommitAsync();
 
-                return new ProceedToPaymentResponse { PaymentID = paymentID, OrderID = order.OrderId, QRCode = paymentQRCode ?? string.Empty };
+                return new ProceedToPaymentResponse { PaymentID = paymentID, OrderID = order.OrderId, QRCode = $"{_config["BackendUrl"]}/{paymentQRCode}" ?? string.Empty };
             }
             catch
             {
