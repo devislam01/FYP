@@ -20,7 +20,7 @@ public partial class Order
 
     public string Status { get; set; } = null!;
 
-    public string CancelReason {  get; set; } = null!;
+    public string? CancelReason {  get; set; }
 
     public DateTime CreatedDateTime { get; set; }
 
