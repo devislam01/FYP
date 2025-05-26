@@ -205,7 +205,7 @@ namespace DemoFYP.Repositories
             {
                 var curData = await context.Payments.FirstOrDefaultAsync(p => p.PaymentId == paymentID && p.Status == "Pending") ?? throw new NotFoundException("Payment Record Not Found!");
 
-                curData.Receipt = receiptUrl ?? null;
+                curData.Receipt = receiptUrl ?? string.Empty;
                 curData.Status = PaymentStatus.Paid.ToString();
                 curData.UpdatedDateTime = DateTime.Now;
                 curData.UpdatedBy = curUserID;
@@ -236,7 +236,7 @@ namespace DemoFYP.Repositories
 
                 if (paymentMethodID == 1)
                 {
-                    await ConfirmPayment(payload.PaymentID, curUserID, null, context);
+                    await ConfirmPayment(payload.PaymentID, curUserID, string.Empty, context);
                 }
 
                 await ConfirmPayment(payload.PaymentID, curUserID, receiptUrl, context);
