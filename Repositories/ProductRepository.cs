@@ -38,7 +38,7 @@ namespace DemoFYP.Repositories
             {
                 var query = context.Products
                     .OrderByDescending(p => p.ProductId)
-                    .Where(p => p.IsActive == 1);
+                    .Where(p => p.IsActive == 1 && p.StockQty > 0);
 
                 if (!string.IsNullOrWhiteSpace(filter.Search))
                 {
