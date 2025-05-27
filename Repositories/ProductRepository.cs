@@ -228,12 +228,16 @@ namespace DemoFYP.Repositories
                     .FirstOrDefaultAsync() ?? throw new NotFoundException("Product Not Found");
 
                 var seller = await context.Users
-                    .Where(u => u.UserId == productWithCategory.product.UserId)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(u => u.UserId == productWithCategory.product.UserId);
 
-                var completedOrders = await context.Orders
-                    .Where(o => o.UserId == productWithCategory.product.UserId)
-                    .CountAsync();
+                int completedOrders = 0;
+
+                if (seller != null)
+                {
+                    completedOrders = await context.OrderItems
+                        .Where(o => o.Product.UserId == seller.UserId && o.Status == "Completed")
+                        .CountAsync();
+                }
 
                 string ImageUrl = GetImageRealPath ? productWithCategory.product.ProductImage : $"{_config["BackendUrl"]}/{productWithCategory.product.ProductImage}";
                 var response = new ProductDetailResponse
@@ -252,7 +256,8 @@ namespace DemoFYP.Repositories
                     },
                     SellerDetail = new SellerDetailResult
                     {
-                        SellerName = seller?.UserName ?? "Unknown",
+                        SellerID = seller?.UserId ?? Guid.Empty,
+                        SellerName = string.IsNullOrWhiteSpace(seller?.UserName) ? "Anonymous Seller" : seller.UserName,
                         RatingMark = seller?.RatingMark,
                         CompletedOrders = completedOrders,
                         JoinTime = seller != null ? (DateTime.Now - seller.CreatedDateTime).Days + " days ago" : "Unknown"

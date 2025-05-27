@@ -24,6 +24,7 @@
 
     public class SellerDetailResult
     {
+        public Guid SellerID { get; set; }
         public string SellerName { get; set; }
         public double? RatingMark { get; set; }
         public int CompletedOrders { get; set; }

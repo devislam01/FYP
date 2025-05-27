@@ -95,7 +95,8 @@ namespace DemoFYP.Repositories
                     OrderID = oi.Order.OrderId,
                     BuyerID = oi.Order.UserId,
                     Receipt = oi.Order.Payment?.Receipt,
-                    PaymentMethodID = oi.Order.Payment.PaymentMethodID
+                    PaymentMethodID = oi.Order.Payment.PaymentMethodID,
+                    CreatedAt = oi.CreatedAt
                 }).ToList();
             }
             catch
@@ -126,10 +127,13 @@ namespace DemoFYP.Repositories
                 {
                     var product = products.FirstOrDefault(p => p.ProductId == item.ProductID);
                     if (product == null)
-                        throw new InvalidOperationException($"Product {item.ProductID} not found.");
+                        throw new NotFoundException($"Product {item.ProductID} not found.");
 
                     if (product.StockQty < item.Qty)
-                        throw new InvalidOperationException($"Product {product.ProductName} does not have enough stock.");
+                        throw new BusinessException($"Product {product.ProductName} does not have enough stock.");
+
+                    if (product.UserId == curUserID)
+                        throw new BusinessException($"You cannot purchase your own product! Product: {product.ProductName}");
                 }
 
                 var order = new Order
@@ -239,15 +243,15 @@ namespace DemoFYP.Repositories
                     await ConfirmPayment(payload.PaymentID, curUserID, string.Empty, context);
                 }
 
+                if (receiptUrl == string.Empty) {
+                    throw new BadRequestException("You have to upload your receipt!");
+                }
                 await ConfirmPayment(payload.PaymentID, curUserID, receiptUrl, context);
-                var order = await context.Orders.OrderByDescending(o => o.OrderId).FirstOrDefaultAsync(o => o.UserId == curUserID) ?? throw new NotFoundException("Order not Found!");
+                await MarkOrderToProcessing(curUserID, context);
+                await MarkOrderItemsToProcessing(payload.OrderID, curUserID, context);
 
-                order.Status = OrderStatus.Processing.ToString();
-                order.UpdatedDateTime = DateTime.Now;
-                order.UpdatedBy = curUserID;
-
-                string subject = $"Order {order.OrderId} Confirmed!";
-                string body = $"You order {order.OrderId} has been placed successfully, kindly contact with our customer service if facing any issues, thank you!";
+                string subject = $"Order {payload.OrderID} Confirmed!";
+                string body = $"You order {payload.OrderID} has been placed successfully, kindly contact with our customer service if facing any issues, thank you!";
 
                 await _emailServices.SendEmailAsync(curUserEmail, subject, body);
 
@@ -255,7 +259,6 @@ namespace DemoFYP.Repositories
 
                 await _cartRepository.RemovePaidProductFromCart(paidProducts, curUserID);
 
-                await context.SaveChangesAsync();
                 await trans.CommitAsync();
             }
             catch
@@ -760,6 +763,49 @@ namespace DemoFYP.Repositories
                 }
             }
             
+        }
+
+        public async Task MarkOrderToProcessing(Guid curUserID, AppDbContext outerContext)
+        {
+            var context = outerContext ?? _factory.CreateDbContext();
+
+            try
+            {
+                var order = await context.Orders.OrderByDescending(o => o.OrderId).FirstOrDefaultAsync(o => o.UserId == curUserID) ?? throw new NotFoundException("Order not Found!");
+
+                order.Status = OrderStatus.Processing.ToString();
+                order.UpdatedDateTime = DateTime.Now;
+                order.UpdatedBy = curUserID;
+
+                await context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task MarkOrderItemsToProcessing(int orderID, Guid curUserID, AppDbContext outerContext)
+        {
+            var context = outerContext ?? _factory.CreateDbContext();
+
+            try
+            {
+                var orderItems = await context.OrderItems.OrderByDescending(o => o.OrderItemID).Where(o => o.OrderID == orderID).ToListAsync() ?? throw new NotFoundException("Order Items not Found!");
+
+                foreach (var item in orderItems)
+                {
+                    item.Status = OrderStatus.Processing.ToString();
+                    item.UpdatedAt = DateTime.Now;
+                    item.UpdatedBy = curUserID;
+                }
+
+                await context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw;
+            }
         }
         #endregion
     }

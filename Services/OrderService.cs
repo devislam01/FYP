@@ -87,11 +87,14 @@ namespace DemoFYP.Services
         {
             if (payload == null) throw new BadRequestException("Payload is required");
             if (payload.PaymentID == 0) throw new BadRequestException("Payment ID is required");
-            if (payload.Receipt != null && payload.Receipt.Length == 0) throw new BadRequestException("Receipt is required");
 
             try
             {
-                string receiptUrl = await _commonServices.UploadImage(payload.Receipt, "", FolderName.Receipt.ToString());
+                string receiptUrl = string.Empty;
+                if (payload.Receipt != null && payload.Receipt.Length > 0)
+                {
+                    receiptUrl = await _commonServices.UploadImage(payload.Receipt, "", FolderName.Receipt.ToString());
+                }
 
                 await _orderRepository.ConfirmOrder(payload, receiptUrl, curUserID, curUserEmail);
             }
