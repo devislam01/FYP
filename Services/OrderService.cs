@@ -180,6 +180,35 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task RateProduct(RateProductRequest payload, Guid curUserID)
+        {
+            if (payload == null) throw new BadRequestException("Payload is required");
+            if (payload.OrderItemID == 0) throw new BadRequestException("Order Item ID is required");
+            if (payload.Rating == 0) throw new BadRequestException("You have to rate the product!");
+
+            try
+            {
+                var sellerID = await _orderRepository.RateProduct(payload, curUserID);
+                await _orderRepository.CalculateAndUpdateSellerRatingMark(sellerID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<FeedbackListResponse>> GetFeedbackList(FeedbackListRequest filter)
+        {
+            try
+            {
+                return await _orderRepository.GetFeedbackList(filter);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         #region Admin Services
 
         public async Task<PagedResult<OrderListResponse>> GetOrderList(OrderListFilterRequest filter)

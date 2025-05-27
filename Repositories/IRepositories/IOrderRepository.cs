@@ -18,6 +18,9 @@ namespace DemoFYP.Repositories.IRepositories
         Task RejectCancelOrderItemBySeller(RejectCancelOrderItemRequest payload, Guid curUserID);
         Task MarkOrderItemAsCompleted(MarkOrderItemCompletedRequest payload, Guid curUserID);
         Task UpdateProductQtyByProductID(int productID, int OrderQty, AppDbContext outerContext);
+        Task<Guid> RateProduct(RateProductRequest payload, Guid curUserID);
+        Task<PagedResult<FeedbackListResponse>> GetFeedbackList(FeedbackListRequest filter);
+        Task CalculateAndUpdateSellerRatingMark(Guid sellerID);
 
         #region Admin
         Task<PagedResult<OrderListResponse>> GetOrderList(OrderListFilterRequest filter);

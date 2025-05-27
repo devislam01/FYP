@@ -16,6 +16,8 @@ namespace DemoFYP.Services.IServices
         Task ConfirmCancelOrderItemBySeller(ConfirmCancelOrderItemRequest payload, Guid curUserID);
         Task RejectCancelBySeller(RejectCancelOrderItemRequest payload, Guid curUserID);
         Task MarkOrderItemAsCompleted(MarkOrderItemCompletedRequest payload, Guid curUserID);
+        Task RateProduct(RateProductRequest payload, Guid curUserID);
+        Task<PagedResult<FeedbackListResponse>> GetFeedbackList(FeedbackListRequest filter);
 
         #region Admin
         Task<PagedResult<OrderListResponse>> GetOrderList(OrderListFilterRequest filter);

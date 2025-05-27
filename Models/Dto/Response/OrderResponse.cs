@@ -48,6 +48,14 @@ namespace DemoFYP.Models.Dto.Response
         public string QRCode { get; set; }
     }
 
+    public class FeedbackListResponse
+    {
+        public string? BuyerName { get; set; }
+        public DateTime FeedbackAt { get; set; }
+        public double Rating { get; set; }
+        public string? Feedbacks { get; set; }
+    }
+
     #region Admin Dto
 
     public class OrderListResponse

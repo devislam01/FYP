@@ -488,6 +488,95 @@ namespace DemoFYP.Repositories
                 await context.DisposeAsync();
             }
         }
+        
+        public async Task<Guid> RateProduct(RateProductRequest payload, Guid curUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var existingReview = await context.SellerReviews
+                    .AnyAsync(r => r.OrderItemID == payload.OrderItemID && r.BuyerID == curUserID);
+
+                if (existingReview) throw new BusinessException("You have already submitted a review for this item.");
+
+                var orderItem = await context.OrderItems
+                    .Include(oi => oi.Product)
+                    .FirstOrDefaultAsync(oi => oi.OrderItemID == payload.OrderItemID) ?? throw new NotFoundException("Order item not found");
+
+                var newData = new SellerReview
+                {
+                    OrderItemID = orderItem.OrderItemID,
+                    SellerID = orderItem.Product.UserId,
+                    BuyerID = curUserID,
+                    Rating = payload.Rating,
+                    Feedback = payload.Feedback,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = curUserID,
+                };
+
+                await context.SellerReviews.AddAsync(newData);
+                await context.SaveChangesAsync();
+
+                return newData.SellerID;
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task<PagedResult<FeedbackListResponse>> GetFeedbackList(FeedbackListRequest filter)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var query = context.SellerReviews
+                    .Where(sr => sr.OrderItemID == filter.OrderItemID)
+                    .Join(context.Users,
+                        sr => sr.BuyerID,
+                        u => u.UserId,
+                        (sr, u) => new FeedbackListResponse
+                        {
+                            BuyerName = u.UserName,
+                            Rating = sr.Rating,
+                            Feedbacks = sr.Feedback,
+                            FeedbackAt = sr.CreatedAt,
+                        });
+
+                int totalRecord = await query.CountAsync();
+
+                var result = await query
+                    .OrderByDescending(sr => sr.FeedbackAt)
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToListAsync();
+
+                return new PagedResult<FeedbackListResponse>
+                {
+                    Data = result,
+                    Pagination = new PaginationResponse
+                    {
+                        PageNumber = filter.PageNumber,
+                        PageSize = filter.PageSize,
+                        TotalRecord = totalRecord
+                    }
+                };
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
         #endregion
 
         #region Admin
@@ -805,6 +894,34 @@ namespace DemoFYP.Repositories
             catch
             {
                 throw;
+            }
+        }
+
+        public async Task CalculateAndUpdateSellerRatingMark(Guid sellerID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var avg = await context.SellerReviews
+                    .Where(x => x.SellerID == sellerID)
+                    .AverageAsync(x => x.Rating);
+
+                var seller = await context.Users.FirstOrDefaultAsync(x => x.UserId == sellerID);
+
+                if (seller != null)
+                {
+                    seller.RatingMark = Math.Round(avg, 2);
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
             }
         }
         #endregion

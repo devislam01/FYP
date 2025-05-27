@@ -33,6 +33,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
     public virtual DbSet<PaymentMethod> PaymentMethods { get; set; }
     public virtual DbSet<OrderItems> OrderItems { get; set; }
+    public virtual DbSet<SellerReview> SellerReviews { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {}
 
@@ -455,6 +456,31 @@ public partial class AppDbContext : DbContext
                 .HasOne(oi => oi.Product)
                 .WithMany(p => p.OrderItems)
                 .HasForeignKey(oi => oi.ProductID)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<SellerReview>(entity =>
+        {
+            entity.HasKey(r => r.ReviewID).HasName("PRIMARY");
+
+            entity.ToTable("seller_review");
+
+            entity.HasIndex(e => e.ReviewID, "ReviewID_UNIQUE").IsUnique();
+
+            entity.Property(e => e.SellerID)
+                .HasColumnType("binary(16)");
+            entity.Property(e => e.BuyerID)
+                .HasColumnType("binary(16)");
+            entity.Property(e => e.Feedback)
+                .HasMaxLength(255);
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime");
+            entity.Property(e => e.CreatedBy)
+                .HasColumnType("binary(16)");
+
+            entity.HasOne(r => r.OrderItem)
+                .WithMany()
+                .HasForeignKey(r => r.OrderItemID)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

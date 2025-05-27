@@ -93,5 +93,20 @@ namespace DemoFYP.Controllers
             await _orderServices.MarkOrderItemAsCompleted(payload, CurUserID);
             return SuccessResponse("Order item marked as completed");
         }
+
+        [Authorize]
+        [HttpPost("rate-product")]
+        public async Task<ActionResult<StandardResponse>> RateProduct(RateProductRequest payload)
+        {
+            await _orderServices.RateProduct(payload, CurUserID);
+            return SuccessResponse("Thanks for your rating!");
+        }
+
+        [Authorize]
+        [HttpPost("feedback")]
+        public async Task<ActionResult<StandardResponse<PagedResult<FeedbackListResponse>>>> GetFeedbackList(FeedbackListRequest filter)
+        {
+            return SuccessResponse<PagedResult<FeedbackListResponse>>(await _orderServices.GetFeedbackList(filter));
+        }
     }
 }

@@ -61,6 +61,18 @@ namespace DemoFYP.Models.Dto.Request
         public string? Reason { get; set; }
     }
 
+    public class RateProductRequest
+    {
+        public int OrderItemID { get; set; }
+        public double Rating { get; set; }
+        public string? Feedback {  get; set; }
+    }
+
+    public class FeedbackListRequest : PaginationRequest
+    {
+        public int OrderItemID { get; set; }
+    }
+
     #region Admin Dto
 
     public class OrderListFilterRequest : PaginationRequest
