@@ -9,8 +9,6 @@ using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using DemoFYP.Repositories;
 using DemoFYP.Repositories.IRepositories;
-using DemoFYP.Exceptions;
-using DemoFYP;
 using System.Text.Json;
 using DemoFYP.Authorization;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 
 // Register MySQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -95,7 +94,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
             }
 
             return Task.CompletedTask;
-        }
+        },
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/orderHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
     };
 });
 
@@ -154,11 +164,12 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost5173", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -166,6 +177,8 @@ var app = builder.Build();
 
 // Register Exception Middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseRouting();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -175,10 +188,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowLocalhost5173");
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<OrderHub>("/orderHub");
 app.UseStaticFiles();
 
 app.Run();

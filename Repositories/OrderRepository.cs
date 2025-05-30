@@ -7,6 +7,7 @@ using DemoFYP.Models.Dto.Response;
 using DemoFYP.Repositories.IRepositories;
 using DemoFYP.Services;
 using DemoFYP.Services.IServices;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
@@ -21,13 +22,15 @@ namespace DemoFYP.Repositories
         private readonly IPaymentRepository _paymentRepository;
         private readonly ICartRepository _cartRepository;
         private readonly IConfiguration _config;
+        private readonly IHubContext<OrderHub> _hubContext;
 
-        public OrderRepository(IDbContextFactory<AppDbContext> factory, IEmailServices emailServices, IPaymentRepository paymentRepository, ICartRepository cartRepository, IConfiguration config) {
+        public OrderRepository(IDbContextFactory<AppDbContext> factory, IEmailServices emailServices, IPaymentRepository paymentRepository, ICartRepository cartRepository, IConfiguration config, IHubContext<OrderHub> hubContext) {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _emailServices = emailServices ?? throw new ArgumentNullException(nameof(emailServices));
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _cartRepository = cartRepository ?? throw new ArgumentNullException(nameof(cartRepository));
             _config = config ?? throw new ArgumentNullException(nameof(config));
+            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
         }
 
         #region frontend
@@ -254,6 +257,7 @@ namespace DemoFYP.Repositories
                 string body = $"You order {payload.OrderID} has been placed successfully, kindly contact with our customer service if facing any issues, thank you!";
 
                 await _emailServices.SendEmailAsync(curUserEmail, subject, body);
+                await OrderHub.NotifyUserAsync(_hubContext, curUserID, $"Order {payload.OrderID} bought successfully!");
 
                 var paidProducts = await context.OrderItems.Where(oi => oi.OrderID == payload.OrderID).Select(oi => oi.ProductID).ToListAsync();
 
