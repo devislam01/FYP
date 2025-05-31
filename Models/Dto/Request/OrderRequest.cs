@@ -21,7 +21,7 @@ namespace DemoFYP.Models.Dto.Request
     {
         public int PaymentID { get; set; }
         public int OrderID {  get; set; }
-        public IFormFile Receipt { get; set; } = null!;
+        public IFormFile? Receipt { get; set; }
     }
 
     public class MarkOrderItemCompletedRequest

@@ -241,15 +241,22 @@ namespace DemoFYP.Repositories
             {
                 var paymentMethodID = await context.Payments.Where(p => p.PaymentId == payload.PaymentID).Select(p => p.PaymentMethodID).FirstOrDefaultAsync();
 
-                if (paymentMethodID == 1)
+                switch (paymentMethodID)
                 {
-                    await ConfirmPayment(payload.PaymentID, curUserID, string.Empty, context);
+                    case 1:
+                        await ConfirmPayment(payload.PaymentID, curUserID, string.Empty, context);
+                        break;
+
+                    case 2:
+                        if (string.IsNullOrWhiteSpace(receiptUrl))
+                            throw new BadRequestException("You have to upload your receipt!");
+                        await ConfirmPayment(payload.PaymentID, curUserID, receiptUrl, context);
+                        break;
+
+                    default:
+                        throw new BadRequestException("Unsupported payment method.");
                 }
 
-                if (receiptUrl == string.Empty) {
-                    throw new BadRequestException("You have to upload your receipt!");
-                }
-                await ConfirmPayment(payload.PaymentID, curUserID, receiptUrl, context);
                 await MarkOrderToProcessing(curUserID, context);
                 await MarkOrderItemsToProcessing(payload.OrderID, curUserID, context);
 
