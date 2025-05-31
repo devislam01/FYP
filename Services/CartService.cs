@@ -49,10 +49,9 @@ namespace DemoFYP.Services
 
         public async Task UpdateShoppingCart(List<ShoppingCartRequest> payload, Guid curUserID)
         {
-            if (payload == null) throw new BadRequestException("Shopping Cart cannot be empty");
-
             var cartList = new List<ShoppingCartObj>();
-            try
+
+            if (payload.Count > 0)
             {
                 foreach (var item in payload)
                 {
@@ -74,14 +73,10 @@ namespace DemoFYP.Services
                     cartItem.Quantity = item.Quantity;
 
                     cartList.Add(cartItem);
-
-                    await _cartRepository.UpdateShoppingCart(cartList, curUserID);
                 }
             }
-            catch
-            {
-                throw;
-            }
+
+            await _cartRepository.UpdateShoppingCart(cartList, curUserID);
         }
     }
 }
