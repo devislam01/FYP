@@ -18,7 +18,7 @@ namespace DemoFYP.Controllers.AdminPortal
         }
 
         [Authorize(Policy = "AP_Read_Order")]
-        [HttpGet]
+        [HttpGet("orderList")]
         public async Task<ActionResult<StandardResponse<PagedResult<OrderListResponse>>>> GetOrderList(OrderListFilterRequest filter)
         {
             var result = await _orderServices.GetOrderList(filter);
@@ -27,7 +27,7 @@ namespace DemoFYP.Controllers.AdminPortal
         }
 
         [Authorize(Policy = "AP_Update_Order")]
-        [HttpGet]
+        [HttpGet("updateOrder")]
         public async Task<ActionResult<StandardResponse>> UpdateOrder(UpdateOrderRequest payload)
         {
             await _orderServices.UpdateOrder(payload, CurUserID);
@@ -36,7 +36,7 @@ namespace DemoFYP.Controllers.AdminPortal
         }
 
         [Authorize(Policy = "AP_Cancel_Order")]
-        [HttpGet]
+        [HttpGet("cancelOrder")]
         public async Task<ActionResult<StandardResponse>> CancelOrder(CancelOrderRequest payload)
         {
             await _orderServices.CancelOrder(payload, CurUserID);
@@ -45,7 +45,7 @@ namespace DemoFYP.Controllers.AdminPortal
         }
 
         [Authorize(Policy = "AP_Cancel_Order_Item")]
-        [HttpGet]
+        [HttpGet("cancelOrderItem")]
         public async Task<ActionResult<StandardResponse>> CancelOrderItem(CancelOrderItemRequest payload)
         {
             await _orderServices.CancelOrderItem(payload, CurUserID);
