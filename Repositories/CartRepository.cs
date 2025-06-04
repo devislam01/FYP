@@ -43,7 +43,7 @@ namespace DemoFYP.Repositories
                     {
                         if (!string.IsNullOrEmpty(item.ProductImage))
                         {
-                            item.ProductImage = $"{_config["BackendUrl"]}/{item.ProductImage}";
+                            item.ProductImage = string.IsNullOrWhiteSpace(item.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{item.ProductImage}";
                         }
 
                         item.StockQty = await context.Products.Where(p => p.ProductId == item.ProductID).Select(p => p.StockQty).FirstOrDefaultAsync();

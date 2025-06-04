@@ -63,7 +63,7 @@ namespace DemoFYP.Repositories
                 return orders.Select(o => new UserOrdersResponse
                 {
                     OrderID = o.OrderId,
-                    Receipt = o.Payment?.Receipt,
+                    Receipt = string.IsNullOrWhiteSpace(o.Payment?.Receipt) ? string.Empty : $"{_config["BackendUrl"]}/{o.Payment?.Receipt}",
                     TotalAmt = o.TotalAmount,
                     Status = o.Status,
                     CreatedAt = o.CreatedDateTime,
@@ -74,7 +74,7 @@ namespace DemoFYP.Repositories
                         ProductName = oi.Product?.ProductName,
                         Price = oi.Product?.ProductPrice ?? 0,
                         Quantity = oi.Qty,
-                        ProductImage = oi.Product?.ProductImage,
+                        ProductImage = string.IsNullOrWhiteSpace(oi.Product?.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{oi.Product?.ProductImage}",
                         SellerName = sellerMap.TryGetValue(oi.Product.UserId, out string? value) ? value : null,
                         Status = oi.Status
                     }).ToList()
@@ -104,16 +104,24 @@ namespace DemoFYP.Repositories
                    .OrderByDescending(oi => oi.Order.CreatedDateTime)
                    .ToListAsync();
 
+                var sellerName = await context.Users
+                    .Where(u => u.UserId == curUserID)
+                    .Select(u => u.UserName)
+                    .FirstOrDefaultAsync() ?? null;
+
                 return orderItems.Select(oi => new SellerOrdersResponse
                 {
                     OrderItemID = oi.OrderItemID,
                     ProductName = oi.Product.ProductName,
+                    ProductImage = string.IsNullOrWhiteSpace(oi.Product.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
                     Price = oi.Product.ProductPrice,
                     Quantity = oi.Qty,
+                    TotalAmt = oi.Product.ProductPrice * oi.Qty,
                     Status = oi.Status,
                     OrderID = oi.Order.OrderId,
                     BuyerID = oi.Order.UserId,
-                    Receipt = oi.Order.Payment?.Receipt,
+                    SellerName = sellerName,
+                    Receipt = string.IsNullOrWhiteSpace(oi.Order.Payment?.Receipt) ? string.Empty : $"{_config["BackendUrl"]}/{oi.Order.Payment?.Receipt}",
                     PaymentMethodID = oi.Order.Payment.PaymentMethodID,
                     CreatedAt = oi.CreatedAt
                 }).ToList();
@@ -207,7 +215,7 @@ namespace DemoFYP.Repositories
                 await context.SaveChangesAsync();
                 await trans.CommitAsync();
 
-                return new ProceedToPaymentResponse { PaymentID = paymentID, OrderID = order.OrderId, QRCode = $"{_config["BackendUrl"]}/{paymentQRCode}" ?? string.Empty };
+                return new ProceedToPaymentResponse { PaymentID = paymentID, OrderID = order.OrderId, QRCode = string.IsNullOrWhiteSpace(paymentQRCode) ? string.Empty : $"{_config["BackendUrl"]}/{paymentQRCode}"};
             }
             catch
             {

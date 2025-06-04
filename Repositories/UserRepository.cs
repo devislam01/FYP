@@ -117,7 +117,7 @@ namespace DemoFYP.Repositories
                                 UserGender = u.UserGender ?? string.Empty,
                                 Address = u.Address ?? string.Empty,
                                 ResidentialCollege = u.ResidentialCollege ?? string.Empty,
-                                PaymentQRCode = u.PaymentQRCode != string.Empty ? $"{_config["BackendUrl"]}/{u.PaymentQRCode}" : string.Empty,
+                                PaymentQRCode = string.IsNullOrWhiteSpace(u.PaymentQRCode) ? string.Empty : $"{_config["BackendUrl"]}/{u.PaymentQRCode}",
                             })
                             .FirstOrDefaultAsync();
 
@@ -278,7 +278,7 @@ namespace DemoFYP.Repositories
                         Gender = q.UserGender,
                         PhoneNumber = q.PhoneNumber ?? string.Empty,
                         Status = q.IsActive == 1 ? "Active" : "Inactive",
-                        QRCode = q.PaymentQRCode != string.Empty ? $"{_config["BackendUrl"]}/{q.PaymentQRCode}" : string.Empty,
+                        QRCode = string.IsNullOrWhiteSpace(q.PaymentQRCode) ? string.Empty : $"{_config["BackendUrl"]}/{q.PaymentQRCode}",
                         CreatedAt = q.CreatedDateTime,
                         CreatedBy = q.CreatedBy,
                     }).ToListAsync();

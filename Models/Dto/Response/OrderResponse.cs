@@ -40,12 +40,15 @@ namespace DemoFYP.Models.Dto.Response
         public int OrderItemID { get; set; }
         public int OrderID { get; set; }
         public Guid BuyerID { get; set; }
-        public string ProductName { get; set; }
+        public string? SellerName { get; set; }
+        public string ProductName { get; set; } = null!;
+        public string ProductImage { get; set; } = null!;
+        public double TotalAmt { get; set; }
         public double Price { get; set; }
         public int Quantity { get; set; }
         public string? Receipt {  get; set; }
         public int PaymentMethodID {  get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
     }
 

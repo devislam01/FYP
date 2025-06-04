@@ -67,7 +67,7 @@ namespace DemoFYP.Repositories
                     ProductDescription = p.ProductDescription,
                     CategoryID = p.CategoryId,
                     ProductCondition = p.ProductCondition,
-                    ProductImage = $"{_config["BackendUrl"]}/{p.ProductImage}",
+                    ProductImage = string.IsNullOrWhiteSpace(p.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{p.ProductImage}",
                     ProductPrice = p.ProductPrice
                 }).ToListAsync();
 
@@ -149,7 +149,7 @@ namespace DemoFYP.Repositories
                             ProductDescription = p.ProductDescription,
                             CategoryID = p.CategoryId,
                             ProductCondition = p.ProductCondition,
-                            ProductImage = $"{_config["BackendUrl"]}/{p.ProductImage}",
+                            ProductImage = string.IsNullOrWhiteSpace(p.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{p.ProductImage}",
                             ProductPrice = p.ProductPrice,
                             StockQty = p.StockQty,
                             CreatedAt = p.CreatedDateTime,
@@ -193,7 +193,7 @@ namespace DemoFYP.Repositories
                         ProductDescription = pl.ProductDescription,
                         CategoryID = pl.CategoryId,
                         ProductCondition = pl.ProductCondition,
-                        ProductImage = $"{_config["BackendUrl"]}/{pl.ProductImage}",
+                        ProductImage = string.IsNullOrWhiteSpace(pl.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{pl.ProductImage}",
                         ProductPrice = pl.ProductPrice,
                         StockQty = pl.StockQty,
                     })
