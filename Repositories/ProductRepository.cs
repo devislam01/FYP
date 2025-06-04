@@ -239,7 +239,8 @@ namespace DemoFYP.Repositories
                         .CountAsync();
                 }
 
-                string ImageUrl = GetImageRealPath ? productWithCategory.product.ProductImage : $"{_config["BackendUrl"]}/{productWithCategory.product.ProductImage}";
+                string ImageUrl = GetImageRealPath ? productWithCategory.product.ProductImage : string.IsNullOrWhiteSpace(productWithCategory.product.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{productWithCategory.product.ProductImage}";
+
                 var response = new ProductDetailResponse
                 {
                     ProductDetail = new ProductDetailResult
