@@ -40,26 +40,42 @@ namespace DemoFYP.Repositories
 
             try
             {
-                var orders = await context.Orders
+                var orders = context.Orders
                     .Include(o => o.OrderItems)
                         .ThenInclude(oi => oi.Product)
                     .Include(o => o.Payment)
                     .Where(o => o.UserId == curUserID)
                     .OrderByDescending(o => o.CreatedDateTime)
-                    .ToListAsync();
+                    .ToList();
+
+                var sellerMap = orders
+                    .SelectMany(o => o.OrderItems)
+                    .Select(oi => oi.Product)
+                    .Where(p => p != null)
+                    .Select(p => p.UserId)
+                    .Distinct()
+                    .Join(context.Users,
+                          userId => userId,
+                          user => user.UserId,
+                          (userId, user) => new { userId, user.UserName })
+                    .ToDictionary(x => x.userId, x => x.UserName);
 
                 return orders.Select(o => new UserOrdersResponse
                 {
                     OrderID = o.OrderId,
+                    Receipt = o.Payment?.Receipt,
+                    TotalAmt = o.TotalAmount,
                     Status = o.Status,
                     CreatedAt = o.CreatedDateTime,
-                    Receipt = o.Payment?.Receipt,
-                    OrderItems = o.OrderItems.Select(oi => new OrderItem
+                    PaymentMethodID = o.Payment.PaymentMethodID,
+                    OrderItems = o.OrderItems.Select(oi => new OrderItemVO
                     {
                         OrderItemID = oi.OrderItemID,
-                        ProductName = oi.Product.ProductName,
-                        Price = oi.Product.ProductPrice,
+                        ProductName = oi.Product?.ProductName,
+                        Price = oi.Product?.ProductPrice ?? 0,
                         Quantity = oi.Qty,
+                        ProductImage = oi.Product?.ProductImage,
+                        SellerName = sellerMap.TryGetValue(oi.Product.UserId, out string? value) ? value : null,
                         Status = oi.Status
                     }).ToList()
                 }).ToList();
