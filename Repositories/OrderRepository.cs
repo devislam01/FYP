@@ -57,8 +57,8 @@ namespace DemoFYP.Repositories
                     .Join(context.Users,
                           userId => userId,
                           user => user.UserId,
-                          (userId, user) => new { userId, user.UserName })
-                    .ToDictionary(x => x.userId, x => x.UserName);
+                          (userId, user) => new { userId, user.UserName, user.PhoneNumber })
+                    .FirstOrDefault();
 
                 return orders.Select(o => new UserOrdersResponse
                 {
@@ -75,7 +75,8 @@ namespace DemoFYP.Repositories
                         Price = oi.Product?.ProductPrice ?? 0,
                         Quantity = oi.Qty,
                         ProductImage = string.IsNullOrWhiteSpace(oi.Product?.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{oi.Product?.ProductImage}",
-                        SellerName = sellerMap.TryGetValue(oi.Product.UserId, out string? value) ? value : null,
+                        SellerName = sellerMap.UserName ?? string.Empty,
+                        SellerPhoneNo = sellerMap.PhoneNumber ?? string.Empty,
                         Status = oi.Status
                     }).ToList()
                 }).ToList();
@@ -104,10 +105,12 @@ namespace DemoFYP.Repositories
                    .OrderByDescending(oi => oi.Order.CreatedDateTime)
                    .ToListAsync();
 
-                var sellerName = await context.Users
-                    .Where(u => u.UserId == curUserID)
-                    .Select(u => u.UserName)
-                    .FirstOrDefaultAsync() ?? null;
+                var buyerIds = orderItems.Select(oi => oi.Order.UserId).Distinct().ToList();
+
+                var buyers = await context.Users
+                    .Where(u => buyerIds.Contains(u.UserId))
+                    .Select(u => new { u.UserId, u.UserName, u.PhoneNumber })
+                    .ToDictionaryAsync(u => u.UserId, u => new { u.UserName, u.PhoneNumber });
 
                 return orderItems.Select(oi => new SellerOrdersResponse
                 {
@@ -120,7 +123,8 @@ namespace DemoFYP.Repositories
                     Status = oi.Status,
                     OrderID = oi.Order.OrderId,
                     BuyerID = oi.Order.UserId,
-                    SellerName = sellerName,
+                    BuyerName = buyers.ContainsKey(oi.Order.UserId) ? buyers[oi.Order.UserId].UserName : string.Empty,
+                    BuyerPhoneNo = buyers.ContainsKey(oi.Order.UserId) ? buyers[oi.Order.UserId].PhoneNumber : string.Empty,
                     Receipt = string.IsNullOrWhiteSpace(oi.Order.Payment?.Receipt) ? string.Empty : $"{_config["BackendUrl"]}/{oi.Order.Payment?.Receipt}",
                     PaymentMethodID = oi.Order.Payment.PaymentMethodID,
                     CreatedAt = oi.CreatedAt

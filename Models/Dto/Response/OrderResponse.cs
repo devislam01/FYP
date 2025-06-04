@@ -33,6 +33,7 @@ namespace DemoFYP.Models.Dto.Response
     {
         public string ProductImage { get; set; } = null!;
         public string SellerName {  get; set; } = null!;
+        public string SellerPhoneNo { get; set; } = null!;
     }
 
     public class SellerOrdersResponse
@@ -40,7 +41,8 @@ namespace DemoFYP.Models.Dto.Response
         public int OrderItemID { get; set; }
         public int OrderID { get; set; }
         public Guid BuyerID { get; set; }
-        public string? SellerName { get; set; }
+        public string? BuyerName {  get; set; }
+        public string? BuyerPhoneNo { get; set; }
         public string ProductName { get; set; } = null!;
         public string ProductImage { get; set; } = null!;
         public double TotalAmt { get; set; }
