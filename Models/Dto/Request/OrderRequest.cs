@@ -19,14 +19,30 @@ namespace DemoFYP.Models.Dto.Request
 
     public class ProceedPaymentRequest
     {
-        public int PaymentID { get; set; }
         public int OrderID {  get; set; }
-        public IFormFile? Receipt { get; set; }
+        public List<PaymentReceipt> ReceiptList { get; set; }
+    }
+
+    public class PaymentReceipt
+    {
+        public int PaymentID { get; set; }
+        public IFormFile? Receipt {  get; set; }
+    }
+
+    public class PaymentReceiptWithReceiptUrl
+    {
+        public int PaymentID { get; set; }
+        public string? ReceiptUrl { get; set; }
     }
 
     public class MarkOrderItemCompletedRequest
     {
         public int OrderItemID { get; set; }
+    }
+
+    public class MarkOrderCompletedRequest
+    {
+        public int OrderID { get; set; }
     }
 
     public class RequestToCancelOrderRequest

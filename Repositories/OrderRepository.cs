@@ -48,36 +48,54 @@ namespace DemoFYP.Repositories
                     .OrderByDescending(o => o.CreatedDateTime)
                     .ToList();
 
-                var sellerMap = orders
+                var allSellerIds = orders
                     .SelectMany(o => o.OrderItems)
-                    .Select(oi => oi.Product)
-                    .Where(p => p != null)
-                    .Select(p => p.UserId)
+                    .Select(oi => oi.Product?.UserId)
+                    .Where(id => id.HasValue)
                     .Distinct()
-                    .Join(context.Users,
-                          userId => userId,
-                          user => user.UserId,
-                          (userId, user) => new { userId, user.UserName, user.PhoneNumber })
-                    .FirstOrDefault();
+                    .ToList();
+
+                var sellerUserMap = context.Users
+                    .Where(u => allSellerIds.Contains(u.UserId))
+                    .ToDictionary(u => u.UserId, u => new { u.UserName, u.PhoneNumber });
 
                 return orders.Select(o => new UserOrdersResponse
                 {
                     OrderID = o.OrderId,
-                    Receipt = string.IsNullOrWhiteSpace(o.Payment?.Receipt) ? string.Empty : $"{_config["BackendUrl"]}/{o.Payment?.Receipt}",
                     TotalAmt = o.TotalAmount,
                     Status = o.Status,
                     CreatedAt = o.CreatedDateTime,
-                    PaymentMethodID = o.Payment.PaymentMethodID,
-                    OrderItems = o.OrderItems.Select(oi => new OrderItemVO
+
+                    OrderItems = o.OrderItems.Select(oi =>
                     {
-                        OrderItemID = oi.OrderItemID,
-                        ProductName = oi.Product?.ProductName,
-                        Price = oi.Product?.ProductPrice ?? 0,
-                        Quantity = oi.Qty,
-                        ProductImage = string.IsNullOrWhiteSpace(oi.Product?.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{oi.Product?.ProductImage}",
-                        SellerName = sellerMap.UserName ?? string.Empty,
-                        SellerPhoneNo = sellerMap.PhoneNumber ?? string.Empty,
-                        Status = oi.Status
+                        var sellerId = oi.Product?.UserId;
+
+                        var paymentForSeller = o.Payment
+                            .FirstOrDefault(p => p.SellerID == sellerId);
+
+                        var receipt = !string.IsNullOrWhiteSpace(paymentForSeller?.Receipt)
+                            ? $"{_config["BackendUrl"]}/{paymentForSeller.Receipt}"
+                            : string.Empty;
+
+                        var sellerInfo = sellerId.HasValue && sellerUserMap.TryGetValue(sellerId.Value, out var seller)
+                            ? seller
+                            : new { UserName = string.Empty, PhoneNumber = string.Empty };
+
+                        return new OrderItemVO
+                        {
+                            OrderItemID = oi.OrderItemID,
+                            ProductName = oi.Product?.ProductName,
+                            Price = oi.Product?.ProductPrice ?? 0,
+                            Quantity = oi.Qty,
+                            ProductImage = string.IsNullOrWhiteSpace(oi.Product?.ProductImage)
+                                ? string.Empty
+                                : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
+                            SellerName = sellerInfo.UserName,
+                            SellerPhoneNo = sellerInfo.PhoneNumber,
+                            Status = oi.Status,
+                            Receipt = receipt,
+                            PaymentMethodID = paymentForSeller?.PaymentMethodID ?? 0
+                        };
                     }).ToList()
                 }).ToList();
             }
@@ -112,23 +130,63 @@ namespace DemoFYP.Repositories
                     .Select(u => new { u.UserId, u.UserName, u.PhoneNumber })
                     .ToDictionaryAsync(u => u.UserId, u => new { u.UserName, u.PhoneNumber });
 
-                return orderItems.Select(oi => new SellerOrdersResponse
+                var groupedOrders = orderItems.GroupBy(oi => oi.Order.OrderId);
+
+                var result = new List<SellerOrdersResponse>();
+
+                foreach (var group in groupedOrders)
                 {
-                    OrderItemID = oi.OrderItemID,
-                    ProductName = oi.Product.ProductName,
-                    ProductImage = string.IsNullOrWhiteSpace(oi.Product.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
-                    Price = oi.Product.ProductPrice,
-                    Quantity = oi.Qty,
-                    TotalAmt = oi.Product.ProductPrice * oi.Qty,
-                    Status = oi.Status,
-                    OrderID = oi.Order.OrderId,
-                    BuyerID = oi.Order.UserId,
-                    BuyerName = buyers.ContainsKey(oi.Order.UserId) ? buyers[oi.Order.UserId].UserName : string.Empty,
-                    BuyerPhoneNo = buyers.ContainsKey(oi.Order.UserId) ? buyers[oi.Order.UserId].PhoneNumber : string.Empty,
-                    Receipt = string.IsNullOrWhiteSpace(oi.Order.Payment?.Receipt) ? string.Empty : $"{_config["BackendUrl"]}/{oi.Order.Payment?.Receipt}",
-                    PaymentMethodID = oi.Order.Payment.PaymentMethodID,
-                    CreatedAt = oi.CreatedAt
-                }).ToList();
+                    var firstOrderItem = group.First();
+                    var order = firstOrderItem.Order;
+
+                    double totalAmt = group.Sum(oi => oi.Product.ProductPrice * oi.Qty);
+
+                    var payment = order.Payment.FirstOrDefault(p => p.SellerID == curUserID);
+
+                    string paymentStatus = payment?.Status ?? PaymentStatus.Pending.ToString();
+
+                    var receipt = !string.IsNullOrWhiteSpace(payment?.Receipt)
+                            ? $"{_config["BackendUrl"]}/{payment.Receipt}"
+                            : string.Empty;
+
+                    var buyerInfo = buyers.TryGetValue(order.UserId, out var b)
+                            ? b
+                            : new { UserName = string.Empty, PhoneNumber = string.Empty };
+
+                    var orderResponse = new SellerOrdersResponse
+                    {
+                        OrderID = order.OrderId,
+                        TotalAmt = totalAmt,
+                        Status = order.Status,
+                        CreatedAt = order.CreatedDateTime,
+                        PaymentStatus = paymentStatus,
+                        Receipt = receipt,
+                        BuyerID = order.UserId,
+                        BuyerName = buyerInfo.UserName,
+                        BuyerPhoneNo = buyerInfo.PhoneNumber,
+                        PaymentMethodID = payment?.PaymentMethodID ?? 0,
+                        OrderItems = new List<SellerOrderItemVO>()
+                    };
+
+                    foreach (var oi in group)
+                    {
+                        orderResponse.OrderItems.Add(new SellerOrderItemVO
+                        {
+                            OrderItemID = oi.OrderItemID,
+                            ProductName = oi.Product.ProductName,
+                            ProductImage = string.IsNullOrWhiteSpace(oi.Product.ProductImage)
+                                ? string.Empty
+                                : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
+                            Price = oi.Product.ProductPrice,
+                            Quantity = oi.Qty,
+                            Status = oi.Status,
+                        });
+                    }
+
+                    result.Add(orderResponse);
+                }
+
+                return result;
             }
             catch
             {
@@ -140,15 +198,13 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<ProceedToPaymentResponse> CheckOutOrder(PlaceOrderRequest payload, Guid curUserID)
+        public async Task<CheckoutResponse> CheckOutOrder(PlaceOrderRequest payload, Guid curUserID)
         {
             var context = _factory.CreateDbContext();
             await using var trans = await context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
             try
             {
-                double totalAmount = payload.orderSummaries.Sum(item => item.UnitPrice * item.Qty);
-
                 var productIds = payload.orderSummaries.Select(x => x.ProductID).ToList();
                 var products = await context.Products
                     .Where(p => productIds.Contains(p.ProductId))
@@ -167,6 +223,7 @@ namespace DemoFYP.Repositories
                         throw new BusinessException($"You cannot purchase your own product! Product: {product.ProductName}");
                 }
 
+                double totalAmount = payload.orderSummaries.Sum(x => x.Qty * x.UnitPrice);
                 var order = new Order
                 {
                     UserId = curUserID,
@@ -179,7 +236,6 @@ namespace DemoFYP.Repositories
                 foreach (var item in payload.orderSummaries)
                 {
                     var product = products.First(p => p.ProductId == item.ProductID);
-
                     product.StockQty -= item.Qty;
 
                     order.OrderItems.Add(new OrderItems
@@ -187,7 +243,7 @@ namespace DemoFYP.Repositories
                         ProductID = item.ProductID,
                         Qty = item.Qty,
                         UnitPrice = item.UnitPrice,
-                        Subtotal = item.UnitPrice * item.Qty,
+                        Subtotal = item.Qty * item.UnitPrice,
                         Status = OrderStatus.Pending.ToString(),
                         CreatedAt = DateTime.Now,
                         CreatedBy = curUserID
@@ -197,29 +253,40 @@ namespace DemoFYP.Repositories
                 context.Orders.Add(order);
                 await context.SaveChangesAsync();
 
-                var paymentID = await _paymentRepository.InsertPayment(order.OrderId, payload.PaymentMethod, order.TotalAmount, curUserID, context);
-                order.PaymentId = paymentID;
+                var response = new CheckoutResponse();
 
-                context.Orders.Update(order);
+                var ordersGroupedBySeller = payload.orderSummaries
+                    .GroupBy(x => products.First(p => p.ProductId == x.ProductID).UserId);
 
-                var firstProductId = products.FirstOrDefault()?.ProductId
-                    ?? throw new BusinessException("No product found to fetch seller's QR Code");
+                foreach (var group in ordersGroupedBySeller)
+                {
+                    var sellerId = group.Key;
+                    double sellerAmount = group.Sum(x => x.Qty * x.UnitPrice);
 
-                var paymentQRCode = await context.Products
-                    .Join(context.Users,
-                          p => p.UserId,
-                          u => u.UserId,
-                          (p, u) => new { p.ProductId, u.PaymentQRCode })
-                    .Where(x => x.ProductId == firstProductId)
-                    .Select(x => x.PaymentQRCode)
-                    .FirstOrDefaultAsync()
-                    ?? throw new NotFoundException("This seller hasn't uploaded a QR Code for payment!");
+                    var paymentID = await _paymentRepository.InsertPayment(order.OrderId, payload.PaymentMethod, sellerId, sellerAmount, curUserID, context);
 
+                    var paymentQRCode = await context.Users
+                        .Where(u => u.UserId == sellerId)
+                        .Select(u => u.PaymentQRCode)
+                        .FirstOrDefaultAsync()
+                        ?? throw new NotFoundException($"Product '{string.Join(", ", group.Select(x => $"{products.FirstOrDefault(p => p.ProductId == x.ProductID).ProductName}"))}' doesn't support for QR Payment!");
+
+                    response.ProceedToPayments.Add(new ProceedToPayment
+                    {
+                        PaymentID = paymentID,
+                        OrderID = order.OrderId,
+                        QRCode = string.IsNullOrWhiteSpace(paymentQRCode)
+                            ? string.Empty
+                            : $"{_config["BackendUrl"]}/{paymentQRCode}",
+                        ProductName = products.FirstOrDefault(p => p.ProductId == group.First().ProductID)?.ProductName ?? string.Empty,
+                        Price = sellerAmount,
+                    });
+                }
 
                 await context.SaveChangesAsync();
                 await trans.CommitAsync();
 
-                return new ProceedToPaymentResponse { PaymentID = paymentID, OrderID = order.OrderId, QRCode = string.IsNullOrWhiteSpace(paymentQRCode) ? string.Empty : $"{_config["BackendUrl"]}/{paymentQRCode}"};
+                return response;
             }
             catch
             {
@@ -232,18 +299,36 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task ConfirmPayment(int paymentID, Guid curUserID, string? receiptUrl, AppDbContext outerContext)
+        public async Task ConfirmPayment(Dictionary<int, string> receipts, Guid curUserID, AppDbContext outerContext)
         {
             var context = outerContext ?? _factory.CreateDbContext();
 
             try
             {
-                var curData = await context.Payments.FirstOrDefaultAsync(p => p.PaymentId == paymentID && p.Status == "Pending") ?? throw new NotFoundException("Payment Record Not Found!");
+                var payments = await context.Payments
+                    .Where(p => receipts.Keys.ToList().Contains(p.PaymentId))
+                    .ToListAsync();
 
-                curData.Receipt = receiptUrl ?? string.Empty;
-                curData.Status = PaymentStatus.Paid.ToString();
-                curData.UpdatedDateTime = DateTime.Now;
-                curData.UpdatedBy = curUserID;
+                if (payments == null || payments.Count == 0)
+                {
+                    throw new NotFoundException("No pending payment records found!");
+                }
+
+                foreach (var payment in payments)
+                {
+                    if (receipts.TryGetValue(payment.PaymentId, out var receiptUrl))
+                    {
+                        payment.Receipt = receiptUrl;
+                    }
+                    else
+                    {
+                        payment.Receipt = null;
+                    }
+
+                    payment.Status = PaymentStatus.Paid.ToString();
+                    payment.UpdatedDateTime = DateTime.Now;
+                    payment.UpdatedBy = curUserID;
+                }
 
                 await context.SaveChangesAsync();
             }
@@ -260,30 +345,37 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task ConfirmOrder(ProceedPaymentRequest payload, string receiptUrl, Guid curUserID, string curUserEmail)
+        public async Task ConfirmOrder(ProceedPaymentRequest payload, Dictionary<int, string> receiptUrls, Guid curUserID, string curUserEmail)
         {
             var context = _factory.CreateDbContext();
             await using var trans = await context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
             try
             {
-                var paymentMethodID = await context.Payments.Where(p => p.PaymentId == payload.PaymentID).Select(p => p.PaymentMethodID).FirstOrDefaultAsync();
+                var payments = await context.Payments
+                    .Where(p => payload.ReceiptList.Select(r => r.PaymentID).Contains(p.PaymentId))
+                    .Select(p => new { p.PaymentId, p.PaymentMethodID })
+                    .ToListAsync();
 
-                switch (paymentMethodID)
+                foreach(var payment in payments)
                 {
-                    case 1:
-                        await ConfirmPayment(payload.PaymentID, curUserID, string.Empty, context);
-                        break;
+                    switch (payment.PaymentMethodID)
+                    {
+                        case 1:
+                            await ConfirmPayment(receiptUrls, curUserID, context);
+                            break;
 
-                    case 2:
-                        if (string.IsNullOrWhiteSpace(receiptUrl))
-                            throw new BadRequestException("You have to upload your receipt!");
-                        await ConfirmPayment(payload.PaymentID, curUserID, receiptUrl, context);
-                        break;
+                        case 2:
+                            if (receiptUrls == null || receiptUrls.Count == 0)
+                                throw new BadRequestException("You have to upload your receipt!");
+                            await ConfirmPayment(receiptUrls, curUserID, context);
+                            break;
 
-                    default:
-                        throw new BadRequestException("Unsupported payment method.");
+                        default:
+                            throw new BadRequestException("Unsupported payment method.");
+                    }
                 }
+                
 
                 await MarkOrderToProcessing(curUserID, context);
                 await MarkOrderItemsToProcessing(payload.OrderID, curUserID, context);
@@ -527,7 +619,46 @@ namespace DemoFYP.Repositories
                 await context.DisposeAsync();
             }
         }
-        
+
+        public async Task MarkOrderAsCompleted(MarkOrderCompletedRequest payload, Guid curUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var order = await context.Orders
+                    .FirstOrDefaultAsync(oi => oi.OrderId == payload.OrderID) ?? throw new NotFoundException("Order not found");
+
+                order.Status = OrderStatus.Completed.ToString();
+                order.UpdatedDateTime = DateTime.Now;
+                order.UpdatedBy = curUserID;
+
+                await context.SaveChangesAsync();
+
+                var orderItems = await context.OrderItems
+                    .Where(oi => oi.OrderID == payload.OrderID)
+                    .ToListAsync();
+
+                foreach (var item in orderItems)
+                {
+                    item.Status = OrderStatus.Completed.ToString();
+                    item.UpdatedAt = DateTime.Now;
+                    item.UpdatedBy = curUserID;
+
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+
         public async Task<Guid> RateProduct(RateProductRequest payload, Guid curUserID)
         {
             var context = _factory.CreateDbContext();

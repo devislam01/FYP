@@ -12,6 +12,8 @@ public partial class Payment
 
     public int PaymentMethodID {  get; set; }
 
+    public Guid SellerID { get; set; }
+
     public string? Receipt {  get; set; }
 
     public string Status { get; set; } = null!;

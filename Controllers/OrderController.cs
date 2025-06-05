@@ -38,14 +38,14 @@ namespace DemoFYP.Controllers
 
         [Authorize]
         [HttpPost("checkout")]
-        public async Task<ActionResult<StandardResponse<ProceedToPaymentResponse>>> Checkout(PlaceOrderRequest payload)
+        public async Task<ActionResult<StandardResponse<CheckoutResponse>>> Checkout(PlaceOrderRequest payload)
         {
-            return SuccessResponse<ProceedToPaymentResponse>(await _orderServices.CheckOut(payload, CurUserID), "Please proceed to Payment");
+            return SuccessResponse<CheckoutResponse>(await _orderServices.CheckOut(payload, CurUserID), "Please proceed to Payment");
         }
 
         [Authorize]
         [HttpPost("confirmOrder")]
-        public async Task<ActionResult<StandardResponse>> ConfirmOrder(ProceedPaymentRequest payload)
+        public async Task<ActionResult<StandardResponse>> ConfirmOrder([FromForm] ProceedPaymentRequest payload)
         {
             await _orderServices.ConfirmOrder(payload, CurUserID, CurUserEmail);
 
@@ -92,6 +92,14 @@ namespace DemoFYP.Controllers
         {
             await _orderServices.MarkOrderItemAsCompleted(payload, CurUserID);
             return SuccessResponse("Order item marked as completed");
+        }
+
+        [Authorize]
+        [HttpPost("mark-order-complete")]
+        public async Task<ActionResult<StandardResponse>> MarkOrderAsCompleted(MarkOrderCompletedRequest payload)
+        {
+            await _orderServices.MarkOrderAsCompleted(payload, CurUserID);
+            return SuccessResponse($"Order '{payload.OrderID}' marked as completed");
         }
 
         [Authorize]

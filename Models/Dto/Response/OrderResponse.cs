@@ -5,11 +5,9 @@ namespace DemoFYP.Models.Dto.Response
     public class UserOrdersResponse
     {
         public int OrderID { get; set; }
-        public string? Receipt {  get; set; }
         public double TotalAmt { get; set; }
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
-        public int PaymentMethodID {  get; set; }
         public List<OrderItemVO> OrderItems { get; set; } = null!;
     }
 
@@ -34,31 +32,48 @@ namespace DemoFYP.Models.Dto.Response
         public string ProductImage { get; set; } = null!;
         public string SellerName {  get; set; } = null!;
         public string SellerPhoneNo { get; set; } = null!;
+        public string? Receipt { get; set; }
+        public int PaymentMethodID { get; set; }
     }
 
     public class SellerOrdersResponse
     {
-        public int OrderItemID { get; set; }
         public int OrderID { get; set; }
-        public Guid BuyerID { get; set; }
-        public string? BuyerName {  get; set; }
-        public string? BuyerPhoneNo { get; set; }
-        public string ProductName { get; set; } = null!;
-        public string ProductImage { get; set; } = null!;
         public double TotalAmt { get; set; }
-        public double Price { get; set; }
-        public int Quantity { get; set; }
-        public string? Receipt {  get; set; }
-        public int PaymentMethodID {  get; set; }
-        public string Status { get; set; } = null!;
+        public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string PaymentStatus { get; set; } = null!;
+        public string? Receipt { get; set; }
+        public int PaymentMethodID { get; set; }
+        public Guid BuyerID { get; set; }
+        public string? BuyerName { get; set; }
+        public string? BuyerPhoneNo { get; set; }
+        public List<SellerOrderItemVO> OrderItems { get; set; } = null!;
+        
     }
 
-    public class ProceedToPaymentResponse
+    public class SellerOrderItemVO
     {
-        public int PaymentID {  get; set; }
-        public int OrderID {  get; set; }
-        public string QRCode { get; set; }
+        public int OrderItemID { get; set; }
+        public string ProductName { get; set; } = null!;
+        public string ProductImage { get; set; } = null!;
+        public double Price { get; set; }
+        public int Quantity { get; set; }
+        public string Status { get; set; } = null!;
+    }
+
+    public class CheckoutResponse
+    {
+        public List<ProceedToPayment> ProceedToPayments { get; set; } = [];
+    }
+
+    public class ProceedToPayment
+    {
+        public int PaymentID { get; set; }
+        public int OrderID { get; set; }
+        public string QRCode { get; set; } = null!;
+        public string ProductName { get; set; } = null!;
+        public double Price { get; set; }
     }
 
     public class FeedbackListResponse

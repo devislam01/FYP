@@ -9,13 +9,14 @@ namespace DemoFYP.Services.IServices
         Task<List<UserOrdersResponse>> GetOrdersByBuyer(Guid curUserID);
         Task<List<SellerOrdersResponse>> GetOrdersBySeller(Guid curUserID);
         Task<OrderSummariesResponse> GetOrderSummaries(Guid curUserID);
-        Task<ProceedToPaymentResponse> CheckOut(PlaceOrderRequest payload, Guid curUserID);
+        Task<CheckoutResponse> CheckOut(PlaceOrderRequest payload, Guid curUserID);
         Task ConfirmOrder(ProceedPaymentRequest payload, Guid curUserID, string curUserEmail);
         Task RequestToCancelOrder(RequestToCancelOrderRequest payload, Guid curUserID);
         Task RequestToCancelOrderItem(RequestToCancelOrderItemRequest payload, Guid curUserID);
         Task ConfirmCancelOrderItemBySeller(ConfirmCancelOrderItemRequest payload, Guid curUserID);
         Task RejectCancelBySeller(RejectCancelOrderItemRequest payload, Guid curUserID);
         Task MarkOrderItemAsCompleted(MarkOrderItemCompletedRequest payload, Guid curUserID);
+        Task MarkOrderAsCompleted(MarkOrderCompletedRequest payload, Guid curUserID);
         Task RateProduct(RateProductRequest payload, Guid curUserID);
         Task<PagedResult<FeedbackListResponse>> GetFeedbackList(FeedbackListRequest filter);
 

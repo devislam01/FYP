@@ -84,7 +84,7 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<int> InsertPayment(int orderId, int paymentMethod, double totalAmount, Guid createdBy, AppDbContext outerContext = null)
+        public async Task<int> InsertPayment(int orderId, int paymentMethod, Guid sellerID, double totalAmount, Guid createdBy, AppDbContext outerContext = null)
         {
             var context = outerContext ?? _factory.CreateDbContext();
 
@@ -94,6 +94,7 @@ namespace DemoFYP.Repositories
                 {
                     OrderId = orderId,
                     PaymentMethodID = paymentMethod,
+                    SellerID = sellerID,
                     TotalPaidAmount = totalAmount,
                     Status = PaymentStatus.Pending.ToString(),
                     CreatedDateTime = DateTime.Now,

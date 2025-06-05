@@ -122,10 +122,10 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("binary(16)")
                 .HasColumnName("userID");
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.Payment)
-                .WithOne(p => p.Order)
-                .HasForeignKey<Payment>(p => p.OrderId)
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Order)
+                .WithMany(o => o.Payment)
+                .HasForeignKey(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -150,6 +150,9 @@ public partial class AppDbContext : DbContext
                 .IsFixedLength()
                 .HasColumnName("orderID");
             entity.Property(e => e.PaymentMethodID).HasColumnName("paymentMethodID");
+            entity.Property(e => e.SellerID)
+                .HasColumnType("binary(16)")
+                .HasColumnName("sellerID");
             entity.Property(e => e.Receipt)
                 .HasMaxLength(255)
                 .HasColumnName("receipt");

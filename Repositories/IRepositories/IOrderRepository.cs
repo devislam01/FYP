@@ -9,14 +9,15 @@ namespace DemoFYP.Repositories.IRepositories
     {
         Task<List<UserOrdersResponse>> GetOrdersByBuyer(Guid curUserID);
         Task<List<SellerOrdersResponse>> GetOrdersBySeller(Guid curUserID);
-        Task<ProceedToPaymentResponse> CheckOutOrder(PlaceOrderRequest payload, Guid curUserID);
-        Task ConfirmPayment(int paymentID, Guid curUserID, string receiptUrl, AppDbContext outerContext = null);
-        Task ConfirmOrder(ProceedPaymentRequest payload, string receiptUrl, Guid curUserID, string curUserEmail);
+        Task<CheckoutResponse> CheckOutOrder(PlaceOrderRequest payload, Guid curUserID);
+        Task ConfirmPayment(Dictionary<int, string> receipts, Guid curUserID, AppDbContext outerContext = null);
+        Task ConfirmOrder(ProceedPaymentRequest payload, Dictionary<int, string> receiptUrl, Guid curUserID, string curUserEmail);
         Task RequestCancelOrderByUser(RequestToCancelOrderRequest payload, Guid curUserID);
         Task RequestCancelOrderItemByUser(RequestToCancelOrderItemRequest payload, Guid curUserID);
         Task ConfirmCancelOrderItemBySeller(ConfirmCancelOrderItemRequest payload, Guid curUserID);
         Task RejectCancelOrderItemBySeller(RejectCancelOrderItemRequest payload, Guid curUserID);
         Task MarkOrderItemAsCompleted(MarkOrderItemCompletedRequest payload, Guid curUserID);
+        Task MarkOrderAsCompleted(MarkOrderCompletedRequest payload, Guid curUserID);
         Task UpdateProductQtyByProductID(int productID, int OrderQty, AppDbContext outerContext);
         Task<Guid> RateProduct(RateProductRequest payload, Guid curUserID);
         Task<PagedResult<FeedbackListResponse>> GetFeedbackList(FeedbackListRequest filter);

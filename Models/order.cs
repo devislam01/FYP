@@ -31,5 +31,5 @@ public partial class Order
     public Guid? UpdatedBy { get; set; }
 
     public List<OrderItems> OrderItems { get; set; } = new();
-    public Payment? Payment { get; set; }
+    public ICollection<Payment> Payment { get; set; } = [];
 }

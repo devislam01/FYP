@@ -66,7 +66,7 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<ProceedToPaymentResponse> CheckOut(PlaceOrderRequest payload, Guid curUserID)
+        public async Task<CheckoutResponse> CheckOut(PlaceOrderRequest payload, Guid curUserID)
         {
             if (payload == null) throw new BadRequestException("Payload is required");
             if (payload.orderSummaries == null) throw new BadRequestException("Your Cart is Empty");
@@ -86,17 +86,27 @@ namespace DemoFYP.Services
         public async Task ConfirmOrder(ProceedPaymentRequest payload, Guid curUserID, string curUserEmail)
         {
             if (payload == null) throw new BadRequestException("Payload is required");
-            if (payload.PaymentID == 0) throw new BadRequestException("Payment ID is required");
+            if (payload.ReceiptList != null && payload.ReceiptList.Count == 0) throw new BadRequestException("At least 1 receipt is required");
 
             try
             {
-                string receiptUrl = string.Empty;
-                if (payload.Receipt != null && payload.Receipt.Length > 0)
+                Dictionary<int, string> receiptUrls = [];
+
+                foreach (var receipt in payload.ReceiptList)
                 {
-                    receiptUrl = await _commonServices.UploadImage(payload.Receipt, "", FolderName.Receipt.ToString());
+                    if (receipt.Receipt != null && receipt.Receipt.Length > 0)
+                    {
+                        var url = await _commonServices.UploadImage(receipt.Receipt, "", FolderName.Receipt.ToString());
+
+                        receiptUrls.Add(receipt.PaymentID, url);
+                    }
+                    else
+                    {
+                        receiptUrls.Add(receipt.PaymentID, "");
+                    }
                 }
 
-                await _orderRepository.ConfirmOrder(payload, receiptUrl, curUserID, curUserEmail);
+                await _orderRepository.ConfirmOrder(payload, receiptUrls, curUserID, curUserEmail);
             }
             catch
             {
@@ -173,6 +183,21 @@ namespace DemoFYP.Services
             try
             {
                 await _orderRepository.MarkOrderItemAsCompleted(payload, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task MarkOrderAsCompleted(MarkOrderCompletedRequest payload, Guid curUserID)
+        {
+            if (payload == null) throw new BadRequestException("Payload is required");
+            if (payload.OrderID == 0) throw new BadRequestException("Order ID is required");
+
+            try
+            {
+                await _orderRepository.MarkOrderAsCompleted(payload, curUserID);
             }
             catch
             {
