@@ -8,6 +8,7 @@ namespace DemoFYP.Models.Dto.Response
         public double TotalAmt { get; set; }
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int PaymentMethodID { get; set; }
         public List<OrderItemVO> OrderItems { get; set; } = null!;
     }
 
@@ -33,7 +34,6 @@ namespace DemoFYP.Models.Dto.Response
         public string SellerName {  get; set; } = null!;
         public string SellerPhoneNo { get; set; } = null!;
         public string? Receipt { get; set; }
-        public int PaymentMethodID { get; set; }
     }
 
     public class SellerOrdersResponse

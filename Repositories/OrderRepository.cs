@@ -65,6 +65,7 @@ namespace DemoFYP.Repositories
                     TotalAmt = o.TotalAmount,
                     Status = o.Status,
                     CreatedAt = o.CreatedDateTime,
+                    PaymentMethodID = o.Payment.Select(p => p.PaymentMethodID).FirstOrDefault(0),
 
                     OrderItems = o.OrderItems.Select(oi =>
                     {
@@ -93,8 +94,7 @@ namespace DemoFYP.Repositories
                             SellerName = sellerInfo.UserName,
                             SellerPhoneNo = sellerInfo.PhoneNumber,
                             Status = oi.Status,
-                            Receipt = receipt,
-                            PaymentMethodID = paymentForSeller?.PaymentMethodID ?? 0
+                            Receipt = receipt
                         };
                     }).ToList()
                 }).ToList();
