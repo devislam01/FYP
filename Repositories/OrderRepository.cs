@@ -67,36 +67,39 @@ namespace DemoFYP.Repositories
                     CreatedAt = o.CreatedDateTime,
                     PaymentMethodID = o.Payment.Select(p => p.PaymentMethodID).FirstOrDefault(0),
 
-                    OrderItems = o.OrderItems.Select(oi =>
-                    {
-                        var sellerId = oi.Product?.UserId;
-
-                        var paymentForSeller = o.Payment
-                            .FirstOrDefault(p => p.SellerID == sellerId);
-
-                        var receipt = !string.IsNullOrWhiteSpace(paymentForSeller?.Receipt)
-                            ? $"{_config["BackendUrl"]}/{paymentForSeller.Receipt}"
-                            : string.Empty;
-
-                        var sellerInfo = sellerId.HasValue && sellerUserMap.TryGetValue(sellerId.Value, out var seller)
-                            ? seller
-                            : new { UserName = string.Empty, PhoneNumber = string.Empty };
-
-                        return new OrderItemVO
+                    OrderItems = o.OrderItems
+                        .GroupBy(oi => oi.Product.UserId)
+                        .Select(group =>
                         {
-                            OrderItemID = oi.OrderItemID,
-                            ProductName = oi.Product?.ProductName,
-                            Price = oi.Product?.ProductPrice ?? 0,
-                            Quantity = oi.Qty,
-                            ProductImage = string.IsNullOrWhiteSpace(oi.Product?.ProductImage)
-                                ? string.Empty
-                                : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
-                            SellerName = sellerInfo.UserName,
-                            SellerPhoneNo = sellerInfo.PhoneNumber,
-                            Status = oi.Status,
-                            Receipt = receipt
-                        };
-                    }).ToList()
+                            var sellerId = group.Key;
+
+                            var sellerInfo = sellerUserMap.TryGetValue(sellerId, out var info)
+                                ? info
+                                : new { UserName = string.Empty, PhoneNumber = string.Empty };
+
+                            var paymentForSeller = o.Payment.FirstOrDefault(p => p.SellerID == sellerId);
+                            var receipt = !string.IsNullOrWhiteSpace(paymentForSeller?.Receipt)
+                                ? $"{_config["BackendUrl"]}/{paymentForSeller.Receipt}"
+                                : null;
+
+                            return new OrderSellerGroupVO
+                            {
+                                SellerName = sellerInfo.UserName ?? "",
+                                SellerPhoneNo = sellerInfo.PhoneNumber ?? "",
+                                Receipt = receipt,
+                                Items = group.Select(oi => new OrderItemVO
+                                {
+                                    OrderItemID = oi.OrderItemID,
+                                    ProductName = oi.Product.ProductName,
+                                    Price = oi.Product?.ProductPrice ?? 0,
+                                    Quantity = oi.Qty,
+                                    ProductImage = string.IsNullOrWhiteSpace(oi.Product?.ProductImage)
+                                        ? string.Empty
+                                        : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
+                                    Status = oi.Status
+                                }).ToList()
+                            };
+                        }).ToList()
                 }).ToList();
             }
             catch

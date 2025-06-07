@@ -9,7 +9,7 @@ namespace DemoFYP.Models.Dto.Response
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public int PaymentMethodID { get; set; }
-        public List<OrderItemVO> OrderItems { get; set; } = null!;
+        public List<OrderSellerGroupVO> OrderItems { get; set; } = null!;
     }
 
     public class OrderSummariesResponse
@@ -31,10 +31,16 @@ namespace DemoFYP.Models.Dto.Response
     public class OrderItemVO : OrderItem
     {
         public string ProductImage { get; set; } = null!;
-        public string SellerName {  get; set; } = null!;
+    }
+
+    public class OrderSellerGroupVO
+    {
+        public string SellerName { get; set; } = null!;
         public string SellerPhoneNo { get; set; } = null!;
         public string? Receipt { get; set; }
+        public List<OrderItemVO> Items { get; set; } = new();
     }
+
 
     public class SellerOrdersResponse
     {
