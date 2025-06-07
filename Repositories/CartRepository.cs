@@ -33,7 +33,7 @@ namespace DemoFYP.Repositories
 
             try
             {
-                var userData = await context.Users.Where(u => u.UserId == curUserID).FirstOrDefaultAsync() ?? throw new UnauthorizedAccessException("User not Found");
+                var userData = await context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == curUserID) ?? throw new UnauthorizedAccessException("User not Found");
 
                 if (!string.IsNullOrEmpty(userData.Shopping_Cart))
                 {
@@ -47,6 +47,7 @@ namespace DemoFYP.Repositories
                         }
 
                         item.StockQty = await context.Products.Where(p => p.ProductId == item.ProductID).Select(p => p.StockQty).FirstOrDefaultAsync();
+                        item.SellerName = await context.Products.Where(p => p.ProductId == item.ProductID).Join(context.Users, p => p.UserId, u => u.UserId, (p, u) => u.UserName).FirstOrDefaultAsync() ?? "Unknown";
                     }
 
                     return cartItems;
