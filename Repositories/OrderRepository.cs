@@ -96,7 +96,8 @@ namespace DemoFYP.Repositories
                                     ProductImage = string.IsNullOrWhiteSpace(oi.Product?.ProductImage)
                                         ? string.Empty
                                         : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
-                                    Status = oi.Status
+                                    Status = oi.Status,
+                                    ProductID = oi.Product.ProductId
                                 }).ToList()
                             };
                         }).ToList()

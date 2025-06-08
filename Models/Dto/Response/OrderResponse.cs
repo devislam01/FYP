@@ -31,6 +31,7 @@ namespace DemoFYP.Models.Dto.Response
     public class OrderItemVO : OrderItem
     {
         public string ProductImage { get; set; } = null!;
+        public int ProductID { get; set; }
     }
 
     public class OrderSellerGroupVO
