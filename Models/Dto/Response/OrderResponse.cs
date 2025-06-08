@@ -39,6 +39,9 @@ namespace DemoFYP.Models.Dto.Response
         public string SellerName { get; set; } = null!;
         public string SellerPhoneNo { get; set; } = null!;
         public string? Receipt { get; set; }
+        public int PaymentID { get; set; }
+        public string PaymentQRCode { get; set; } = null!;
+        public double TotalAmtForSeller {  get; set; }
         public List<OrderItemVO> Items { get; set; } = new();
     }
 

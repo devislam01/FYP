@@ -57,7 +57,7 @@ namespace DemoFYP.Repositories
 
                 var sellerUserMap = context.Users
                     .Where(u => allSellerIds.Contains(u.UserId))
-                    .ToDictionary(u => u.UserId, u => new { u.UserName, u.PhoneNumber });
+                    .ToDictionary(u => u.UserId, u => new { u.UserName, u.PhoneNumber, u.PaymentQRCode });
 
                 return orders.Select(o => new UserOrdersResponse
                 {
@@ -75,7 +75,11 @@ namespace DemoFYP.Repositories
 
                             var sellerInfo = sellerUserMap.TryGetValue(sellerId, out var info)
                                 ? info
-                                : new { UserName = string.Empty, PhoneNumber = string.Empty };
+                                : new { UserName = string.Empty, PhoneNumber = string.Empty, PaymentQRCode = string.Empty };
+
+                            var paymentQRCode = !string.IsNullOrWhiteSpace(sellerInfo.PaymentQRCode)
+                                ? $"{_config["BackendUrl"]}/{sellerInfo.PaymentQRCode}"
+                                : null;
 
                             var paymentForSeller = o.Payment.FirstOrDefault(p => p.SellerID == sellerId);
                             var receipt = !string.IsNullOrWhiteSpace(paymentForSeller?.Receipt)
@@ -87,6 +91,9 @@ namespace DemoFYP.Repositories
                                 SellerName = sellerInfo.UserName ?? "",
                                 SellerPhoneNo = sellerInfo.PhoneNumber ?? "",
                                 Receipt = receipt,
+                                PaymentID = paymentForSeller?.PaymentId ?? 0,
+                                PaymentQRCode = paymentQRCode,
+                                TotalAmtForSeller = group.Sum(oi => oi.UnitPrice * oi.Qty),
                                 Items = group.Select(oi => new OrderItemVO
                                 {
                                     OrderItemID = oi.OrderItemID,
