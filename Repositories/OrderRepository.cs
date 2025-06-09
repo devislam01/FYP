@@ -529,7 +529,7 @@ namespace DemoFYP.Repositories
 
                 string email = await context.Orders.Where(o => o.OrderId == orderItem.OrderID).Join(context.Users, o => o.UserId, u => u.UserId, (o, u) => u.Email).FirstOrDefaultAsync() ?? "";
 
-                string subject = $"Order ID: '{orderItem.OrderID}' Cancelled!";
+                string subject = $"Order ID: {orderItem.OrderID} Cancelled!";
                 string body = "Your order has been cancelled, please contact us if you have any issues regarding to this action. Thank you!";
 
                 await _emailServices.SendEmailAsync(email, subject, body);
@@ -634,21 +634,20 @@ namespace DemoFYP.Repositories
         public async Task MarkOrderAsCompleted(MarkOrderCompletedRequest payload, Guid curUserID)
         {
             var context = _factory.CreateDbContext();
+            await using var trans = await context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
             try
             {
                 var order = await context.Orders
-                    .FirstOrDefaultAsync(oi => oi.OrderId == payload.OrderID) ?? throw new NotFoundException("Order not found");
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Product)
+                    .FirstOrDefaultAsync(o => o.OrderId == payload.OrderID) ?? throw new NotFoundException("Order not found");
 
-                order.Status = OrderStatus.Completed.ToString();
-                order.UpdatedDateTime = DateTime.Now;
-                order.UpdatedBy = curUserID;
+                var orderItems = order.OrderItems
+                    .Where(oi => oi.OrderID == payload.OrderID && oi.Product.UserId == curUserID)
+                    .ToList();
 
-                await context.SaveChangesAsync();
-
-                var orderItems = await context.OrderItems
-                    .Where(oi => oi.OrderID == payload.OrderID)
-                    .ToListAsync();
+                var buyerEmail = await context.Users.Select(u => new { u.UserId, u.Email }).FirstOrDefaultAsync(u => u.UserId == order.UserId);
 
                 foreach (var item in orderItems)
                 {
@@ -656,11 +655,35 @@ namespace DemoFYP.Repositories
                     item.UpdatedAt = DateTime.Now;
                     item.UpdatedBy = curUserID;
 
-                    await context.SaveChangesAsync();
                 }
+
+                await context.SaveChangesAsync();
+
+                bool allItemsCompleted = order.OrderItems
+                    .All(oi => oi.Status == OrderStatus.Completed.ToString());
+
+                if (allItemsCompleted)
+                {
+                    order.Status = OrderStatus.Completed.ToString();
+                    order.UpdatedDateTime = DateTime.Now;
+                    order.UpdatedBy = curUserID;
+
+                    await context.SaveChangesAsync();
+
+                    string subject = $"Order {order.OrderId} has been completed!";
+                    string body = $"All of your Orders with ID {order.OrderId} already completed! Feel free to contact our customer service if you facing any issue. Thank you!";
+                    string supportEmail = _config["Email:SupportEmail"] ?? "";
+                    await _emailServices.SendEmailAsync(buyerEmail?.Email ?? supportEmail, subject, body);
+                }
+
+                await trans.CommitAsync();
             }
             catch
             {
+                if (trans != null)
+                {
+                    await trans.RollbackAsync();
+                }
                 throw;
             }
             finally
