@@ -65,6 +65,45 @@ namespace DemoFYP.Repositories
             }
         }
 
+        public async Task<List<ShoppingCartObj>> GetShoppingCartByProductIDs(List<int> productIDs, Guid curUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var userData = await context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == curUserID) ?? throw new UnauthorizedAccessException("User not Found");
+
+                if (!string.IsNullOrEmpty(userData.Shopping_Cart))
+                {
+                    var cartItems = JsonSerializer.Deserialize<List<ShoppingCartObj>>(userData.Shopping_Cart) ?? new List<ShoppingCartObj>();
+                    var filteredCart = cartItems.Where(ci => productIDs.Contains(ci.ProductID)).ToList();
+
+                    foreach (var item in filteredCart)
+                    {
+                        if (!string.IsNullOrEmpty(item.ProductImage))
+                        {
+                            item.ProductImage = string.IsNullOrWhiteSpace(item.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{item.ProductImage}";
+                        }
+
+                        item.StockQty = await context.Products.Where(p => p.ProductId == item.ProductID).Select(p => p.StockQty).FirstOrDefaultAsync();
+                        item.SellerName = await context.Products.Where(p => p.ProductId == item.ProductID).Join(context.Users, p => p.UserId, u => u.UserId, (p, u) => u.UserName).FirstOrDefaultAsync() ?? "Unknown";
+                    }
+
+                    return filteredCart;
+                }
+
+                return new List<ShoppingCartObj>();
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
         public async Task AddToCart(ShoppingCartRequest payload, Guid curUserID)
         {
             var context = _factory.CreateDbContext();

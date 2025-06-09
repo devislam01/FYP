@@ -33,6 +33,20 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task<List<ShoppingCartObj>> GetShoppingCartByProductIDs(List<int> productIDs, Guid curUserID)
+        {
+            if (curUserID == Guid.Empty) throw new UnauthorizedAccessException();
+
+            try
+            {
+                return await _cartRepository.GetShoppingCartByProductIDs(productIDs, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task AddToCart(ShoppingCartRequest payload, Guid curUserID)
         {
             if (payload.ProductID == 0) throw new BadRequestException("Product ID is required");

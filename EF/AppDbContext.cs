@@ -344,7 +344,8 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.EmailId).HasColumnName("EmailID");
             entity.Property(e => e.From).HasMaxLength(45);
             entity.Property(e => e.To).HasMaxLength(45);
-            entity.Property(e => e.Subject).HasMaxLength(45);
+            entity.Property(e => e.Subject).HasMaxLength(255);
+            entity.Property(e => e.ErrorMessage).HasMaxLength(255);
             entity.Property(e => e.IsSent).HasColumnName("isSent");
         });
 

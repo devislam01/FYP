@@ -32,6 +32,7 @@ namespace DemoFYP.Models.Dto.Response
     {
         public string ProductImage { get; set; } = null!;
         public int ProductID { get; set; }
+        public bool HasRating { get; set; }
     }
 
     public class OrderSellerGroupVO

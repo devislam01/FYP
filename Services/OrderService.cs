@@ -46,11 +46,11 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<OrderSummariesResponse> GetOrderSummaries(Guid curUserID)
+        public async Task<OrderSummariesResponse> GetOrderSummaries(List<int> productIDs, Guid curUserID)
         {
             try
             {
-                List<ShoppingCartObj> shoppingCart = await _cartServices.GetShoppingCart(curUserID);
+                List<ShoppingCartObj> shoppingCart = await _cartServices.GetShoppingCartByProductIDs(productIDs, curUserID);
 
                 double total = shoppingCart.Sum(sc => sc.ProductPrice * sc.Quantity);
 

@@ -6,6 +6,7 @@
         Processing,
         Completed,
         RequestCancel,
+        PartiallyRequestCancel,
         Cancelled
     }
 

@@ -86,7 +86,7 @@ namespace DemoFYP.Models.Dto.Request
 
     public class FeedbackListRequest : PaginationRequest
     {
-        public int OrderItemID { get; set; }
+        public int ProductID { get; set; }
     }
 
     #region Admin Dto

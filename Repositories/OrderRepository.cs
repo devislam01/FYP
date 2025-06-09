@@ -59,6 +59,10 @@ namespace DemoFYP.Repositories
                     .Where(u => allSellerIds.Contains(u.UserId))
                     .ToDictionary(u => u.UserId, u => new { u.UserName, u.PhoneNumber, u.PaymentQRCode });
 
+                var reviewedOrderItemIds = context.SellerReviews
+                    .Select(sr => sr.OrderItemID)
+                    .ToHashSet();
+
                 return orders.Select(o => new UserOrdersResponse
                 {
                     OrderID = o.OrderId,
@@ -104,7 +108,8 @@ namespace DemoFYP.Repositories
                                         ? string.Empty
                                         : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
                                     Status = oi.Status,
-                                    ProductID = oi.Product.ProductId
+                                    ProductID = oi.Product.ProductId,
+                                    HasRating = reviewedOrderItemIds.Contains(oi.OrderItemID)
                                 }).ToList()
                             };
                         }).ToList()
@@ -388,7 +393,7 @@ namespace DemoFYP.Repositories
                 }
                 
 
-                await MarkOrderToProcessing(curUserID, context);
+                await MarkOrderToProcessing(payload.OrderID, curUserID, context);
                 await MarkOrderItemsToProcessing(payload.OrderID, curUserID, context);
 
                 string subject = $"Order {payload.OrderID} Confirmed!";
@@ -396,6 +401,26 @@ namespace DemoFYP.Repositories
 
                 await _emailServices.SendEmailAsync(curUserEmail, subject, body);
                 await OrderHub.NotifyUserAsync(_hubContext, curUserID, $"Order {payload.OrderID} bought successfully!");
+
+                // notify seller
+                var order = await context.Orders.Include(o => o.OrderItems).ThenInclude(oi => oi.Product).Where(o => o.OrderId == payload.OrderID).FirstOrDefaultAsync();
+                var sellerID = order.OrderItems.Select(oi => oi.Product.UserId).FirstOrDefault();
+                var sellerEmail = await context.Users.Where(u => u.UserId == sellerID).Select(u => u.Email).FirstOrDefaultAsync();
+
+                string sellerSubject = $"You have a new order! Order ID: {payload.OrderID}";
+                string sellerBody = $@"
+                        Dear Seller,
+
+                        Good news! Your product(s) have just been purchased under Order ID: {payload.OrderID}.
+
+                        Please log in to your seller dashboard to view the order details and proceed with the next steps.
+
+                        If you have any questions or encounter issues, feel free to contact our support team.
+
+                        Thank you for selling with us!
+                        ";
+                await _emailServices.SendEmailAsync(sellerEmail, sellerSubject, sellerBody);
+                await OrderHub.NotifyUserAsync(_hubContext, sellerID, $"You have a new order! Order ID: {payload.OrderID}");
 
                 var paidProducts = await context.OrderItems.Where(oi => oi.OrderID == payload.OrderID).Select(oi => oi.ProductID).ToListAsync();
 
@@ -432,7 +457,7 @@ namespace DemoFYP.Repositories
 
                 await context.SaveChangesAsync();
 
-                await MarkOrderItemsAsRequestCancel(curData.OrderItems, curUserID, context);
+                await MarkOrderItemsAsRequestCancel(curData.OrderItems, curUserID, payload.CancelReason, context);
 
                 var orderItemIds = curData.OrderItems.Select(oi => oi.OrderItemID).ToList();
                 List<string> sellerEmails = await GetSellerEmailsByOrderItemIds(orderItemIds, context);
@@ -440,7 +465,7 @@ namespace DemoFYP.Repositories
                 foreach(var sellerEmail in sellerEmails)
                 {
                     string subject = $"Cancellation Request of Order {payload.OrderID}";
-                    string body = $"You have a request for cancelling Order ID '{payload.OrderID}', please have a look and verify whether you accept this cancellation, thank you!";
+                    string body = $"You have a request for cancelling Order ID {payload.OrderID}, please have a look and verify whether you accept this cancellation, thank you!";
 
                     await _emailServices.SendEmailAsync(sellerEmail, subject, body);
                 }
@@ -471,7 +496,37 @@ namespace DemoFYP.Repositories
                 curData.UpdatedAt = DateTime.Now;
                 curData.UpdatedBy = curUserID;
 
+                var orderId = curData.OrderID;
+
                 await context.SaveChangesAsync();
+
+                var allItems = await context.OrderItems
+                    .Where(o => o.OrderID == orderId)
+                    .ToListAsync();
+
+                var allStatuses = allItems.Select(i => i.Status).Distinct().ToList();
+
+                var order = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+                if (order != null)
+                {
+                    if (allStatuses.All(s => s == OrderStatus.RequestCancel.ToString()))
+                    {
+                        order.Status = OrderStatus.RequestCancel.ToString();
+                    }
+                    else if (allStatuses.Contains(OrderStatus.RequestCancel.ToString()))
+                    {
+                        order.Status = OrderStatus.PartiallyRequestCancel.ToString();
+                    }
+                    else
+                    {
+                        order.Status = OrderStatus.Processing.ToString();
+                    }
+
+                    order.UpdatedDateTime = DateTime.Now;
+                    order.UpdatedBy = curUserID;
+
+                    await context.SaveChangesAsync();
+                }
 
                 await trans.CommitAsync();
             }
@@ -489,6 +544,7 @@ namespace DemoFYP.Repositories
         public async Task ConfirmCancelOrderItemBySeller(ConfirmCancelOrderItemRequest payload, Guid curUserID)
         {
             var context = _factory.CreateDbContext();
+            await using var trans = await context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
             try
             {
@@ -512,19 +568,25 @@ namespace DemoFYP.Repositories
                 await UpdateProductQtyByProductID(orderItem.ProductID, orderItem.Qty, context);
 
                 var allItems = await context.OrderItems
-                    .Where(oi => oi.OrderID == orderItem.OrderID)
-                    .ToListAsync();
+                   .Where(oi => oi.OrderID == orderItem.OrderID)
+                   .ToListAsync();
 
-                if (allItems.All(oi => oi.Status == OrderStatus.Cancelled.ToString()))
+                var order = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderItem.OrderID);
+
+                if (order != null)
                 {
-                    var order = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderItem.OrderID);
-                    if (order != null)
+                    if (allItems.All(oi => oi.Status == OrderStatus.Cancelled.ToString()))
                     {
                         order.Status = OrderStatus.Cancelled.ToString();
-                        order.UpdatedDateTime = DateTime.Now;
-                        order.UpdatedBy = curUserID;
-                        await context.SaveChangesAsync();
                     }
+                    else if (allItems.Any(oi => oi.Status == OrderStatus.Cancelled.ToString()))
+                    {
+                        order.Status = OrderStatus.PartiallyRequestCancel.ToString();
+                    }
+
+                    order.UpdatedDateTime = DateTime.Now;
+                    order.UpdatedBy = curUserID;
+                    await context.SaveChangesAsync();
                 }
 
                 string email = await context.Orders.Where(o => o.OrderId == orderItem.OrderID).Join(context.Users, o => o.UserId, u => u.UserId, (o, u) => u.Email).FirstOrDefaultAsync() ?? "";
@@ -533,9 +595,15 @@ namespace DemoFYP.Repositories
                 string body = "Your order has been cancelled, please contact us if you have any issues regarding to this action. Thank you!";
 
                 await _emailServices.SendEmailAsync(email, subject, body);
+
+                await trans.CommitAsync();
             }
             catch
             {
+                if (trans != null)
+                {
+                    await trans.RollbackAsync();
+                }
                 throw;
             }
             finally
@@ -547,6 +615,7 @@ namespace DemoFYP.Repositories
         public async Task RejectCancelOrderItemBySeller(RejectCancelOrderItemRequest payload, Guid curUserID)
         {
             var context = _factory.CreateDbContext();
+            await using var trans = await context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
             try
             {
@@ -559,24 +628,57 @@ namespace DemoFYP.Repositories
                     throw new ForbiddenException("You are not the owner of this product.");
 
                 if (orderItem.Status != "RequestCancel")
-                    throw new InvalidOperationException("This item is not in RequestCancel status.");
+                    throw new InvalidOperationException("This item was not requested to cancel.");
 
                 orderItem.Status = OrderStatus.Processing.ToString();
                 orderItem.UpdatedAt = DateTime.Now;
                 orderItem.UpdatedBy = curUserID;
-                orderItem.CancelReason = null;
+                orderItem.CancelReason = payload.Reason;
 
                 await context.SaveChangesAsync();
 
+                var allItems = await context.OrderItems
+                   .Where(oi => oi.OrderID == orderItem.OrderID)
+                   .ToListAsync();
+
+                var order = await context.Orders
+                    .FirstOrDefaultAsync(o => o.OrderId == orderItem.OrderID);
+
+                if (order != null)
+                {
+                    if (allItems.All(oi => oi.Status == OrderStatus.Processing.ToString()))
+                    {
+                        order.Status = OrderStatus.Processing.ToString();
+                    }
+                    else if (allItems.Any(oi => oi.Status == OrderStatus.RequestCancel.ToString()))
+                    {
+                        order.Status = OrderStatus.PartiallyRequestCancel.ToString();
+                    }
+                    else if (allItems.Any(oi => oi.Status == OrderStatus.Cancelled.ToString()))
+                    {
+                        order.Status = OrderStatus.PartiallyRequestCancel.ToString();
+                    }
+
+                    order.UpdatedDateTime = DateTime.Now;
+                    order.UpdatedBy = curUserID;
+                    await context.SaveChangesAsync();
+                }
+
                 string email = await context.Orders.Where(o => o.OrderId == orderItem.OrderID).Join(context.Users, o => o.UserId, u => u.UserId, (o, u) => u.Email).FirstOrDefaultAsync() ?? "";
 
-                string subject = $"Order ID: '{orderItem.OrderID}' Cancellation has been Rejected!";
+                string subject = $"Order ID: {orderItem.OrderID} Cancellation has been Rejected!";
                 string body = "Your order has been rejected, please contact seller personally if you have any issues regarding to this. Thank you!";
 
                 await _emailServices.SendEmailAsync(email, subject, body);
+
+                await trans.CommitAsync();
             }
             catch
             {
+                if (trans != null)
+                {
+                    await trans.RollbackAsync();
+                }
                 throw;
             }
             finally
@@ -659,10 +761,13 @@ namespace DemoFYP.Repositories
 
                 await context.SaveChangesAsync();
 
-                bool allItemsCompleted = order.OrderItems
-                    .All(oi => oi.Status == OrderStatus.Completed.ToString());
+                bool allItemsDone = order.OrderItems
+                    .All(oi => oi.Status == OrderStatus.Completed.ToString() || oi.Status == OrderStatus.Cancelled.ToString());
 
-                if (allItemsCompleted)
+                bool atLeastOneCompleted = order.OrderItems
+                    .Any(oi => oi.Status == OrderStatus.Completed.ToString());
+
+                if (allItemsDone && atLeastOneCompleted)
                 {
                     order.Status = OrderStatus.Completed.ToString();
                     order.UpdatedDateTime = DateTime.Now;
@@ -740,8 +845,12 @@ namespace DemoFYP.Repositories
 
             try
             {
+                var orderItemIds = context.OrderItems
+                    .Where(oi => oi.ProductID == filter.ProductID)
+                    .Select(oi => oi.OrderItemID);
+
                 var query = context.SellerReviews
-                    .Where(sr => sr.OrderItemID == filter.OrderItemID)
+                    .Where(sr => orderItemIds.Contains(sr.OrderItemID))
                     .Join(context.Users,
                         sr => sr.BuyerID,
                         u => u.UserId,
@@ -1004,7 +1113,7 @@ namespace DemoFYP.Repositories
                         .FirstOrDefaultAsync() ?? throw new NotFoundException("Seller Email not Found");
 
                 string subject = $"Cancellation Request of Order {orderItemID}";
-                string body = $"You have a request for cancelling Order ID '{orderItemID}', please have a look and verify whether you accept this cancellation, thank you!";
+                string body = $"You have a request for cancelling Order ID {orderItemID}, please have a look and verify whether you accept this cancellation, thank you!";
 
                 bool isSucess = await _emailServices.SendEmailAsync(sellerEmail, subject, body);
 
@@ -1020,13 +1129,14 @@ namespace DemoFYP.Repositories
             }
         }
 
-        private static async Task MarkOrderItemsAsRequestCancel(List<OrderItems> orderItems, Guid userId, AppDbContext context)
+        private static async Task MarkOrderItemsAsRequestCancel(List<OrderItems> orderItems, Guid userId, string cancelReason, AppDbContext context)
         {
             foreach (var item in orderItems)
             {
                 item.Status = OrderStatus.RequestCancel.ToString();
                 item.UpdatedAt = DateTime.Now;
                 item.UpdatedBy = userId;
+                item.CancelReason = cancelReason;
             }
 
             await context.SaveChangesAsync();
@@ -1058,13 +1168,13 @@ namespace DemoFYP.Repositories
             
         }
 
-        public async Task MarkOrderToProcessing(Guid curUserID, AppDbContext outerContext)
+        public async Task MarkOrderToProcessing(int orderID, Guid curUserID, AppDbContext outerContext)
         {
             var context = outerContext ?? _factory.CreateDbContext();
 
             try
             {
-                var order = await context.Orders.OrderByDescending(o => o.OrderId).FirstOrDefaultAsync(o => o.UserId == curUserID) ?? throw new NotFoundException("Order not Found!");
+                var order = await context.Orders.OrderByDescending(o => o.OrderId).Where(o => o.OrderId == orderID).FirstOrDefaultAsync() ?? throw new NotFoundException("Order not Found!");
 
                 order.Status = OrderStatus.Processing.ToString();
                 order.UpdatedDateTime = DateTime.Now;

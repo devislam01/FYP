@@ -31,9 +31,9 @@ namespace DemoFYP.Controllers
 
         [Authorize]
         [HttpGet("orderSummaries")]
-        public async Task<ActionResult<StandardResponse<OrderSummariesResponse>>> GetOrderSummaries()
+        public async Task<ActionResult<StandardResponse<OrderSummariesResponse>>> GetOrderSummaries([FromQuery] List<int> productID)
         {
-            return SuccessResponse<OrderSummariesResponse>(await _orderServices.GetOrderSummaries(CurUserID));
+            return SuccessResponse<OrderSummariesResponse>(await _orderServices.GetOrderSummaries(productID, CurUserID));
         } 
 
         [Authorize]
