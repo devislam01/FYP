@@ -236,7 +236,7 @@ namespace DemoFYP.Repositories
 
                 if (!string.IsNullOrEmpty(filter.Email))
                 {
-                    query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
+                    query = query.Where(u => u.Email.ToLower().Contains(filter.Email.ToLower()));
                 }
 
                 if (filter.Ratings != null)
@@ -246,7 +246,7 @@ namespace DemoFYP.Repositories
 
                 if (!string.IsNullOrEmpty(filter.UserName))
                 {
-                    query = query.Where(u => u.UserName.ToLower() == filter.UserName.ToLower());
+                    query = query.Where(u => u.UserName.ToLower().Contains(filter.UserName.ToLower()));
                 }
 
                 if (!string.IsNullOrEmpty(filter.PhoneNumber))
@@ -297,6 +297,34 @@ namespace DemoFYP.Repositories
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to Get User List", ex);
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task<EditUserDetailsResponse> GetUserDetails(Guid userID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                return await context.Users
+                    .Select(u => new EditUserDetailsResponse 
+                    { 
+                        UserID = u.UserId, 
+                        UserName = u.UserName ?? string.Empty, 
+                        Email = u.Email, 
+                        PhoneNumber = u.PhoneNumber ?? string.Empty, 
+                        UserGender = u.UserGender ?? string.Empty, 
+                        Address = u.Address ?? string.Empty, 
+                        ResidentialCollege = u.ResidentialCollege ?? string.Empty
+                    }).FirstOrDefaultAsync(u => u.UserID == userID) ?? new EditUserDetailsResponse();
+            }
+            catch(Exception ex)
+            {
+                throw new InvalidOperationException("Failed to Get User Detail", ex);
             }
             finally
             {

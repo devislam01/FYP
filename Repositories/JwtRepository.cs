@@ -31,6 +31,11 @@ namespace DemoFYP.Repositories
                 }
                 else
                 {
+                    if (existUserToken.IsRevoked)
+                    {
+                        throw new BusinessException("Your account has been banned.");
+                    }
+
                     existUserToken.AccessToken = userToken.AccessToken;
                     existUserToken.AccessTokenExpiresAt = userToken.AccessTokenExpiresAt;
                     existUserToken.RefreshToken = userToken.RefreshToken;
@@ -41,9 +46,9 @@ namespace DemoFYP.Repositories
 
                 await context.SaveChangesAsync();
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Insert token failed");
+                throw new InvalidOperationException("Insert Token Failed", ex);
             }
             finally
             {
@@ -122,7 +127,7 @@ namespace DemoFYP.Repositories
             try
             {
                 var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == userID) ?? throw new NotFoundException($"{userID} was not found");
-                var userToken = await context.Usertokens.OrderByDescending(ut => ut.TokenId).FirstOrDefaultAsync(ut => ut.UserId == userID) ?? throw new NotFoundException("Token not Found");
+                var userToken = await context.Usertokens.OrderByDescending(ut => ut.TokenId).FirstOrDefaultAsync(ut => ut.UserId == userID) ?? throw new NotFoundException("This user haven't login yet");
 
                 user.IsActive = 0;
                 userToken.IsRevoked = true;
@@ -131,7 +136,7 @@ namespace DemoFYP.Repositories
             }
             catch
             {
-                throw new InvalidOperationException("Internal Error happen");
+                throw;
             }
             finally
             {

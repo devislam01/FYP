@@ -27,7 +27,13 @@ namespace DemoFYP.Controllers.Admin
             return SuccessResponse<PagedResult<UserListResponse>>(await _userServices.GetUserList(filter));
         }
 
-        [Authorize(Policy = "Admin_Create_User")]
+        [HttpPost("userDetails")]
+        public async Task<ActionResult<StandardResponse<EditUserDetailsResponse>>> GetUserDetails([FromBody] GetUserDetailRequest payload)
+        {
+            return SuccessResponse<EditUserDetailsResponse>(await _userServices.GetUserDetails(payload.UserID));
+        }
+
+        [Authorize(Policy = "AP_Create_User")]
         [HttpPost("createUser")]
         public async Task<ActionResult<StandardResponse>> CreateUser(UserRegisterRequest payload)
         {
@@ -36,7 +42,7 @@ namespace DemoFYP.Controllers.Admin
             return SuccessResponse("User Created Successfully!");
         }
 
-        [Authorize(Policy = "Admin_Update_User")]
+        [Authorize(Policy = "AP_Update_User")]
         [HttpPost("updateUser")]
         public async Task<ActionResult<StandardResponse>> UpdateUser(UserUpdateDetailRequest payload)
         {

@@ -17,6 +17,7 @@ namespace DemoFYP.Repositories.IRepositories
         Task<UserPermissionResponse> GetAdminPermissions();
         Task<UserPermissionResponse> GetUserPermissionsByLoginID(Guid curUserID);
         Task<PagedResult<UserListResponse>> GetUserList(UserListFilterRequest filter);
+        Task<EditUserDetailsResponse> GetUserDetails(Guid userID);
 
         #endregion
 

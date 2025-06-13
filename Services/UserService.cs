@@ -108,6 +108,18 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task<EditUserDetailsResponse> GetUserDetails(Guid userID)
+        {
+            try
+            {
+                return await _userRepository.GetUserDetails(userID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         #endregion
 
         #region Create Services

@@ -21,6 +21,8 @@ namespace DemoFYP.Services.IServices
 
         Task<PagedResult<UserListResponse>> GetUserList(UserListFilterRequest filter);
 
+        Task<EditUserDetailsResponse> GetUserDetails(Guid userID);
+
         #endregion
 
         #region Create Services

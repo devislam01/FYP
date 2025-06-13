@@ -197,10 +197,9 @@ namespace DemoFYP.Repositories
             {
                 var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == curUserID) ?? throw new NotFoundException("User not Found");
 
-                var cartItems = JsonSerializer.Deserialize<List<ShoppingCartObj>>(user.Shopping_Cart);
+                if (user.Shopping_Cart == null) return;
 
-                if (cartItems == null)
-                    return;
+                var cartItems = JsonSerializer.Deserialize<List<ShoppingCartObj>>(user.Shopping_Cart);
 
                 cartItems.RemoveAll(item => paidProductIds.Contains(item.ProductID));
 

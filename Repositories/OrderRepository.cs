@@ -575,13 +575,23 @@ namespace DemoFYP.Repositories
 
                 if (order != null)
                 {
-                    if (allItems.All(oi => oi.Status == OrderStatus.Cancelled.ToString()))
+                    if (allItems.All(oi =>
+                            oi.Status == OrderStatus.Completed.ToString() ||
+                            oi.Status == OrderStatus.Cancelled.ToString()))
+                    {
+                        order.Status = OrderStatus.Completed.ToString();
+                    }
+                    else if (allItems.All(oi => oi.Status == OrderStatus.Cancelled.ToString()))
                     {
                         order.Status = OrderStatus.Cancelled.ToString();
                     }
-                    else if (allItems.Any(oi => oi.Status == OrderStatus.Cancelled.ToString()))
+                    else if (allItems.Any(oi => oi.Status == OrderStatus.RequestCancel.ToString()))
                     {
                         order.Status = OrderStatus.PartiallyRequestCancel.ToString();
+                    }
+                    else
+                    {
+                        order.Status = OrderStatus.Processing.ToString();
                     }
 
                     order.UpdatedDateTime = DateTime.Now;
@@ -654,9 +664,9 @@ namespace DemoFYP.Repositories
                     {
                         order.Status = OrderStatus.PartiallyRequestCancel.ToString();
                     }
-                    else if (allItems.Any(oi => oi.Status == OrderStatus.Cancelled.ToString()))
+                    else
                     {
-                        order.Status = OrderStatus.PartiallyRequestCancel.ToString();
+                        order.Status = OrderStatus.Processing.ToString();
                     }
 
                     order.UpdatedDateTime = DateTime.Now;

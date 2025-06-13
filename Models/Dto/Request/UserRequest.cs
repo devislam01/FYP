@@ -64,5 +64,10 @@
         public DateTime? CreatedAt { get; set; }
     }
 
+    public class GetUserDetailRequest
+    {
+        public Guid UserID { get; set; }
+    }
+
     #endregion
 }
