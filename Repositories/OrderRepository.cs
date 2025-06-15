@@ -909,31 +909,31 @@ namespace DemoFYP.Repositories
 
             try
             {
-                var query = context.Orders.OrderByDescending(o => o.CreatedDateTime);
+                var query = context.Orders.OrderByDescending(o => o.CreatedDateTime).AsQueryable();
 
                 if (filter.OrderID != null && filter.OrderID > 0)
                 {
-                    query.Where(q => q.OrderId == filter.OrderID);
+                    query = query.Where(q => q.OrderId == filter.OrderID);
                 }
 
                 if (filter.UserID != null && filter.UserID != Guid.Empty)
                 {
-                    query.Where(q => q.UserId == filter.UserID);
+                    query = query.Where(q => q.UserId == filter.UserID);
                 }
 
                 if (filter.PaymentID != null && filter.PaymentID > 0)
                 {
-                    query.Where(q => q.PaymentId == filter.PaymentID);
+                    query = query.Where(q => q.PaymentId == filter.PaymentID);
                 }
 
                 if (!string.IsNullOrEmpty(filter.Status.ToString()))
                 {
-                    query.Where(q => q.Status == filter.Status.ToString());
+                    query = query.Where(q => q.Status == filter.Status.ToString());
                 }
 
                 if (filter.CreatedAt != null)
                 {
-                    query.Where(q => q.CreatedDateTime == filter.CreatedAt);
+                    query = query.Where(q => q.CreatedDateTime == filter.CreatedAt);
                 }
 
                 int totalRecord = await query.CountAsync();
@@ -945,7 +945,7 @@ namespace DemoFYP.Repositories
                     {
                         OrderID = q.OrderId,
                         UserID = q.UserId,
-                        PaymentID = q.PaymentId ?? 0,
+                        PaymentID = string.Join(",", q.Payment.Select(q => q.PaymentId)),
                         TotalAmount = q.TotalAmount,
                         Status = q.Status,
                         CreatedAt = q.CreatedDateTime,

@@ -18,7 +18,7 @@ namespace DemoFYP.Controllers.AdminPortal
         }
 
         [Authorize(Policy = "AP_Read_Order")]
-        [HttpGet("orderList")]
+        [HttpPost("orderList")]
         public async Task<ActionResult<StandardResponse<PagedResult<OrderListResponse>>>> GetOrderList(OrderListFilterRequest filter)
         {
             var result = await _orderServices.GetOrderList(filter);

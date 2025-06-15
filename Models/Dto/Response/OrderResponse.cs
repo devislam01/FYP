@@ -101,7 +101,7 @@ namespace DemoFYP.Models.Dto.Response
     {
         public int OrderID { get; set; }
         public Guid UserID { get; set; }
-        public int PaymentID { get; set; }
+        public string PaymentID { get; set; }
         public double TotalAmount {  get; set; }
         public string Status {  get; set; }
         public DateTime CreatedAt { get; set; }
