@@ -27,6 +27,7 @@ namespace DemoFYP.Services.IServices
         Task UpdateProductByProductID(UpdateProductRequest product, Guid curUserID);
         Task DeleteProductByProductID(int productID, Guid curUserID);
         Task UnpublishProductByAdmin(int productID, Guid curUserID);
+        Task PublishProductByAdmin(int productID, Guid curUserID);
 
         #endregion
     }

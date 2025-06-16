@@ -99,8 +99,7 @@ namespace DemoFYP.Repositories
             try
             {
                 var query = context.Products
-                    .OrderByDescending(p => p.ProductId)
-                    .Where(p => p.IsActive == 1);
+                    .OrderByDescending(p => p.ProductId).AsQueryable();
 
                 if (filter.ProductID != null && filter.ProductID != 0)
                 {
@@ -216,7 +215,7 @@ namespace DemoFYP.Repositories
             try
             {
                 var productWithCategory = await context.Products
-                    .Where(p => p.ProductId == ProductID && p.IsActive == 1)
+                    .Where(p => p.ProductId == ProductID)
                     .Join(context.ProductCategories,
                           product => product.CategoryId,
                           pc => pc.CategoryId,
@@ -324,16 +323,16 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task UpdateProductByProductID(UpdateProductRequest payload, Guid curUserID, string ImageURL)
+        public async Task UpdateProductByProductID(UpdateProductRequest payload, Guid curUserID, string ImageURL, bool isAdmin)
         {
             var context = _factory.CreateDbContext();
             IDbContextTransaction tran = await context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
             try
             {
-                var existingData = await context.Products.FirstOrDefaultAsync(p => p.ProductId == payload.ProductID && p.IsActive == 1) ?? throw new NotFoundException("Product Not Found");
+                var existingData = await context.Products.FirstOrDefaultAsync(p => p.ProductId == payload.ProductID) ?? throw new NotFoundException("Product Not Found");
 
-                if (existingData.UserId != curUserID) { throw new ForbiddenException(); }
+                if (existingData.UserId != curUserID && !isAdmin) { throw new ForbiddenException(); }
 
                 existingData.ProductName = payload.ProductName ?? existingData.ProductName;
                 existingData.ProductDescription = payload.ProductDescription ?? existingData.ProductDescription;
@@ -408,6 +407,30 @@ namespace DemoFYP.Repositories
                 var result = await context.Products.FirstOrDefaultAsync(p => p.ProductId == productID && p.IsActive == 1) ?? throw new NotFoundException("Product Not Found"); ;
 
                 result.IsActive = 0;
+                result.UpdatedBy = curUserID;
+                result.UpdatedDateTime = DateTime.Now;
+
+                await context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task PublishProductByAdmin(int productID, Guid curUserID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var result = await context.Products.FirstOrDefaultAsync(p => p.ProductId == productID) ?? throw new NotFoundException("Product Not Found"); ;
+
+                result.IsActive = 1;
                 result.UpdatedBy = curUserID;
                 result.UpdatedDateTime = DateTime.Now;
 

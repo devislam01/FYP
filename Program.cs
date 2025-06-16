@@ -121,7 +121,8 @@ builder.Services.AddAuthorization(options =>
         "AP_Update_Product", "AP_Delete_Product", "AP_Reset_Password",
         "AP_Read_Order", "AP_Update_Order", "AP_Read_Payment",
         "AP_Update_Payment", "AP_Cancel_Order", "AP_Cancel_Order_Item",
-        "Confirm_Cancel", "Reject_Cancel", "AP_Update_User"
+        "Confirm_Cancel", "Reject_Cancel", "AP_Update_User", "AP_Publish_Product",
+        "AP_Read_PaymentDetail"
     };
 
     foreach (var permission in allPermissions)

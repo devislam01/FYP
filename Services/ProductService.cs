@@ -125,7 +125,7 @@ namespace DemoFYP.Services
 
             try
             {
-                await _productRepository.UpdateProductByProductID(payload, curUserID, imageURL);
+                await _productRepository.UpdateProductByProductID(payload, curUserID, imageURL, true);
             }
             catch
             {
@@ -156,6 +156,21 @@ namespace DemoFYP.Services
             try
             {
                 await _productRepository.UnpublishProductByAdmin(productID, curUserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task PublishProductByAdmin(int productID, Guid curUserID)
+        {
+            if (productID == 0) throw new BadRequestException("Product ID is required");
+            if (curUserID == Guid.Empty) throw new UnauthorizedAccessException("Session Expired! Please login again");
+
+            try
+            {
+                await _productRepository.PublishProductByAdmin(productID, curUserID);
             }
             catch
             {

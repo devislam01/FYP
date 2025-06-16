@@ -11,6 +11,11 @@ namespace DemoFYP.Models.Dto.Request
         public DateTime? CreatedDateTime { get; set; }
     }
 
+    public class PaymentDetailRequest
+    {
+        public int PaymentID { get; set; }
+    }
+
     public class UpdatePaymentRequest
     {
         public int PaymentId { get; set; }

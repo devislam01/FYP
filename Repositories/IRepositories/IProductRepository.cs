@@ -24,9 +24,10 @@ namespace DemoFYP.Repositories.IRepositories
 
         #region Update
 
-        Task UpdateProductByProductID(UpdateProductRequest paylaod, Guid curUserID, string ImageURL);
+        Task UpdateProductByProductID(UpdateProductRequest paylaod, Guid curUserID, string ImageURL, bool isAdmin = false);
         Task DeleteProductByProductID(int productID, Guid curUserID);
         Task UnpublishProductByAdmin(int productID, Guid curUserID);
+        Task PublishProductByAdmin(int productID, Guid curUserID);
         #endregion
     }
 }

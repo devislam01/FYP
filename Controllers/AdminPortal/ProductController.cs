@@ -61,5 +61,14 @@ namespace DemoFYP.Controllers.AdminPortal
 
             return SuccessResponse($"Product ID: '{payload.ProductID}' has been unpublished");
         }
+
+        [Authorize(Policy = "AP_Publish_Product")]
+        [HttpPost("publish-product")]
+        public async Task<ActionResult<StandardResponse>> PublishProduct(PublishProductRequest payload)
+        {
+            await _productServices.PublishProductByAdmin(payload.ProductID, CurUserID);
+
+            return SuccessResponse($"Product ID: '{payload.ProductID}' has been published");
+        }
     }
 }

@@ -12,8 +12,11 @@ namespace DemoFYP.Repositories
     public class PaymentRepository : IPaymentRepository
     {
         private readonly IDbContextFactory<AppDbContext> _factory;
-        public PaymentRepository(IDbContextFactory<AppDbContext> factory) {
+        private readonly IConfiguration _config;
+
+        public PaymentRepository(IDbContextFactory<AppDbContext> factory, IConfiguration config) {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
         public async Task<PagedResult<PaymentListResponse>> GetPaymentList(PaymentListFilterRequest filter)
@@ -58,6 +61,8 @@ namespace DemoFYP.Repositories
                     {
                         OrderID = q.OrderId,
                         PaymentID = q.PaymentId,
+                        PaymentMethodID = q.PaymentMethodID,
+                        Receipt = !string.IsNullOrWhiteSpace(q.Receipt) ? $"{_config["BackendUrl"]}/{q.Receipt}" : null,
                         TotalPaidAmount = q.TotalPaidAmount,
                         Status = q.Status,
                         CreatedAt = q.CreatedDateTime,
@@ -72,6 +77,34 @@ namespace DemoFYP.Repositories
                         PageSize = filter.PageSize,
                         TotalRecord = totalRecord
                     }
+                };
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task<PaymentListResponse> GetPaymentDetail(int paymentID)
+        {
+            var context = await _factory.CreateDbContextAsync();
+
+            try
+            {
+                var result = await context.Payments.Include(p => p.Order).FirstOrDefaultAsync(p => p.PaymentId == paymentID);
+
+                return new PaymentListResponse
+                {
+                    PaymentID = result.PaymentId,
+                    OrderID = result.Order.OrderId,
+                    TotalPaidAmount = result.TotalPaidAmount,
+                    PaymentMethodID = result.PaymentMethodID,
+                    Receipt = !string.IsNullOrWhiteSpace(result.Receipt) ? $"{_config["BackendUrl"]}/{result.Receipt}" : null,
+                    Status = result.Status,
                 };
             }
             catch

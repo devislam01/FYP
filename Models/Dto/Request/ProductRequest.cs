@@ -51,4 +51,9 @@ namespace DemoFYP.Models.Dto.Request
     {
         public int ProductID { get; set; }
     }
+
+    public class PublishProductRequest
+    {
+        public int ProductID { get; set; }
+    }
 }

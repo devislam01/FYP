@@ -29,6 +29,11 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task<PaymentListResponse> GetPaymentDetail(int paymentID)
+        {
+            return await _paymentRepository.GetPaymentDetail(paymentID);
+        }
+
         public async Task UpdatePayment(UpdatePaymentRequest payload, Guid curUserID)
         {
             try

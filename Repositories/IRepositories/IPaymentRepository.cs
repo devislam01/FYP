@@ -8,6 +8,7 @@ namespace DemoFYP.Repositories.IRepositories
     public interface IPaymentRepository
     {
         Task<PagedResult<PaymentListResponse>> GetPaymentList(PaymentListFilterRequest filter);
+        Task<PaymentListResponse> GetPaymentDetail(int paymentID);
         Task<int> InsertPayment(int orderId, int paymentMethod, Guid sellerID, double totalAmount, Guid createdBy, AppDbContext outerContext = null);
         Task UpdatePayment(UpdatePaymentRequest payload, Guid curUserID);
     }

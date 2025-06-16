@@ -24,6 +24,13 @@ namespace DemoFYP.Controllers.AdminPortal
             return SuccessResponse<PagedResult<PaymentListResponse>>(await _paymentServices.GetPaymentList(filter));
         }
 
+        [Authorize(Policy = "AP_Read_PaymentDetail")]
+        [HttpPost("paymentDetail")]
+        public async Task<ActionResult<StandardResponse<PaymentListResponse>>> GetPaymentDetail(PaymentDetailRequest payload)
+        {
+            return SuccessResponse<PaymentListResponse>(await _paymentServices.GetPaymentDetail(payload.PaymentID));
+        }
+
         [Authorize(Policy = "AP_Update_Payment")]
         [HttpPost("updatePayment")]
         public async Task<ActionResult<StandardResponse>> UpdatePaymentRecord(UpdatePaymentRequest payload)
