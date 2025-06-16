@@ -109,7 +109,8 @@ namespace DemoFYP.Repositories
                                         : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
                                     Status = oi.Status,
                                     ProductID = oi.Product.ProductId,
-                                    HasRating = reviewedOrderItemIds.Contains(oi.OrderItemID)
+                                    HasRating = reviewedOrderItemIds.Contains(oi.OrderItemID),
+                                    Reason = oi.RejectReason,
                                 }).ToList()
                             };
                         }).ToList()
@@ -196,6 +197,7 @@ namespace DemoFYP.Repositories
                             Price = oi.Product.ProductPrice,
                             Quantity = oi.Qty,
                             Status = oi.Status,
+                            Reason = oi.CancelReason,
                         });
                     }
 
@@ -653,7 +655,8 @@ namespace DemoFYP.Repositories
                 orderItem.Status = OrderStatus.Processing.ToString();
                 orderItem.UpdatedAt = DateTime.Now;
                 orderItem.UpdatedBy = curUserID;
-                orderItem.CancelReason = payload.Reason;
+                orderItem.RejectReason = payload.Reason;
+                orderItem.CancelReason = string.Empty;
 
                 await context.SaveChangesAsync();
 
@@ -766,7 +769,7 @@ namespace DemoFYP.Repositories
                     .FirstOrDefaultAsync(o => o.OrderId == payload.OrderID) ?? throw new NotFoundException("Order not found");
 
                 var orderItems = order.OrderItems
-                    .Where(oi => oi.OrderID == payload.OrderID && oi.Product.UserId == curUserID)
+                    .Where(oi => oi.OrderID == payload.OrderID && oi.Product.UserId == curUserID && oi.Status != OrderStatus.Cancelled.ToString())
                     .ToList();
 
                 var buyerEmail = await context.Users.Select(u => new { u.UserId, u.Email }).FirstOrDefaultAsync(u => u.UserId == order.UserId);
@@ -776,7 +779,7 @@ namespace DemoFYP.Repositories
                     item.Status = OrderStatus.Completed.ToString();
                     item.UpdatedAt = DateTime.Now;
                     item.UpdatedBy = curUserID;
-
+                    item.CancelReason = string.Empty;
                 }
 
                 await context.SaveChangesAsync();

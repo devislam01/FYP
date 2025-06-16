@@ -26,6 +26,7 @@ namespace DemoFYP.Models.Dto.Response
         public double Price { get; set; }
         public int Quantity { get; set; }
         public string Status { get; set; }
+        public string? Reason { get; set; }
     }
 
     public class OrderItemVO : OrderItem
@@ -71,6 +72,7 @@ namespace DemoFYP.Models.Dto.Response
         public double Price { get; set; }
         public int Quantity { get; set; }
         public string Status { get; set; } = null!;
+        public string? Reason { get; set; }
     }
 
     public class CheckoutResponse

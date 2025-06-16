@@ -10,6 +10,7 @@
         public double Subtotal { get; set; }
         public string Status { get; set; } = null!;
         public string? CancelReason {  get; set; }
+        public string? RejectReason { get; set; }
         public DateTime CreatedAt { get; set; }
         public Guid CreatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }

@@ -449,6 +449,8 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(45);
             entity.Property(e => e.CancelReason)
                 .HasMaxLength(255);
+            entity.Property(e => e.RejectReason)
+                .HasMaxLength(45);
 
             modelBuilder.Entity<OrderItems>()
                 .HasOne(oi => oi.Order)
