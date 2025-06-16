@@ -404,23 +404,33 @@ namespace DemoFYP.Repositories
 
                 // notify seller
                 var order = await context.Orders.Include(o => o.OrderItems).ThenInclude(oi => oi.Product).Where(o => o.OrderId == payload.OrderID).FirstOrDefaultAsync();
-                var sellerID = order.OrderItems.Select(oi => oi.Product.UserId).FirstOrDefault();
-                var sellerEmail = await context.Users.Where(u => u.UserId == sellerID).Select(u => u.Email).FirstOrDefaultAsync();
+                var sellerIDs = order.OrderItems.Select(oi => oi.Product.UserId).Distinct().ToList();
 
-                string sellerSubject = $"You have a new order! Order ID: {payload.OrderID}";
-                string sellerBody = $@"
-                        Dear Seller,
+                foreach(var sellerID in sellerIDs)
+                {
+                    var sellerEmail = await context.Users.Where(u => u.UserId == sellerID).Select(u => u.Email).FirstOrDefaultAsync();
 
-                        Good news! Your product(s) have just been purchased under Order ID: {payload.OrderID}.
+                    if (!string.IsNullOrEmpty(sellerEmail))
+                    {
+                        string sellerSubject = $"You have a new order! Order ID: {payload.OrderID}";
+                        string sellerBody = string.Join("<br/>", new[]
+                        {
+                            "Dear Seller,",
+                            "",
+                            $"Good news! Your product(s) have just been purchased under Order ID: {payload.OrderID}.",
+                            "",
+                            "Please log in to your seller dashboard to view the order details and proceed with the next steps.",
+                            "",
+                            "If you have any questions or encounter issues, feel free to contact our support team.",
+                            "",
+                            "Thank you for selling with us!"
+                        });
 
-                        Please log in to your seller dashboard to view the order details and proceed with the next steps.
+                        await _emailServices.SendEmailAsync(sellerEmail, sellerSubject, sellerBody);
+                    }
 
-                        If you have any questions or encounter issues, feel free to contact our support team.
-
-                        Thank you for selling with us!
-                        ";
-                await _emailServices.SendEmailAsync(sellerEmail, sellerSubject, sellerBody);
-                await OrderHub.NotifyUserAsync(_hubContext, sellerID, $"You have a new order! Order ID: {payload.OrderID}");
+                    await OrderHub.NotifyUserAsync(_hubContext, sellerID, $"You have a new order! Order ID: {payload.OrderID}");
+                }
 
                 var paidProducts = await context.OrderItems.Where(oi => oi.OrderID == payload.OrderID).Select(oi => oi.ProductID).ToListAsync();
 

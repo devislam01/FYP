@@ -32,6 +32,7 @@ namespace DemoFYP.Services
             {
                 Subject = subject,
                 Body = body,
+                IsBodyHtml = true,
             };
 
             try
