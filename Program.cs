@@ -102,7 +102,7 @@ builder.Services.AddAuthorization(options =>
         "Create_Product", "Update_Product", "Delete_Product",
         "Reset_Password", "AP_Revoke_User", "AP_Create_Role",
         "Read_Cart", "Update_Cart", "AP_Create_User",
-        "AP_Reinstate_user", "AP_Read_Product", "AP_Read_ProductDetail",
+        "AP_Reinstate_User", "AP_Read_Product", "AP_Read_ProductDetail",
         "AP_Update_Product", "AP_Delete_Product", "AP_Reset_Password",
         "AP_Read_Order", "AP_Update_Order", "AP_Read_Payment",
         "AP_Update_Payment", "AP_Cancel_Order", "AP_Cancel_Order_Item",
