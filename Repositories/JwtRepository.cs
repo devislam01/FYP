@@ -31,11 +31,6 @@ namespace DemoFYP.Repositories
                 }
                 else
                 {
-                    if (existUserToken.IsRevoked)
-                    {
-                        throw new BusinessException("Your account has been banned.");
-                    }
-
                     existUserToken.AccessToken = userToken.AccessToken;
                     existUserToken.AccessTokenExpiresAt = userToken.AccessTokenExpiresAt;
                     existUserToken.RefreshToken = userToken.RefreshToken;
@@ -56,21 +51,46 @@ namespace DemoFYP.Repositories
             }
         }
 
-        public async Task<Usertoken?> GetUserTokenByRefreshToken(string refreshToken)
+        public async Task<UserJwtClaims> GetUserClaimsByRefreshToken(string refreshToken)
         {
             var context = _factory.CreateDbContext();
 
             try
             {
-                return await context.Usertokens
-                .FirstOrDefaultAsync(t =>
-                    t.RefreshToken == refreshToken &&
-                    !t.IsRevoked &&
-                    t.RefreshTokenExpiresAt > DateTime.Now);
+                var result = await context.Usertokens
+                    .Join(context.Users, ut => ut.UserId, u => u.UserId, (ut, u) => new { u.UserId, u.Email, u.RoleID, ut.RefreshToken, ut.IsRevoked, ut.RefreshTokenExpiresAt })
+                    .Join(context.Roles, u => u.RoleID, r => r.RoleID, (u, r) => new {u.UserId, u.Email, u.RefreshToken, u.IsRevoked, u.RefreshTokenExpiresAt, u.RoleID, r.RoleName})
+                    .Where(ut =>
+                        ut.RefreshToken == refreshToken &&
+                        !ut.IsRevoked &&
+                        ut.RefreshTokenExpiresAt > DateTime.Now
+                    )
+                    .Select(u => new { 
+                        UserID = u.UserId, 
+                        Email = u.Email, 
+                        RoleID = u.RoleID,
+                        Role = u.RoleName 
+                    }).FirstOrDefaultAsync() ?? throw new UnauthorizedAccessException("Session Expired.");
+
+                var permissionNames = await context.RolePermissions
+                    .Where(rp => rp.RoleID == result.RoleID)
+                    .Join(context.Permissions,
+                        rp => rp.PermissionID,
+                        p => p.PermissionID,
+                        (rp, p) => p.PermissionName)
+                    .ToListAsync();
+
+                return new UserJwtClaims
+                {
+                    UserID = result.UserID,
+                    Email = result.Email,
+                    Role = result.Role,
+                    Permissions = permissionNames
+                };
             }
             catch
             {
-                throw new InvalidOperationException("Failed to get refresh-token");
+                throw;
             }
             finally
             {
@@ -113,6 +133,29 @@ namespace DemoFYP.Repositories
             catch
             {
                 throw new InvalidOperationException("Failed to Revoked User");
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
+        public async Task<bool> RevokeUserTokenByUserID(Guid userID)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var token = await context.Usertokens.FirstOrDefaultAsync(ut => ut.UserId == userID) ?? throw new UnauthorizedAccessException();
+
+                token.IsRevoked = true;
+                await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch
+            {
+                throw;
             }
             finally
             {

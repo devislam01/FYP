@@ -102,6 +102,26 @@ namespace DemoFYP.Repositories
             }
         }
 
+        public async Task<Guid> CheckIfUserLogin(string refreshToken)
+        {
+            var context = _factory.CreateDbContext();
+
+            try
+            {
+                var result = await context.Usertokens.FirstOrDefaultAsync(ut => ut.RefreshToken == refreshToken) ?? throw new NotFoundException("This user haven't login yet");
+
+                return result.UserId;
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await context.DisposeAsync();
+            }
+        }
+
         public async Task<UserDetailResponse> GetUserProfileByLoginID(Guid CurUserID)
         {
             var context = _factory.CreateDbContext();

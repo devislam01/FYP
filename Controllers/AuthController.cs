@@ -18,6 +18,7 @@ namespace DemoFYP.Controllers
             _userServices = userServices ?? throw new ArgumentNullException(nameof(userServices));
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<StandardResponse<JwtAuthResult>>> Login(UserLoginRequest request)
         {
@@ -27,11 +28,23 @@ namespace DemoFYP.Controllers
             return SuccessResponse(data, "Login Successfully");
         }
 
+        [HttpPost("logout")]
+        public async Task<ActionResult<StandardResponse>> Logout(UserLogoutRequest request)
+        {
+            Guid userID = await _userServices.CheckIsLogin(request.RefreshToken);
+            bool isLogout = await _Jwtservices.LogoutUserByRevokeToken(userID);
+
+            if (!isLogout) return SuccessResponse("Log out Failed");
+
+            return SuccessResponse("Logged out Successfully");
+        }
+
+        [AllowAnonymous]
         [HttpPost("refresh-token")]
         public async Task<ActionResult<StandardResponse<JwtAuthResult>>> RefreshToken([FromBody] RefreshTokenRequest payload)
         {
-            var data = await _Jwtservices.VerifyAndGenerateRefreshToken(payload, CurUserEmail, CurUserRole);
-
+            var data = await _Jwtservices.VerifyAndGenerateRefreshToken(payload);
+                
             return SuccessResponse(data);
         }
     }

@@ -10,6 +10,7 @@ namespace DemoFYP.Services.IServices
         #region Read Services
 
         Task<UserJwtClaims> CheckLoginCredentials(UserLoginRequest login);
+        Task<Guid> CheckIsLogin(string refreshToken);
 
         Task<UserDetailResponse> GetUserProfile(Guid curUserID);
 

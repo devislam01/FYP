@@ -44,6 +44,11 @@ namespace DemoFYP.Services
             }
         }
 
+        public async Task<Guid> CheckIsLogin(string refreshToken)
+        {
+            return await _userRepository.CheckIfUserLogin(refreshToken);
+        }
+
         public async Task<UserDetailResponse> GetUserProfile(Guid curUserID)
         {
             if (curUserID == Guid.Empty) throw new UnauthorizedAccessException();

@@ -48,7 +48,7 @@ namespace DemoFYP.Services
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddMinutes(1),
                 signingCredentials: creds
             );
 
@@ -59,7 +59,7 @@ namespace DemoFYP.Services
             {
                 UserId = userClaims.UserID,
                 AccessToken = jwtToken,
-                AccessTokenExpiresAt = DateTime.Now.AddMinutes(15),
+                AccessTokenExpiresAt = DateTime.Now.AddMinutes(1),
                 RefreshToken = refreshToken.Token,
                 RefreshTokenExpiresAt = refreshToken.Expiry,
             };
@@ -79,20 +79,25 @@ namespace DemoFYP.Services
             }
         }
 
-        public async Task<JwtAuthResult> VerifyAndGenerateRefreshToken(RefreshTokenRequest payload, string curUserEmail, string curUserRole)
+        public async Task<bool> LogoutUserByRevokeToken(Guid userID)
         {
-            if (string.IsNullOrEmpty(payload.RefreshToken)) throw new BadRequestException("Refresh token is required");
+            return await _jwtRepository.RevokeUserTokenByUserID(userID);
+        }
 
-            var userToken = await _jwtRepository.GetUserTokenByRefreshToken(payload.RefreshToken) ?? throw new UnauthorizedAccessException("Invalid or expired refresh token");
-            var userId = userToken.UserId;
+        public async Task<JwtAuthResult> VerifyAndGenerateRefreshToken(RefreshTokenRequest payload)
+        {
+            if (string.IsNullOrEmpty(payload.RefreshToken)) throw new UnauthorizedAccessException();
+
+            var userClaims = await _jwtRepository.GetUserClaimsByRefreshToken(payload.RefreshToken);
 
             await _jwtRepository.RevokeUserTokenByRefreshToken(payload.RefreshToken);
 
             var jwtResult = await GenerateToken(new UserJwtClaims
             {
-                UserID = userId,
-                Email = curUserEmail,
-                Role = curUserRole,
+                UserID = userClaims.UserID,
+                Email = userClaims.Email,
+                Role = userClaims.Role,
+                Permissions = userClaims.Permissions,
             });
 
             return jwtResult;
@@ -134,7 +139,7 @@ namespace DemoFYP.Services
 
             return new RefreshToken {
                 Token = Convert.ToBase64String(randomBytes),
-                Expiry = DateTime.Now.AddDays(7)
+                Expiry = DateTime.Now.AddDays(7).AddMinutes(15)
             };
         }
     }

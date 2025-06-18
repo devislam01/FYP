@@ -46,7 +46,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+        ClockSkew = TimeSpan.Zero,
     };
 
     options.Events = new JwtBearerEvents
@@ -79,22 +80,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                     return;
                 }
             }
-        },
-        OnChallenge = context =>
-        {
-            if (!context.Response.HasStarted)
-            {
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                var result = JsonSerializer.Serialize(new
-                {
-                    code = 401,
-                    message = context?.AuthenticateFailure?.Message
-                });
-                return context.Response.WriteAsync(result);
-            }
-
-            return Task.CompletedTask;
         },
         OnMessageReceived = context =>
         {

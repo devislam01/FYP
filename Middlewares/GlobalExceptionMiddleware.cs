@@ -18,6 +18,10 @@ namespace DemoFYP.Middlewares
             }
             catch (Exception ex)
             {
+                if (context.Response.HasStarted)
+                {
+                    throw;
+                }
                 context.Response.ContentType = "application/json";
 
                 var response = new StandardResponse
