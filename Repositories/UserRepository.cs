@@ -247,7 +247,7 @@ namespace DemoFYP.Repositories
             {
                 var query = context.Users
                     .OrderByDescending(u => u.CreatedDateTime)
-                    .Where(u => u.RoleID != (int)UserLevel.Admin && u.IsActive == (sbyte)Status.Active);
+                    .Where(u => u.RoleID != (int)UserLevel.Admin);
 
                 if (filter.UserID != null && filter.UserID != Guid.Empty)
                 {

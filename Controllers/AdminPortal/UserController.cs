@@ -60,7 +60,7 @@ namespace DemoFYP.Controllers.Admin
             return SuccessResponse($"User {payload.UserID} has been revoked");
         }
 
-        [Authorize(Policy = "AP_Reinstate_user")]
+        [Authorize(Policy = "AP_Reinstate_User")]
         [HttpPost("reinstate-user")]
         public async Task<ActionResult<StandardResponse>> ReinstateUser(ReinstateUserRequest payload)
         {
