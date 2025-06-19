@@ -13,6 +13,7 @@ using System.Text.Json;
 using DemoFYP.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Serialization;
+using DemoFYP.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,10 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(connecti
         errorNumbersToAdd: null);
 }));
 builder.Services.AddDbContextFactory<AppDbContext>(options => options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 33))), ServiceLifetime.Scoped);
+
+// Register Cloudinary
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings"));
 
 // Register AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));

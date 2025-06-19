@@ -1,43 +1,56 @@
-﻿using DemoFYP.Exceptions;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using DemoFYP.Exceptions;
+using DemoFYP.Models;
 using DemoFYP.Services.IServices;
+using Microsoft.Extensions.Options;
 
 namespace DemoFYP.Services
 {
     public class CommonService : ICommonServices
     {
         private readonly IWebHostEnvironment _environment;
+        private readonly Cloudinary _cloudinary;
 
-        public CommonService(IWebHostEnvironment environment) {
+        public CommonService(IWebHostEnvironment environment, IOptions<CloudinarySettings> config) {
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+            var account = new Account(
+                   config.Value.CloudName,
+                   config.Value.ApiKey,
+                   config.Value.ApiSecret
+            );
+            _cloudinary = new Cloudinary(account);
         }
 
         #region Upload Image
 
         public async Task<string> UploadImage(IFormFile file, string fileName, string folderName)
         {
-            if (file == null || file.Length == 0) throw new BadRequestException(" No File received ");
-
-            string directoryPath = Path.Combine(_environment.WebRootPath, folderName);
-            string safeFileName = string.IsNullOrEmpty(fileName) ? file.FileName : fileName;
-            string filePath = Path.Combine(directoryPath, safeFileName);
+            if (file == null || file.Length == 0)
+                throw new BadRequestException("No file received");
 
             try
             {
-                if (!Directory.Exists(directoryPath))
+                using var stream = file.OpenReadStream();
+                var uploadParams = new ImageUploadParams
                 {
-                    Directory.CreateDirectory(directoryPath);
-                }
+                    File = new FileDescription(fileName ?? file.FileName, stream),
+                    Folder = folderName,
+                    UseFilename = true,
+                    UniqueFilename = false,
+                    Overwrite = true
+                };
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
-                return $"{folderName}/{safeFileName}";
+                if (uploadResult.Error != null)
+                    throw new Exception($"Cloudinary upload error: {uploadResult.Error.Message}");
+
+                return uploadResult.SecureUrl.AbsoluteUri;
             }
-            catch
+            catch (Exception ex)
             {
-                throw new Exception("Failed to save file. Please try again.");
+                throw new Exception("Failed to upload to Cloudinary. " + ex.Message);
             }
         }
 
