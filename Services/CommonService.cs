@@ -32,9 +32,11 @@ namespace DemoFYP.Services
             try
             {
                 using var stream = file.OpenReadStream();
+                var safefileName = string.IsNullOrWhiteSpace(fileName) ? file.FileName : fileName;
+
                 var uploadParams = new ImageUploadParams
                 {
-                    File = new FileDescription(fileName ?? file.FileName, stream),
+                    File = new FileDescription(safefileName, stream),
                     Folder = folderName,
                     UseFilename = true,
                     UniqueFilename = false,
