@@ -159,7 +159,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("https://devislam01-github-io.vercel.app/")
+        policy.WithOrigins("https://devislam01-github-io.vercel.app")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
