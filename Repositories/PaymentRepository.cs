@@ -62,7 +62,7 @@ namespace DemoFYP.Repositories
                         OrderID = q.OrderId,
                         PaymentID = q.PaymentId,
                         PaymentMethodID = q.PaymentMethodID,
-                        Receipt = !string.IsNullOrWhiteSpace(q.Receipt) ? $"{_config["BackendUrl"]}/{q.Receipt}" : null,
+                        Receipt = !string.IsNullOrWhiteSpace(q.Receipt) ? q.Receipt : null,
                         TotalPaidAmount = q.TotalPaidAmount,
                         Status = q.Status,
                         CreatedAt = q.CreatedDateTime,
@@ -103,7 +103,7 @@ namespace DemoFYP.Repositories
                     OrderID = result.Order.OrderId,
                     TotalPaidAmount = result.TotalPaidAmount,
                     PaymentMethodID = result.PaymentMethodID,
-                    Receipt = !string.IsNullOrWhiteSpace(result.Receipt) ? $"{_config["BackendUrl"]}/{result.Receipt}" : null,
+                    Receipt = !string.IsNullOrWhiteSpace(result.Receipt) ? result.Receipt : null,
                     Status = result.Status,
                 };
             }

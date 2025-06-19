@@ -67,7 +67,7 @@ namespace DemoFYP.Repositories
                     ProductDescription = p.ProductDescription,
                     CategoryID = p.CategoryId,
                     ProductCondition = p.ProductCondition,
-                    ProductImage = string.IsNullOrWhiteSpace(p.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{p.ProductImage}",
+                    ProductImage = string.IsNullOrWhiteSpace(p.ProductImage) ? string.Empty : p.ProductImage,
                     ProductPrice = p.ProductPrice
                 }).ToListAsync();
 
@@ -148,7 +148,7 @@ namespace DemoFYP.Repositories
                             ProductDescription = p.ProductDescription,
                             CategoryID = p.CategoryId,
                             ProductCondition = p.ProductCondition,
-                            ProductImage = string.IsNullOrWhiteSpace(p.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{p.ProductImage}",
+                            ProductImage = string.IsNullOrWhiteSpace(p.ProductImage) ? string.Empty : p.ProductImage,
                             ProductPrice = p.ProductPrice,
                             StockQty = p.StockQty,
                             CreatedAt = p.CreatedDateTime,
@@ -192,7 +192,7 @@ namespace DemoFYP.Repositories
                         ProductDescription = pl.ProductDescription,
                         CategoryID = pl.CategoryId,
                         ProductCondition = pl.ProductCondition,
-                        ProductImage = string.IsNullOrWhiteSpace(pl.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{pl.ProductImage}",
+                        ProductImage = string.IsNullOrWhiteSpace(pl.ProductImage) ? string.Empty : pl.ProductImage,
                         ProductPrice = pl.ProductPrice,
                         StockQty = pl.StockQty,
                     })
@@ -238,7 +238,7 @@ namespace DemoFYP.Repositories
                         .CountAsync();
                 }
 
-                string ImageUrl = GetImageRealPath ? productWithCategory.product.ProductImage : string.IsNullOrWhiteSpace(productWithCategory.product.ProductImage) ? string.Empty : $"{_config["BackendUrl"]}/{productWithCategory.product.ProductImage}";
+                string ImageUrl = GetImageRealPath ? productWithCategory.product.ProductImage : string.IsNullOrWhiteSpace(productWithCategory.product.ProductImage) ? string.Empty : productWithCategory.product.ProductImage;
 
                 var response = new ProductDetailResponse
                 {

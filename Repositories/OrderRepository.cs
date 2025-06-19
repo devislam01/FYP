@@ -82,12 +82,12 @@ namespace DemoFYP.Repositories
                                 : new { UserName = string.Empty, PhoneNumber = string.Empty, PaymentQRCode = string.Empty };
 
                             var paymentQRCode = !string.IsNullOrWhiteSpace(sellerInfo.PaymentQRCode)
-                                ? $"{_config["BackendUrl"]}/{sellerInfo.PaymentQRCode}"
+                                ? sellerInfo.PaymentQRCode
                                 : null;
 
                             var paymentForSeller = o.Payment.FirstOrDefault(p => p.SellerID == sellerId);
                             var receipt = !string.IsNullOrWhiteSpace(paymentForSeller?.Receipt)
-                                ? $"{_config["BackendUrl"]}/{paymentForSeller.Receipt}"
+                                ? paymentForSeller.Receipt
                                 : null;
 
                             return new OrderSellerGroupVO
@@ -106,7 +106,7 @@ namespace DemoFYP.Repositories
                                     Quantity = oi.Qty,
                                     ProductImage = string.IsNullOrWhiteSpace(oi.Product?.ProductImage)
                                         ? string.Empty
-                                        : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
+                                        : oi.Product.ProductImage,
                                     Status = oi.Status,
                                     ProductID = oi.Product.ProductId,
                                     HasRating = reviewedOrderItemIds.Contains(oi.OrderItemID),
@@ -163,7 +163,7 @@ namespace DemoFYP.Repositories
                     string paymentStatus = payment?.Status ?? PaymentStatus.Pending.ToString();
 
                     var receipt = !string.IsNullOrWhiteSpace(payment?.Receipt)
-                            ? $"{_config["BackendUrl"]}/{payment.Receipt}"
+                            ? payment.Receipt
                             : string.Empty;
 
                     var buyerInfo = buyers.TryGetValue(order.UserId, out var b)
@@ -193,7 +193,7 @@ namespace DemoFYP.Repositories
                             ProductName = oi.Product.ProductName,
                             ProductImage = string.IsNullOrWhiteSpace(oi.Product.ProductImage)
                                 ? string.Empty
-                                : $"{_config["BackendUrl"]}/{oi.Product.ProductImage}",
+                                : oi.Product.ProductImage,
                             Price = oi.Product.ProductPrice,
                             Quantity = oi.Qty,
                             Status = oi.Status,
@@ -295,7 +295,7 @@ namespace DemoFYP.Repositories
                         OrderID = order.OrderId,
                         QRCode = string.IsNullOrWhiteSpace(paymentQRCode)
                             ? string.Empty
-                            : $"{_config["BackendUrl"]}/{paymentQRCode}",
+                            : paymentQRCode,
                         ProductName = products.FirstOrDefault(p => p.ProductId == group.First().ProductID)?.ProductName ?? string.Empty,
                         Price = sellerAmount,
                     });
