@@ -110,7 +110,6 @@ namespace DemoFYP.Controllers
             return SuccessResponse("Thanks for your rating!");
         }
 
-        [Authorize]
         [HttpPost("feedback")]
         public async Task<ActionResult<StandardResponse<PagedResult<FeedbackListResponse>>>> GetFeedbackList(FeedbackListRequest filter)
         {

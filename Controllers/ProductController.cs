@@ -45,7 +45,6 @@ namespace DemoFYP.Controllers
             return SuccessResponse<List<FilteredProductListResult>>(result);
         }
 
-        [Authorize]
         [HttpPost("getProductDetail")]
         public async Task<ActionResult<StandardResponse<ProductDetailResponse>>> GetProductDetail(ProductDetailRequest payload)
         {
