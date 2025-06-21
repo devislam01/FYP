@@ -60,6 +60,8 @@ namespace DemoFYP.Models.Dto.Response
         public Guid BuyerID { get; set; }
         public string? BuyerName { get; set; }
         public string? BuyerPhoneNo { get; set; }
+        public string? BuyerAddress {  get; set; }
+        public string? ResidentialCollege {  get; set; }
         public List<SellerOrderItemVO> OrderItems { get; set; } = null!;
         
     }

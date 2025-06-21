@@ -144,8 +144,8 @@ namespace DemoFYP.Repositories
 
                 var buyers = await context.Users
                     .Where(u => buyerIds.Contains(u.UserId))
-                    .Select(u => new { u.UserId, u.UserName, u.PhoneNumber })
-                    .ToDictionaryAsync(u => u.UserId, u => new { u.UserName, u.PhoneNumber });
+                    .Select(u => new { u.UserId, u.UserName, u.PhoneNumber, u.Address, u.ResidentialCollege })
+                    .ToDictionaryAsync(u => u.UserId, u => new { u.UserName, u.PhoneNumber, u.Address, u.ResidentialCollege });
 
                 var groupedOrders = orderItems.GroupBy(oi => oi.Order.OrderId);
 
@@ -168,7 +168,7 @@ namespace DemoFYP.Repositories
 
                     var buyerInfo = buyers.TryGetValue(order.UserId, out var b)
                             ? b
-                            : new { UserName = string.Empty, PhoneNumber = string.Empty };
+                            : new { UserName = string.Empty, PhoneNumber = string.Empty, Address = string.Empty, ResidentialCollege = string.Empty };
 
                     var orderResponse = new SellerOrdersResponse
                     {
@@ -181,6 +181,8 @@ namespace DemoFYP.Repositories
                         BuyerID = order.UserId,
                         BuyerName = buyerInfo.UserName,
                         BuyerPhoneNo = buyerInfo.PhoneNumber,
+                        BuyerAddress = buyerInfo.Address,
+                        ResidentialCollege = buyerInfo.ResidentialCollege,
                         PaymentMethodID = payment?.PaymentMethodID ?? 0,
                         OrderItems = new List<SellerOrderItemVO>()
                     };
