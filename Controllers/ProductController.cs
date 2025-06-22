@@ -26,7 +26,7 @@ namespace DemoFYP.Controllers
                 filter = new ProductFilterRequest
                 {
                     PageNumber = 1,
-                    PageSize = 10,
+                    PageSize = 9,
                     DisablePagination = false
                 };
             }
