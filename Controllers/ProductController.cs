@@ -21,16 +21,6 @@ namespace DemoFYP.Controllers
         [HttpPost("getProductList")]
         public async Task<ActionResult<StandardResponse<PagedResult<ProductListResult>>>> GetProductList(ProductFilterRequest? filter)
         {
-            if (filter == null)
-            {
-                filter = new ProductFilterRequest
-                {
-                    PageNumber = 1,
-                    PageSize = 9,
-                    DisablePagination = false
-                };
-            }
-
             var result = await _productServices.GetProductList(filter);
 
             return SuccessResponse<PagedResult<ProductListResult>>(result);
