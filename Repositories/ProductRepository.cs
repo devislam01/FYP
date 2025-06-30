@@ -260,7 +260,8 @@ namespace DemoFYP.Repositories
                         SellerName = string.IsNullOrWhiteSpace(seller?.UserName) ? "Anonymous Seller" : seller.UserName,
                         RatingMark = seller?.RatingMark,
                         CompletedOrders = completedOrders,
-                        JoinTime = seller != null ? (DateTime.Now - seller.CreatedDateTime).Days + " days ago" : "Unknown"
+                        JoinTime = seller != null ? (DateTime.Now - seller.CreatedDateTime).Days + " days ago" : "Unknown",
+                        PhoneNumber = seller?.PhoneNumber,
                     }
                 };
 

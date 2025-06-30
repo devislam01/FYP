@@ -29,6 +29,7 @@
         public double? RatingMark { get; set; }
         public int CompletedOrders { get; set; }
         public string JoinTime { get; set; }
+        public string? PhoneNumber {  get; set; }
     }
 
     public class ProductDetailResponse
